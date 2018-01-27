@@ -12,6 +12,7 @@
 #include "ModelMatrixTransformations.h"
 #include "ShaderLoader.h"
 #include "ModelLoader.h"
+#include "ErrorHandling.h"
 
 #include <iostream>
 #include <math.h>
@@ -21,12 +22,17 @@
 
 using namespace std;
 
+//Used for error handling in GL
+#define ASSERT(x) if (!(x)) __debugbreak();
+#define GLCall(x) error_handling::GLErrors::GLClearErrors();\
+    x;\
+    ASSERT(error_handling::GLErrors::GLLogCall(#x, __FILE__, __LINE__))
+
 Camera FPcamera(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 Camera TPcamera;
 
 int window_height = 0;
 int window_width = 0;
-
 int mouse_x, mouse_y;
 
 //A matrix that is updated in the keyboard function, allows moving model around in the scene
@@ -153,10 +159,7 @@ void Render() {
 	}
 }
 
-//REFEERENCE The part of this to do with silhouette shading
-//QUESTION - what is going on here with the depth buffer and the the face culling?
-//I understand doing black + normal and then drawing white over it. I don't get any of the depth stuff though
-//What I'm doing now makes sense to me, but what about the original code
+//REFERENCE http://sunandblackcat.com/tipFullView.php?l=eng&topicid=15
 
 //TODO this does not work if the model gets reversed since the order of the faces gets reversed
 void RenderCel() {
@@ -228,7 +231,7 @@ void RenderCel() {
 					glUniform1f(offset_id, 0.05f);
 				}
 
-				glDrawElements(GL_TRIANGLES, Scene[j].GetNumIndices(i), GL_UNSIGNED_INT, (void*)0);
+        GLCall(glDrawElements(GL_TRIANGLES, Scene[j].GetNumIndices(i), GL_UNSIGNED_INT, (void*)0));
 			}
 		}
 		else if (j == 1) { //Render the knot

@@ -17,4 +17,4 @@ namespace core {
 		GLuint CreateProgram(char** filenames);
 		
 	};
-}
+} //namespace core
