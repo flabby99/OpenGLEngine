@@ -22,12 +22,6 @@
 
 using namespace std;
 
-//Used for error handling in GL
-#define ASSERT(x) if (!(x)) __debugbreak();
-#define GLCall(x) error_handling::GLErrors::GLClearErrors();\
-    x;\
-    ASSERT(error_handling::GLErrors::GLLogCall(#x, __FILE__, __LINE__))
-
 Camera FPcamera(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 Camera TPcamera;
 
@@ -263,66 +257,6 @@ void RenderCel() {
 			}
 		}
 	}
-
-	////Render the white normal mesh
-	//glClear(GL_DEPTH_BUFFER_BIT);
-	//glCullFace(GL_BACK);
-	//glDepthMask(GL_FALSE); //Don't write to the depth buffer
-	//glUniform3fv(colour_id, 1, &(glm::vec3(1.0f, 1.0f, 1.0f)[0]));
-	//glUniform1f(offset_id, 0.0f);
-	//for (size_t j = 0; j != Scene.size(); ++j) {
-	//	for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-	//		//Bind the correct VAO and VBO
-	//		glBindVertexArray(Scene[j].GetData(i).first);
-	//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
-	//		glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
-	//		glm::mat4 local1 = glm::mat4(1.0f);
-	//		//If the plane is too big and too far forward, make it smaller before applying the keyboard defined transformation, and then move it backwards
-	//		local1 = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -20.0f)) * model_transform;
-
-	//		// for the root, we orient it in global space
-	//		global1 = local1;
-	//		glm::mat4 view;
-	//		if (use_fp_camera) {
-	//			FPcamera.updatePosition(glm::vec3(global1 * glm::vec4(-0.007894f, 2.238691f, 2.166406f, 1.0f)));
-	//			FPcamera.updateDirection(glm::vec3(model_transform * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f)));
-	//			view = FPcamera.getMatrix();
-	//		}
-	//		else {
-	//			view = TPcamera.getMatrix();
-	//		}
-	//		// update uniforms & draw
-	//		glUniformMatrix4fv(projmatrix_id, 1, GL_FALSE, &persp_proj[0][0]);
-	//		glUniformMatrix4fv(viewmatrix_id, 1, GL_FALSE, &view[0][0]);
-	//		glUniformMatrix4fv(modelmatrix_id, 1, GL_FALSE, &global1[0][0]);
-	//		//Needed so that normals behave correctly under non uniform scaling
-	//		glm::mat4 global2;
-	//		//The centre of the propellor
-	//		if (i == 29) {
-	//			angle = fmod(angle + 0.05f, FULLROTATIONINRADIANS);
-	//			//The translation is defined by the first point for this mesh in the obj file
-	//			//This is not exactly right, but it is close, how do I know it exactly?
-	//			glm::mat4 local2 = glm::translate(glm::mat4(1.0), glm::vec3(0.007894f, 1.238691f, 3.366406f));
-	//			local2 = glm::rotate(local2, angle, glm::vec3(0.0f, 0.0f, 1.0f));
-	//			local2 = glm::translate(local2, -glm::vec3(0.007894f, 1.238691f, 3.366406f));
-	//			global2 = global1 * local2;
-	//			glUniformMatrix4fv(modelmatrix_id, 1, GL_FALSE, &global2[0][0]);
-	//			//Needed so that normals behave correctly under non uniform scaling
-
-	//		}
-	//		//The blades of the propellor
-	//		else if (i == 31 || i == 32) {
-	//			glUniformMatrix4fv(modelmatrix_id, 1, GL_FALSE, &global2[0][0]);
-	//			//Needed so that normals behave correctly under non uniform scaling
-	//		}
-	//		//The wheels
-	//		/*else if (i == 82 || i == 106 || i == 116) {
-	//		glUniform3fv(diffuse_colour_id, 1, &(glm::vec3(0.0f, 0.0f, 0.0f)[0]));
-	//		}
-	//		else glUniform3fv(diffuse_colour_id, 1, &(glm::vec3(0.0f, 0.0f, 1.0f)[0]));*/
-	//		glDrawElements(GL_TRIANGLES, Scene[j].GetNumIndices(i), GL_UNSIGNED_INT, (void*)0);
-	//	}
-	//}
 
 	//Render the colours
 	glUseProgram(cel);

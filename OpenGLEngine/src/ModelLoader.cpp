@@ -2,6 +2,8 @@
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>     // Post processing flags
 #include "ModelLoader.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 SceneInfo::SceneInfo()
 {
