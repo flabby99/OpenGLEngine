@@ -26,7 +26,9 @@
     <ClInclude Include="include\ModelMatrixTransformations.h" />
     <ClInclude Include="include\Renderer.h" />
     <ClInclude Include="include\ShaderLoader.h" />
+    <ClInclude Include="include\VertexArray.h" />
     <ClInclude Include="include\VertexBuffer.h" />
+    <ClInclude Include="include\VertexBufferLayout.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\ErrorHandling.cpp" />
@@ -37,6 +39,7 @@
     <ClCompile Include="src\ModelMatrixTransformations.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\ShaderLoader.cpp" />
+    <ClCompile Include="src\VertexArray.cpp" />
     <ClCompile Include="src\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
