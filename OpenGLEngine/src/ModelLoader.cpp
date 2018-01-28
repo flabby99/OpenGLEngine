@@ -104,47 +104,18 @@ bool SceneInfo::InitMaterials(const aiScene * Scene, const std::string & Filenam
 	return false;
 }
 
-//Not dealing with textures right now
-GLuint SceneInfo::GenerateBufferObject(std::vector<GLfloat> points, GLsizeiptr points_size) {
-	GLuint vbo = 0;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, points_size, points.data(), GL_STATIC_DRAW);
-	return vbo;
-}
-
-GLuint SceneInfo::GenerateIndexObject(std::vector<int> points, GLsizeiptr points_size) {
-	GLuint vbo = 0;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, points_size, points.data(), GL_STATIC_DRAW);
-	return vbo;
-}
-
-//TODO NOTE that this is currently linked to our shader!
-//EG if position was at location 5 it would no longer work
-GLuint SceneInfo::GenerateArrayObject(GLuint points_vbo, GLuint normals_vbo) {
-	GLuint vao = 0;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, normals_vbo);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	return vao;
-}
-
 //This lends itself nicely to being able to work with heirarchical transforms
 void SceneInfo::InitBuffersAndArrays() {
 	for (size_t i = 0; i < NumMeshes; ++i)
 	{
-		std::pair<GLuint, GLuint> vao_vbo_pair;
-		GLuint points_vbo = GenerateBufferObject(meshes[i].positions, meshes[i].positions.size() * sizeof(GLfloat));
-		GLuint normals_vbo = GenerateBufferObject(meshes[i].normals, meshes[i].normals.size() * sizeof(GLfloat));
-		vao_vbo_pair.first = GenerateArrayObject(points_vbo, normals_vbo);
-		vao_vbo_pair.second = GenerateIndexObject(meshes[i].indices, meshes[i].indices.size() * sizeof(int));
+		std::pair<render::VertexArray, render::IndexBuffer> vao_vbo_pair;
+		render::VertexBuffer points_vbo(meshes[i].positions.data(), meshes[i].positions.size() * sizeof(GLfloat));
+    render::VertexBuffer normals_vbo(meshes[i].normals.data(), meshes[i].normals.size() * sizeof(GLfloat));
+    render::VertexArray va;
+    va.Addbuffer_3f(points_vbo, 0);
+    va.Addbuffer_3f(normals_vbo, 1);
+    vao_vbo_pair.first = va;
+		vao_vbo_pair.second = render::IndexBuffer(meshes[i].indices.data(), meshes[i].indices.size());
 		output.push_back(vao_vbo_pair);
 	}
 }
@@ -159,7 +130,7 @@ int SceneInfo::GetNumIndices(int index)
 	return meshes[index].indices.size();
 }
 
-std::pair<GLuint, GLuint> SceneInfo::GetData(int index)
+std::pair<render::VertexArray, render::IndexBuffer> SceneInfo::GetData(int index)
 {
 	return output[index];
 }

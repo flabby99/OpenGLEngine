@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 #include "glew/glew.h"
+#include "VertexArray.h"
+//TODO later decouple vas and ibs
+#include "IndexBuffer.h"
 
 //Forward declare structs
 struct aiScene;
@@ -12,7 +15,7 @@ struct MeshInfo {
 	std::vector<GLfloat> positions;
 	std::vector<GLfloat> normals;
 	std::vector<GLfloat> textures;
-	std::vector<int> indices;
+	std::vector<GLuint> indices;
 };
 
 //Handles loading a model from a file
@@ -25,10 +28,10 @@ public:
 	void InitBuffersAndArrays();
 	int GetNumMeshes();
 	int GetNumIndices(int index);
-	std::pair<GLuint, GLuint> GetData(int index);
+	std::pair<render::VertexArray, render::IndexBuffer> GetData(int index);
 private:
 	//Data that is later retrieved in main
-	std::vector<std::pair<GLuint, GLuint>> output;
+	std::vector<std::pair<render::VertexArray, render::IndexBuffer>> output;
 	unsigned int NumMeshes = 0;
 
 	//Temp data, can later put this into the functions using them. 
@@ -36,7 +39,7 @@ private:
 	std::vector<GLfloat> positions;
 	std::vector<GLfloat> normals;
 	std::vector<GLfloat> textures;
-	std::vector<int> indices;
+	std::vector<GLuint> indices;
 	std::vector<MeshInfo> meshes;
 	
 	//Private functions
@@ -45,7 +48,4 @@ private:
 	bool InitFromScene(const aiScene* Scene, const std::string& Filename);
 	void InitMesh(const aiMesh* aiMesh);
 	bool InitMaterials(const aiScene* Scene, const std::string& Filename);
-	GLuint GenerateBufferObject(std::vector<GLfloat> points, GLsizeiptr points_size);
-	GLuint GenerateIndexObject(std::vector<int> points, GLsizeiptr points_size);
-	GLuint GenerateArrayObject(GLuint points_vbo, GLuint normals_vbo);
 };

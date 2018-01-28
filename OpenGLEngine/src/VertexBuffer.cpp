@@ -11,7 +11,7 @@ namespace render {
 
     VertexBuffer::~VertexBuffer()
     {
-        GLCall(glDeleteBuffers(1, &renderer_id_));
+        //GLCall(glDeleteBuffers(1, &renderer_id_));
     }
 
     void VertexBuffer::Bind() const

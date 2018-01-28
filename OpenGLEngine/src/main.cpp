@@ -134,8 +134,8 @@ void RenderCel() {
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
 				glUniform1f(offset_id, 0.12f);
 				//Bind the correct VAO and VBO
-				glBindVertexArray(Scene[j].GetData(i).first);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
+				Scene[j].GetData(i).first.Bind();
+				Scene[j].GetData(i).second.Bind();
 				glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
 				glm::mat4 local1 = glm::mat4(1.0f);
 				//If the plane is too big and too far forward, make it smaller before applying the keyboard defined transformation, and then move it backwards
@@ -188,8 +188,8 @@ void RenderCel() {
 		}
 		else if (j == 1) { //Render the knot
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-				glBindVertexArray(Scene[j].GetData(i).first);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
+        Scene[j].GetData(i).first.Bind();
+        Scene[j].GetData(i).second.Bind();
 				glm::mat4 local1 = glm::mat4(1.0f);
 				local1 = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 1.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(3.0f));
 				global1 = local1;
@@ -202,8 +202,8 @@ void RenderCel() {
 		}
 		else if (j == 2) { //Render the sphere
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-				glBindVertexArray(Scene[j].GetData(i).first);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
+        Scene[j].GetData(i).first.Bind();
+        Scene[j].GetData(i).second.Bind();
 				glm::mat4 local1 = glm::mat4(1.0f);
 				local1 = glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, -2.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(0.3f));
 				global1 = local1;
@@ -229,8 +229,8 @@ void RenderCel() {
 		if (j == 0) { //Render the plane
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
 				//Bind the correct VAO and VBO
-				glBindVertexArray(Scene[j].GetData(i).first);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
+        Scene[j].GetData(i).first.Bind();
+        Scene[j].GetData(i).second.Bind();
 				glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
 				glm::mat4 local1 = glm::mat4(1.0f);
 				//If the plane is too big and too far forward, make it smaller before applying the keyboard defined transformation, and then move it backwards
@@ -286,8 +286,8 @@ void RenderCel() {
 		}
 		else if (j == 1) { //Render the knot
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-				glBindVertexArray(Scene[j].GetData(i).first);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
+        Scene[j].GetData(i).first.Bind();
+        Scene[j].GetData(i).second.Bind();
 				glm::mat4 local1 = glm::mat4(1.0f);
 				local1 = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 1.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(3.0f));
 				global1 = local1;
@@ -301,8 +301,8 @@ void RenderCel() {
 		}
 		else if (j == 2) { //Render the sphere
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-				glBindVertexArray(Scene[j].GetData(i).first);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
+        Scene[j].GetData(i).first.Bind();
+        Scene[j].GetData(i).second.Bind();
 				glm::mat4 local1 = glm::mat4(1.0f);
 				local1 = glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, -2.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(0.3f));
 				global1 = local1;
@@ -334,8 +334,8 @@ void RenderBlinn() {
 		if (j == 0) { //Render the plane
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
 				//Bind the correct VAO and VBO
-				glBindVertexArray(Scene[j].GetData(i).first);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
+        Scene[j].GetData(i).first.Bind();
+        Scene[j].GetData(i).second.Bind();
 				glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
 				glm::mat4 local1 = glm::mat4(1.0f);
 				//If the plane is too big and too far forward, make it smaller before applying the keyboard defined transformation, and then move it backwards
@@ -387,13 +387,13 @@ void RenderBlinn() {
 					glUniform3fv(diffuse_colour_id, 1, &(glm::vec3(0.0f, 0.0f, 0.0f)[0]));
 				}
 				else glUniform3fv(diffuse_colour_id, 1, &(glm::vec3(0.0f, 0.0f, 1.0f)[0]));
-				glDrawElements(GL_TRIANGLES, Scene[j].GetNumIndices(i), GL_UNSIGNED_INT, (void*)0);
+ 				GLCall(glDrawElements(GL_TRIANGLES, Scene[j].GetData(i).second.GetCount(), GL_UNSIGNED_INT, (void*)0));
 			}
 		}
 		else if (j == 1) { //Render the knot
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-				glBindVertexArray(Scene[j].GetData(i).first);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
+        Scene[j].GetData(i).first.Bind();
+        Scene[j].GetData(i).second.Bind();
 				glm::mat4 local1 = glm::mat4(1.0f);
 				local1 = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 1.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(3.0f));
 				global1 = local1;
@@ -407,8 +407,8 @@ void RenderBlinn() {
 		}
 		else if (j == 2) { //Render the sphere
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-				glBindVertexArray(Scene[j].GetData(i).first);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
+        Scene[j].GetData(i).first.Bind();
+        Scene[j].GetData(i).second.Bind();
 				glm::mat4 local1 = glm::mat4(1.0f);
 				local1 = glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, -2.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(0.3f));
 				global1 = local1;
@@ -440,8 +440,8 @@ void RenderMinnaert() {
 		if (j == 0) { //Render the plane
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
 				//Bind the correct VAO and VBO
-				glBindVertexArray(Scene[j].GetData(i).first);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
+        Scene[j].GetData(i).first.Bind();
+        Scene[j].GetData(i).second.Bind();
 				glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
 				glm::mat4 local1 = glm::mat4(1.0f);
 				//If the plane is too big and too far forward, make it smaller before applying the keyboard defined transformation, and then move it backwards
@@ -498,8 +498,8 @@ void RenderMinnaert() {
 		}
 		else if (j == 1) { //Render the knot
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-				glBindVertexArray(Scene[j].GetData(i).first);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
+        Scene[j].GetData(i).first.Bind();
+        Scene[j].GetData(i).second.Bind();
 				glm::mat4 local1 = glm::mat4(1.0f);
 				local1 = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 1.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(3.0f));
 				global1 = local1;
@@ -513,8 +513,8 @@ void RenderMinnaert() {
 		}
 		else if (j == 2) { //Render the sphere
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-				glBindVertexArray(Scene[j].GetData(i).first);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Scene[j].GetData(i).second);
+        Scene[j].GetData(i).first.Bind();
+        Scene[j].GetData(i).second.Bind();
 				glm::mat4 local1 = glm::mat4(1.0f);
 				local1 = glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, -2.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(0.3f));
 				global1 = local1;

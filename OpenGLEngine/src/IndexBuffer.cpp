@@ -2,6 +2,7 @@
 #include "ErrorHandling.h"
 
 namespace render {
+    IndexBuffer::IndexBuffer() {}
     IndexBuffer::IndexBuffer(const GLuint* data, unsigned int count) 
         : count_(count)
     {
@@ -12,7 +13,7 @@ namespace render {
 
     IndexBuffer::~IndexBuffer()
     {
-        GLCall(glDeleteBuffers(1, &renderer_id_));
+        //GLCall(glDeleteBuffers(1, &renderer_id_));
     }
 
     void IndexBuffer::Bind() const

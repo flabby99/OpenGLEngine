@@ -10,7 +10,7 @@ namespace render {
 
     VertexArray::~VertexArray()
     {
-        GLCall(glDeleteVertexArrays(1, &renderer_id_));
+        //GLCall(glDeleteVertexArrays(1, &renderer_id_));
     }
 
     void VertexArray::Bind() const {
@@ -35,5 +35,12 @@ namespace render {
                 layout.GetStride(), (const GLvoid*)offset));
             offset += element.count * VertexBufferElement::GetSizeOfType(element.type);
         }
+    }
+
+    void VertexArray::Addbuffer_3f(const VertexBuffer& vb, const GLuint index) {
+        Bind();
+        vb.Bind();
+        GLCall(glEnableVertexAttribArray(index));
+        GLCall(glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, NULL))
     }
 } //namespace render
