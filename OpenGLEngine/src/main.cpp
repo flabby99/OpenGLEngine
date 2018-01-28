@@ -68,6 +68,16 @@ void CreateShaders() {
     minnaert = render::Shader("minnaert", shaderfile);
 }
 
+//int g_
+
+//fn{
+    //int boo(params) {
+    //do_stuff
+    //return thing
+//} //Destuctor
+
+//g_ = thing
+
 void ReloadShaders() {
     blinn_phong.Reload();
     silhoutte.Reload();
