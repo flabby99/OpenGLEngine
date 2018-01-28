@@ -10,9 +10,9 @@
 
 #include "Camera.h"
 #include "ModelMatrixTransformations.h"
-#include "ShaderLoader.h"
 #include "ModelLoader.h"
 #include "ErrorHandling.h"
+#include "Shader.h"
 
 #include <iostream>
 #include <math.h>
@@ -46,11 +46,6 @@ bool use_quaternions = false;
 //NOTE it might be more effective to refactor this to Enum and allow many camera types
 bool use_fp_camera = false;
 
-//IDs for programs
-GLuint blinn_phong = 0;
-GLuint silhouette = 0;
-GLuint cel = 0;
-GLuint minnaert = 0;
 
 enum class eRenderType {
 	RT_blinn,
@@ -60,61 +55,24 @@ enum class eRenderType {
 
 eRenderType render_type = eRenderType::RT_blinn;
 
-/*
-Loads the shaders and creates a program using these shaders
-@param program - the ID of the program
-@param type - a string indicating which type of shader you are loading
-@param shaders - the name of the file containing the shaders
-*/
-void LoadShaders(GLuint& program, const std::string type, const std::string shaders) {
-	ifstream shader_names(shaders);
-	string name;
-	core::ShaderLoader shaderloader;
-	char* filenames[2];
-	bool done = false;
-	while (!done) {
-		if (!getline(shader_names, name)) {
-			fprintf(stderr, "Did not find shaders to use for %s\n", type.c_str());
-			exit(-1);
-		}
-		if (name == type) {
-			getline(shader_names, name);
-			char * cstr = new char[name.length() + 1];
-			if (strcpy_s(cstr, name.length() + 1, name.c_str())) {
-				fprintf(stderr, "Error copying string %s", name.c_str());
-				exit(-1);
-			}
-			filenames[0] = cstr;
-			getline(shader_names, name);
-			cstr = new char[name.length() + 1];
-			if (strcpy_s(cstr, name.length() + 1, name.c_str())) {
-				fprintf(stderr, "Error copying string %s", name.c_str());
-				exit(-1);
-			}
-			filenames[1] = cstr;
-			done = true;
-		}
-	}
-	program = shaderloader.CreateProgram(filenames);
-	delete[](filenames[0]);
-	delete[](filenames[1]);
-	shader_names.close();
+render::Shader blinn_phong;
+render::Shader silhoutte;
+render::Shader cel;
+render::Shader minnaert;
+
+void CreateShaders() {
+    const std::string shaderfile = "shadernames.txt";
+    blinn_phong = render::Shader("blinn_phong", shaderfile);
+    silhoutte = render::Shader("silhouette", shaderfile);
+    cel = render::Shader("cel", shaderfile);
+    minnaert = render::Shader("minnaert", shaderfile);
 }
 
-void CreatePrograms() {
-	const std::string shaderfile = "shadernames.txt";
-
-	LoadShaders(blinn_phong, "blinn_phong", shaderfile);
-	LoadShaders(silhouette, "silhouette", shaderfile);
-	LoadShaders(cel, "cel", shaderfile);
-	LoadShaders(minnaert, "minnaert", shaderfile);
-}
-
-void DeletePrograms() {
-	glDeleteProgram(blinn_phong);
-	glDeleteProgram(silhouette);
-	glDeleteProgram(cel);
-	glDeleteProgram(minnaert);
+void ReloadShaders() {
+    blinn_phong.Reload();
+    silhoutte.Reload();
+    cel.Reload();
+    minnaert.Reload();
 }
 
 void LoadModels() {
@@ -159,7 +117,7 @@ void Render() {
 void RenderCel() {
 	GLuint viewmatrix_id = 0, projmatrix_id = 1, modelmatrix_id = 2, modelview_inversetranspose = 3;
 	GLuint offset_id = 5, colour_id = 4;
-	glUseProgram(silhouette);
+  silhoutte.Bind();
 	static float angle = 0.0;
 	glm::mat4 global1 = glm::mat4(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -169,7 +127,7 @@ void RenderCel() {
 	//Render the black outline silhoutte
 	glCullFace(GL_FRONT); //We need to able culling of front faces for the black outline
 	glDepthMask(GL_TRUE); //We want to write to the depth buffer here
-	glUniform3fv(colour_id, 1, &(glm::vec3(0.0f, 0.0f, 0.0f)[0]));
+  silhoutte.SetUniform3f("colour", glm::vec3(0.0f));
 	glm::mat4 view;
 	for (size_t j = 0; j != Scene.size(); ++j) {
 		if (j == 0) { //Render the plane
@@ -259,7 +217,7 @@ void RenderCel() {
 	}
 
 	//Render the colours
-	glUseProgram(cel);
+  cel.Bind();
 	//glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_BACK);
 	glDepthMask(GL_TRUE);
@@ -363,7 +321,7 @@ void RenderCel() {
 void RenderBlinn() {
 	GLuint viewmatrix_id = 0, projmatrix_id = 1, modelmatrix_id = 2;
 	GLuint modelview_inversetranspose = 3, diffuse_colour_id = 4;
-	glUseProgram(blinn_phong);
+  blinn_phong.Bind();
 	static float angle = 0.0;
 	glm::mat4 global1 = glm::mat4(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -469,7 +427,7 @@ void RenderBlinn() {
 void RenderMinnaert() {
 	GLuint viewmatrix_id = 0, projmatrix_id = 1, modelmatrix_id = 2;
 	GLuint modelview_inversetranspose = 3, diffuse_colour_id = 4;
-	glUseProgram(minnaert);
+  minnaert.Bind();
 	static float angle = 0.0;
 	glm::mat4 global1 = glm::mat4(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -608,8 +566,7 @@ void Keyboard(unsigned char key, int x, int y) {
 
 		//Reload vertex and fragment shaders during runtime
 	case 'P':
-		DeletePrograms();
-		CreatePrograms();
+    ReloadShaders();
 		std::cout << "Reloaded shaders" << endl;
 		break;
 
@@ -794,8 +751,8 @@ void PassiveMouseMovement(int x, int y) {
 void Init() {
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f); //Grey clear colour
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	CreatePrograms();
 	LoadModels();
+  CreateShaders();
 }
 
 int main(int argc, char** argv) {

@@ -7,14 +7,14 @@ namespace core {
 		//Read the file containing the GLSL shader code and return a string
 		char* ReadShader(const char* filename);
 		//Make a shader of type shadertype with code shadercode
-		GLuint CreateShader(GLenum shadertype, const char* shadercode);
+		GLint CreateShader(GLenum shadertype, const char* shadercode);
 
 	public:
 		//Constructor and destructor:
 		ShaderLoader();
 		~ShaderLoader();
 		//Create a program and add in all the wanted shaders to this program
-		GLuint CreateProgram(char** filenames);
+		GLint CreateProgram(char** filenames);
 		
 	};
 } //namespace core

@@ -5,6 +5,8 @@
 #include <string.h>
 
 namespace render {
+    Shader::Shader()
+        :renderer_id_(0) {}
     Shader::Shader(const std::string type, const std::string shaders)
         : name_(type)
     {
@@ -37,34 +39,49 @@ namespace render {
             }
         }
         renderer_id_ = shaderloader.CreateProgram(filenames);
-        delete[](filenames[0]);
-        delete[](filenames[1]);
+        filenames_ = new char*[2];
+        filenames_[0] = filenames[0];
+        filenames_[1] = filenames[1];
+        //TODO do I keep memory here?
+        //delete[](filenames[0]);
+        //delete[](filenames[1]);
         shader_names.close();
     }
 
     Shader::Shader(char ** filenames) 
-        :name_(filenames[0])
+        :name_(filenames[0]), filenames_(filenames)
     {
         core::ShaderLoader shaderloader;
         renderer_id_ = shaderloader.CreateProgram(filenames);
     }
-
+    //TODO I am having some scoping problems that I would like to fix later
     Shader::~Shader()
     {
-        GLCall(glDeleteProgram(renderer_id_));
+        //GLCall(glDeleteProgram(renderer_id_));
     }
+
     void Shader::Bind() const
     {
         GLCall(glUseProgram(renderer_id_));
     }
+
     void Shader::UnBind() const
     {
         GLCall(glUseProgram(0));
     }
+
+    void Shader::Reload()
+    {
+        GLCall(glDeleteProgram(renderer_id_));
+        core::ShaderLoader shaderloader;
+        renderer_id_ = shaderloader.CreateProgram(filenames_);
+    }
+
     void Shader::SetUniform3f(const std::string name, glm::vec3 value)
     {
         GLCall(glUniform3fv(GetUniformLocation(name), 1, &value[0]));
     }
+
     GLuint Shader::GetUniformLocation(const std::string name)
     {
         if (uniform_location_cache_.find(name) != uniform_location_cache_.end())
