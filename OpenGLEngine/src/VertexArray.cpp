@@ -26,12 +26,13 @@ namespace render {
         Bind();
         vb.Bind();
         const auto& elements = layout.GetElements();
+        //TODO unsure of the use of offset
         unsigned int offset = 0;
         for (unsigned int i = 0; i < elements.size(); ++i) {
             const auto& element = elements[i];
             GLCall(glEnableVertexAttribArray(i));
             GLCall(glVertexAttribPointer(i, element.count, element.type, element.normalised, 
-                layout.GetStride(), (const void*)offset));
+                layout.GetStride(), (const GLvoid*)offset));
             offset += element.count * VertexBufferElement::GetSizeOfType(element.type);
         }
     }

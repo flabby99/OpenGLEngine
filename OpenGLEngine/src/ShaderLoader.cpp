@@ -6,7 +6,7 @@ namespace core {
 	ShaderLoader::ShaderLoader() {}
 	ShaderLoader::~ShaderLoader() {}
 
-	char* ShaderLoader::ReadShader(char * filename)
+	char* ShaderLoader::ReadShader(const char * filename)
 	{
 		ifstream file(filename, ifstream::in | ifstream::binary | ifstream::ate); //ate indicates start at eof
 		if (!file) {

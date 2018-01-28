@@ -5,7 +5,7 @@
 namespace core {
 	class ShaderLoader {
 		//Read the file containing the GLSL shader code and return a string
-		char* ReadShader(char* filename);
+		char* ReadShader(const char* filename);
 		//Make a shader of type shadertype with code shadercode
 		GLuint CreateShader(GLenum shadertype, const char* shadercode);
 
