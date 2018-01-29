@@ -42,9 +42,6 @@ namespace render {
         filenames_ = new char*[2];
         filenames_[0] = filenames[0];
         filenames_[1] = filenames[1];
-        //TODO do I keep memory here?
-        //delete[](filenames[0]);
-        //delete[](filenames[1]);
         shader_names.close();
     }
 
@@ -57,7 +54,8 @@ namespace render {
     //TODO I am having some scoping problems that I would like to fix later
     Shader::~Shader()
     {
-        //GLCall(glDeleteProgram(renderer_id_));
+        GLCall(glDeleteProgram(renderer_id_));
+		delete[](filenames_);
     }
 
     void Shader::Bind() const
@@ -82,6 +80,16 @@ namespace render {
         GLCall(glUniform3fv(GetUniformLocation(name), 1, &value[0]));
     }
 
+	void Shader::SetUniform4fv(const std::string name, glm::mat4 value)
+	{
+		GLCall(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0][0]));
+	}
+
+	void Shader::SetUniform1f(const std::string name, float value)
+	{
+		GLCall(glUniform1f(GetUniformLocation(name), value));
+	}
+
     GLuint Shader::GetUniformLocation(const std::string name)
     {
         if (uniform_location_cache_.find(name) != uniform_location_cache_.end())
@@ -93,4 +101,12 @@ namespace render {
         uniform_location_cache_[name] = location;
         return location;
     }
+	void CommonShader::SetUniforms(glm::mat4 view, glm::mat4 proj, glm::mat4 model, glm::vec3 colour)
+	{
+		SetUniform4fv("view", view);
+		SetUniform4fv("proj", proj);
+		SetUniform4fv("model", model);
+		SetUniform4fv("mv_it", glm::transpose(glm::inverse(view * model)));
+		SetUniform3f("colour", colour);
+	}
 } //namespace render

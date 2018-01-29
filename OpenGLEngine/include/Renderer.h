@@ -5,8 +5,8 @@
 namespace render {
 	class Renderer {
      //This should bind the vao and ib in object, set up any tranforms, set uniforms, bind the shader, and draw triangles
-		void Draw(scene::Object object, const Shader& shader);
+		void Draw(scene::Object object, const Shader* shader);
     //Clears the depth and colour buffers
     void Clear() const; 
 	};
-} //namespace core
+} //namespace render

@@ -55,34 +55,24 @@ enum class eRenderType {
 
 eRenderType render_type = eRenderType::RT_blinn;
 
-render::Shader blinn_phong;
-render::Shader silhoutte;
-render::Shader cel;
-render::Shader minnaert;
+render::CommonShader* blinn_phong;
+render::CommonShader* silhoutte;
+render::CommonShader* cel;
+render::CommonShader* minnaert;
 
 void CreateShaders() {
     const std::string shaderfile = "shadernames.txt";
-    blinn_phong = render::Shader("blinn_phong", shaderfile);
-    silhoutte = render::Shader("silhouette", shaderfile);
-    cel = render::Shader("cel", shaderfile);
-    minnaert = render::Shader("minnaert", shaderfile);
+    blinn_phong = new render::CommonShader("blinn_phong", shaderfile);
+    silhoutte = new render::CommonShader("silhouette", shaderfile);
+    cel = new render::CommonShader("cel", shaderfile);
+    minnaert = new render::CommonShader("minnaert", shaderfile);
 }
 
-//int g_
-
-//fn{
-    //int boo(params) {
-    //do_stuff
-    //return thing
-//} //Destuctor
-
-//g_ = thing
-
 void ReloadShaders() {
-    blinn_phong.Reload();
-    silhoutte.Reload();
-    cel.Reload();
-    minnaert.Reload();
+    blinn_phong->Reload();
+    silhoutte->Reload();
+    cel->Reload();
+    minnaert->Reload();
 }
 
 void LoadModels() {
@@ -127,7 +117,7 @@ void Render() {
 void RenderCel() {
 	GLuint viewmatrix_id = 0, projmatrix_id = 1, modelmatrix_id = 2, modelview_inversetranspose = 3;
 	GLuint offset_id = 5, colour_id = 4;
-  silhoutte.Bind();
+	silhoutte->Bind();
 	static float angle = 0.0;
 	glm::mat4 global1 = glm::mat4(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -137,7 +127,7 @@ void RenderCel() {
 	//Render the black outline silhoutte
 	glCullFace(GL_FRONT); //We need to able culling of front faces for the black outline
 	glDepthMask(GL_TRUE); //We want to write to the depth buffer here
-  silhoutte.SetUniform3f("colour", glm::vec3(0.0f));
+	silhoutte->SetUniform3f("colour", glm::vec3(0.0f));
 	glm::mat4 view;
 	for (size_t j = 0; j != Scene.size(); ++j) {
 		if (j == 0) { //Render the plane
@@ -227,7 +217,7 @@ void RenderCel() {
 	}
 
 	//Render the colours
-  cel.Bind();
+	cel->Bind();
 	//glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_BACK);
 	glDepthMask(GL_TRUE);
@@ -331,7 +321,7 @@ void RenderCel() {
 void RenderBlinn() {
 	GLuint viewmatrix_id = 0, projmatrix_id = 1, modelmatrix_id = 2;
 	GLuint modelview_inversetranspose = 3, diffuse_colour_id = 4;
-  blinn_phong.Bind();
+	blinn_phong->Bind();
 	static float angle = 0.0;
 	glm::mat4 global1 = glm::mat4(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -437,7 +427,7 @@ void RenderBlinn() {
 void RenderMinnaert() {
 	GLuint viewmatrix_id = 0, projmatrix_id = 1, modelmatrix_id = 2;
 	GLuint modelview_inversetranspose = 3, diffuse_colour_id = 4;
-  minnaert.Bind();
+	minnaert->Bind();
 	static float angle = 0.0;
 	glm::mat4 global1 = glm::mat4(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -765,6 +755,13 @@ void Init() {
   CreateShaders();
 }
 
+void CleanUp() {
+	delete(blinn_phong);
+	delete(minnaert);
+	delete(cel);
+	delete(silhoutte);
+}
+
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
@@ -801,5 +798,6 @@ int main(int argc, char** argv) {
 	glutPassiveMotionFunc(PassiveMouseMovement);
 	Init();
 	glutMainLoop();
+	CleanUp();
 	return 0;
 }
