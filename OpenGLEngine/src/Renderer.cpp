@@ -10,7 +10,7 @@ namespace render {
 		object.GetMesh().ib.Bind();
 		GLCall(glDrawElements(GL_TRIANGLES, object.GetMesh().ib.GetCount(), GL_UNSIGNED_INT, (void*)0);)
 	}
-	void Renderer::Clear() const
+	void Renderer::Clear()
 	{
 		GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 	}

@@ -13,6 +13,8 @@
 #include "ModelLoader.h"
 #include "ErrorHandling.h"
 #include "Shader.h"
+#include "Renderer.h"
+#include "Object.h"
 
 #include <iostream>
 #include <math.h>
@@ -439,9 +441,9 @@ void RenderMinnaert() {
 	for (size_t j = 0; j != Scene.size(); ++j) {
 		if (j == 0) { //Render the plane
 			for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
+				//TODO note that here model transform could be a scene root
 				//Bind the correct VAO and VBO
-        Scene[j].GetData(i).first.Bind();
-        Scene[j].GetData(i).second.Bind();
+				scene::Object obj(Scene[j].GetData(i).first, Scene[j].GetData(i).second);
 				glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
 				glm::mat4 local1 = glm::mat4(1.0f);
 				//If the plane is too big and too far forward, make it smaller before applying the keyboard defined transformation, and then move it backwards
@@ -458,12 +460,8 @@ void RenderMinnaert() {
 					view = TPcamera.getMatrix();
 				}
 				// update uniforms & draw
-				glUniformMatrix4fv(projmatrix_id, 1, GL_FALSE, &persp_proj[0][0]);
-				glUniformMatrix4fv(viewmatrix_id, 1, GL_FALSE, &view[0][0]);
-				glUniformMatrix4fv(modelmatrix_id, 1, GL_FALSE, &global1[0][0]);
-				//Needed so that normals behave correctly under non uniform scaling
-				glm::mat4 modelview_it = glm::transpose(glm::inverse(view * global1));
-				glUniformMatrix4fv(modelview_inversetranspose, 1, GL_FALSE, &modelview_it[0][0]);
+				minnaert->SetUniforms(view, persp_proj, local1, glm::vec3(1.0f));
+				render::Renderer::Draw(obj, blinn_phong);
 				glm::mat4 global2;
 				//The centre of the propellor
 				if (i == 29) {

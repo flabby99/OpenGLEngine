@@ -4,9 +4,10 @@
 //The Cherno Project
 namespace render {
 	class Renderer {
+	public:
      //This should bind the vao and ib in object, set up any tranforms, set uniforms, bind the shader, and draw triangles
-		void Draw(scene::Object object, const Shader* shader);
+	static void Draw(scene::Object object, const Shader* shader);
     //Clears the depth and colour buffers
-    void Clear() const; 
+    static void Clear(); 
 	};
 } //namespace render

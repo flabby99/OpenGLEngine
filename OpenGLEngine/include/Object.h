@@ -24,6 +24,9 @@ namespace scene {
         ~Object();
 		void UpdateModelMatrix();
 		inline void SetParent(Object* parent) { parent_ = parent; }
+		inline void SetRotation(glm::mat4 rotation) { rotation_ = rotation; }
+		inline void SetTranslation(glm::vec3 translation) { translation_ = translation; }
+		inline void SetScale(glm::vec3 scale) { scale_ = scale; }
 		inline glm::mat4 GetLocalModelMatrix() const { return model_matrix_;}
 		inline Mesh GetMesh() const { return mesh_; }
 		//Returns the model matrix relative to the object heirarchy
