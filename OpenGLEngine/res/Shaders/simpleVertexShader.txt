@@ -10,6 +10,6 @@ uniform mat4 proj;
 uniform mat4 model;
 
 void main(){
-	n_eye = (view * vec4 (vertex_normals, 0.0)).xyz;
-	gl_Position =  proj * view * model * vec4 (vertex_position, 1.0);
+  n_eye = (view * vec4 (vertex_normals, 0.0)).xyz;
+  gl_Position =  proj * view * model * vec4 (vertex_position, 1.0);
 }

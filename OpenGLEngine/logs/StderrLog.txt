@@ -1,4 +1,3 @@
-glew version is not 4.5
 Glm is not forced using radians
 Read 196 meshes from res/Models/piper_pa18.obj
 Read 1 meshes from res/Models/SimpleKnot.obj
