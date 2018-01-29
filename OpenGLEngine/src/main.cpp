@@ -38,7 +38,7 @@ glm::mat4 model_transform = glm::mat4(1.0f);
 glm::mat4 rotation = glm::mat4(1.0f);
 
 //Holds the information loaded from the obj files
-vector<SceneInfo> Scene;
+vector<core::SceneInfo> Scene;
 
 //Modified in the mouse function
 bool left_mouse_down;
@@ -82,7 +82,7 @@ void LoadModels() {
   string name;
   int i = 0;
   while (getline(model_names, name)) {
-    Scene.push_back(SceneInfo());
+    Scene.push_back(core::SceneInfo());
     if (!Scene[i].LoadModelFromFile(name)) {
       fprintf(stderr, "Did not correctly read %s\n", name.c_str());
       exit(-1);
@@ -136,8 +136,6 @@ void RenderCel() {
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
         glUniform1f(offset_id, 0.12f);
         //Bind the correct VAO and VBO
-        Scene[j].GetData(i).first.Bind();
-        Scene[j].GetData(i).second.Bind();
         glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
         glm::mat4 local1 = glm::mat4(1.0f);
         //If the plane is too big and too far forward, make it smaller before applying the keyboard defined transformation, and then move it backwards
@@ -190,8 +188,6 @@ void RenderCel() {
     }
     else if (j == 1) { //Render the knot
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        Scene[j].GetData(i).first.Bind();
-        Scene[j].GetData(i).second.Bind();
         glm::mat4 local1 = glm::mat4(1.0f);
         local1 = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 1.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(3.0f));
         global1 = local1;
@@ -204,8 +200,6 @@ void RenderCel() {
     }
     else if (j == 2) { //Render the sphere
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        Scene[j].GetData(i).first.Bind();
-        Scene[j].GetData(i).second.Bind();
         glm::mat4 local1 = glm::mat4(1.0f);
         local1 = glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, -2.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(0.3f));
         global1 = local1;
@@ -231,8 +225,6 @@ void RenderCel() {
     if (j == 0) { //Render the plane
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
         //Bind the correct VAO and VBO
-        Scene[j].GetData(i).first.Bind();
-        Scene[j].GetData(i).second.Bind();
         glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
         glm::mat4 local1 = glm::mat4(1.0f);
         //If the plane is too big and too far forward, make it smaller before applying the keyboard defined transformation, and then move it backwards
@@ -288,8 +280,6 @@ void RenderCel() {
     }
     else if (j == 1) { //Render the knot
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        Scene[j].GetData(i).first.Bind();
-        Scene[j].GetData(i).second.Bind();
         glm::mat4 local1 = glm::mat4(1.0f);
         local1 = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 1.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(3.0f));
         global1 = local1;
@@ -303,8 +293,6 @@ void RenderCel() {
     }
     else if (j == 2) { //Render the sphere
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        Scene[j].GetData(i).first.Bind();
-        Scene[j].GetData(i).second.Bind();
         glm::mat4 local1 = glm::mat4(1.0f);
         local1 = glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, -2.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(0.3f));
         global1 = local1;
@@ -336,8 +324,6 @@ void RenderBlinn() {
     if (j == 0) { //Render the plane
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
         //Bind the correct VAO and VBO
-        Scene[j].GetData(i).first.Bind();
-        Scene[j].GetData(i).second.Bind();
         glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
         glm::mat4 local1 = glm::mat4(1.0f);
         //If the plane is too big and too far forward, make it smaller before applying the keyboard defined transformation, and then move it backwards
@@ -389,13 +375,11 @@ void RenderBlinn() {
           glUniform3fv(diffuse_colour_id, 1, &(glm::vec3(0.0f, 0.0f, 0.0f)[0]));
         }
         else glUniform3fv(diffuse_colour_id, 1, &(glm::vec3(0.0f, 0.0f, 1.0f)[0]));
-         GLCall(glDrawElements(GL_TRIANGLES, Scene[j].GetData(i).second.GetCount(), GL_UNSIGNED_INT, (void*)0));
+        //GLCall(glDrawElements(GL_TRIANGLES, Scene[j].GetData(i).second.GetCount(), GL_UNSIGNED_INT, (void*)0));
       }
     }
     else if (j == 1) { //Render the knot
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        Scene[j].GetData(i).first.Bind();
-        Scene[j].GetData(i).second.Bind();
         glm::mat4 local1 = glm::mat4(1.0f);
         local1 = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 1.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(3.0f));
         global1 = local1;
@@ -409,8 +393,6 @@ void RenderBlinn() {
     }
     else if (j == 2) { //Render the sphere
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        Scene[j].GetData(i).first.Bind();
-        Scene[j].GetData(i).second.Bind();
         glm::mat4 local1 = glm::mat4(1.0f);
         local1 = glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, -2.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(0.3f));
         global1 = local1;
@@ -456,68 +438,61 @@ void RenderMinnaert() {
       scene::Object root;
       root.SetTranslation(glm::vec3(0.0f, 0.0f, -20.0f));
       root.UpdateModelMatrix();
-      scene::Object plane_root(Scene[0].GetData(0).first, Scene[0].GetData(0).second);
-      plane_root.SetParent(&root);
-      plane_root.SetModelMatrix(model_transform);
-      scene::Object propellor_centre;
+      scene::Object* plane_root = Scene[0].GetObject_(0);
+      plane_root->SetParent(&root);
+      plane_root->SetModelMatrix(model_transform);
+      scene::Object* propellor_centre;
+      propellor_centre = Scene[0].GetObject_(29);
+      propellor_centre->SetParent(plane_root);
+      propellor_centre->SetOriginOffset(glm::vec3(0.007894f, 1.238691f, 3.366406f));
+      propellor_centre->SetColour(glm::vec3(1.0f, 0.0f, 0.1f));
+      //Rendering
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        //Bind the correct VAO and VBO
-        //TODO of course this would be improved if model loader directly stored as object
-        scene::Object obj(Scene[j].GetData(i).first, Scene[j].GetData(i).second);
-        obj.SetParent(&root);
-        obj.SetModelMatrix(model_transform);
-        obj.SetColour(glm::vec3(0.0f, 0.0f, 1.0f));
+        scene::Object* obj = Scene[j].GetObject_(i);
+        obj->SetParent(&root);
+        obj->SetModelMatrix(model_transform);
+        obj->SetColour(glm::vec3(0.0f, 0.0f, 1.0f));
         //The centre of the propellor
         if (i == 29) {
-          propellor_centre.SetMesh(Scene[j].GetData(i).first, Scene[j].GetData(i).second);
-          propellor_centre.SetParent(&plane_root);
-          propellor_centre.SetOriginOffset(glm::vec3(0.007894f, 1.238691f, 3.366406f));
-          propellor_centre.RotateAboutPivotPoint(angle, glm::vec3(0.0f, 0.0f, 1.0f));
-          propellor_centre.SetColour(glm::vec3(1.0f, 0.0f, 0.1f));
-          render::Renderer::Draw(propellor_centre, minnaert);
+          propellor_centre->RotateAboutPivotPoint(angle, glm::vec3(0.0f, 0.0f, 1.0f));
+          render::Renderer::Draw(*propellor_centre, minnaert);
           continue;
         }
         //The blades of the propellor
         else if (i == 31 || i == 32) {
-          obj.SetParent(&propellor_centre);
-          obj.SetModelMatrix(glm::mat4(1.0f));
-          obj.SetColour(obj.GetParent()->GetColour());
+          obj->SetParent(propellor_centre);
+          obj->SetModelMatrix(glm::mat4(1.0f));
+          obj->SetColour(obj->GetParent()->GetColour());
         }
         //The wheels
         else if (i == 82 || i == 106 || i == 116) {
-          obj.SetColour(glm::vec3(0.0f));
+          obj->SetColour(glm::vec3(0.0f));
         }
-        render::Renderer::Draw(obj, minnaert);
+        render::Renderer::Draw(*obj, minnaert);
       }
     }
     else if (j == 1) { //Render the knot
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        Scene[j].GetData(i).first.Bind();
-        Scene[j].GetData(i).second.Bind();
-        glm::mat4 local1 = glm::mat4(1.0f);
-        local1 = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 1.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(3.0f));
-        global1 = local1;
-        glUniformMatrix4fv(modelmatrix_id, 1, GL_FALSE, &global1[0][0]);
-        //Needed so that normals behave correctly under non uniform scaling
-        glm::mat4 modelview_it = glm::transpose(glm::inverse(view * global1));
-        glUniformMatrix4fv(modelview_inversetranspose, 1, GL_FALSE, &modelview_it[0][0]);
-        glUniform3fv(diffuse_colour_id, 1, &(glm::vec3(1.0f, 3.0f, 0.0f)[0]));
-        glDrawElements(GL_TRIANGLES, Scene[j].GetNumIndices(i), GL_UNSIGNED_INT, (void*)0);
+        scene::Object* obj = Scene[j].GetObject_(i);
+        scene::Object root;
+        root.SetTranslation(glm::vec3(10.0f, 1.0f, -20.0f));
+        root.UpdateModelMatrix();
+        obj->SetModelMatrix(model_transform * glm::scale(glm::vec3(3.0f)));
+        obj->SetParent(&root);
+        obj->SetColour(glm::vec3(0.7f, 1.0f, 0.0f));
+        render::Renderer::Draw(*obj, minnaert);
       }
     }
     else if (j == 2) { //Render the sphere
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        Scene[j].GetData(i).first.Bind();
-        Scene[j].GetData(i).second.Bind();
-        glm::mat4 local1 = glm::mat4(1.0f);
-        local1 = glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, -2.0f, -20.0f)) * model_transform * glm::scale(glm::vec3(0.3f));
-        global1 = local1;
-        glUniformMatrix4fv(modelmatrix_id, 1, GL_FALSE, &global1[0][0]);
-        //Needed so that normals behave correctly under non uniform scaling
-        glm::mat4 modelview_it = glm::transpose(glm::inverse(view * global1));
-        glUniformMatrix4fv(modelview_inversetranspose, 1, GL_FALSE, &modelview_it[0][0]);
-        glUniform3fv(diffuse_colour_id, 1, &(glm::vec3(0.0f, 1.0f, 0.0f)[0]));
-        glDrawElements(GL_TRIANGLES, Scene[j].GetNumIndices(i), GL_UNSIGNED_INT, (void*)0);
+        scene::Object* obj = Scene[j].GetObject_(i);
+        scene::Object root;
+        root.SetTranslation(glm::vec3(-10.0f, -1.0f, -20.0f));
+        root.UpdateModelMatrix();
+        obj->SetModelMatrix(model_transform * glm::scale(glm::vec3(0.3f)));
+        obj->SetParent(&root);
+        obj->SetColour(glm::vec3(0.0f, 1.0f, 0.0f));
+        render::Renderer::Draw(*obj, minnaert);
       }
     }
   }
