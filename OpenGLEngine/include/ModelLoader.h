@@ -36,6 +36,9 @@ namespace core {
     std::vector<scene::Object*> output;
     unsigned int NumMeshes = 0;
     std::vector<scene::Texture*> loaded_textures;
+    std::vector<scene::Texture*> object_textures;
+    std::vector<int> material_indices;
+    bool has_materials = true;
 
     //Temp data, can later put this into the functions using them. 
     //They are empty after loading a model

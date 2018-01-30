@@ -3,6 +3,7 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "glm/glm.hpp"
+#include "Texture.h"
 
 namespace scene {
   struct Mesh {
@@ -19,6 +20,7 @@ namespace scene {
     glm::vec3 origin_offset_;
     glm::vec3 colour_;
     Object* parent_; //Heirarchy
+    Texture* texture_;
   public:
     Object();
     Object(const render::VertexArray& va, const render::IndexBuffer& ib);
@@ -33,6 +35,7 @@ namespace scene {
     inline void SetModelMatrix(const glm::mat4& model) { model_matrix_ = model; }
     inline void SetOriginOffset(const glm::vec3& offset) { origin_offset_ = offset; }
     inline void SetColour(const glm::vec3& colour) { colour_ = colour; }
+    inline void SetTexture(Texture* texture) { texture_ = texture; }
     inline void SetMesh(const render::VertexArray& va, const render::IndexBuffer& ib) {
       mesh_.va = va; mesh_.ib = ib;
     }

@@ -44,9 +44,9 @@ namespace scene {
     }
 
     //Copy image data into the openGL texture
-    glGenTextures(1, &texture_id_);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture_id_);
+    GLCall(glGenTextures(1, &texture_id_));
+    GLCall(glActiveTexture(GL_TEXTURE0));
+    GLCall(glBindTexture(GL_TEXTURE_2D, texture_id_));
     //TODO, think of what will happen if we are reading a RGB image
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
     //Good for anti-aliasing and safe wrapping
@@ -54,6 +54,7 @@ namespace scene {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    stbi_image_free(image_data);
   }
 
   Texture::Texture()
@@ -63,8 +64,7 @@ namespace scene {
 
   Texture::Texture(char* filename)
   {
-    GLCall(glGenTextures(1, &texture_id_));
-    filename_ = filename;
+    Load(filename);
   }
 
   Texture::~Texture()

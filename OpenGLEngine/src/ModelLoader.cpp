@@ -63,8 +63,9 @@ namespace core {
       CopyVectors();
       ClearVectors();
     }
-    //Can later support textures
-    //return InitMaterials(Scene, Filename);
+    if(Scene->HasMaterials())
+        return InitMaterials(Scene, Filename);
+    has_materials = false;
     return true;
   }
 
@@ -93,23 +94,46 @@ namespace core {
       indices.push_back(face.mIndices[1]);
       indices.push_back(face.mIndices[2]);
     }
+    material_indices.push_back(aiMesh->mMaterialIndex);
   }
 
   //Placeholder code to deal with materials and textures
   bool SceneInfo::InitMaterials(const aiScene * Scene, const std::string & Filename)
   {
     for (size_t i = 0; i < Scene->mNumMaterials; ++i) {
-      const aiMaterial* Material = Scene->mMaterials[i];
-      bool skip = false;
-      //If the texture is not loaded, then load it
-      for (auto& texture_ptr : loaded_textures) {
-        if (strcmp(texture_ptr->GetFileName(), //Name of the texture file, aiString) == 0) {
-
+        aiMaterial* Material = Scene->mMaterials[i];
+        bool skip = false;
+        std::string dir = "res/Models/";
+        if (Material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
+            aiString Path;
+            if (Material->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
+                std::string full_path = dir + Path.data;
+                //If the texture is not loaded, then load it
+                for (auto& texture_ptr : loaded_textures) {
+                    if (strcmp(texture_ptr->GetFileName(), full_path.c_str()) == 0) {
+                        object_textures.push_back(texture_ptr);
+                        skip = true;
+                    }
+                }
+                if (!skip) {
+                    char * cstr = new char[full_path.length() + 1];
+                    if (strcpy_s(cstr, full_path.length() + 1, full_path.c_str())) {
+                        fprintf(stderr, "Error copying string %s", full_path.c_str());
+                        exit(-1);
+                    }
+                    scene::Texture *texture = new scene::Texture(cstr);
+                    loaded_textures.push_back(texture);
+                    object_textures.push_back(texture);
+                }
+            }
+            else {
+                fprintf(stderr, "ERROR: Could not find diffuse texture at %s", Path.data);
+                exit(-1);
+            }
         }
-      }
-      if(!)
+        else object_textures.push_back(NULL);
     }
-    return false;
+    return true;
   }
 
   //This lends itself nicely to being able to work with heirarchical transforms
@@ -121,7 +145,17 @@ namespace core {
       render::VertexArray va;
       va.Addbuffer_3f(points_vbo, 0);
       va.Addbuffer_3f(normals_vbo, 1);
+      if (has_materials) {
+          render::VertexBuffer textures_vbo(meshes[i].textures.data(), meshes[i].textures.size() * sizeof(GLfloat));
+          va.Addbuffer_2f(textures_vbo, 2);
+      }
+      
       scene::Object* object = new scene::Object(va, render::IndexBuffer(meshes[i].indices.data(), meshes[i].indices.size()));
+      //TODO this will not be the same size as the number of meshes
+      if (has_materials) {
+          object->SetTexture(object_textures[material_indices[i]]);
+      }
+      else object->SetTexture(NULL);
       output.push_back(object);
     }
   }
