@@ -5,6 +5,7 @@
 #include "VertexArray.h"
 #include "Object.h"
 #include "IndexBuffer.h"
+#include "Texture.h"
 
 //Forward declare structs
 struct aiScene;
@@ -34,6 +35,7 @@ namespace core {
     //Data that is later retrieved in main
     std::vector<scene::Object*> output;
     unsigned int NumMeshes = 0;
+    std::vector<scene::Texture*> loaded_textures;
 
     //Temp data, can later put this into the functions using them. 
     //They are empty after loading a model

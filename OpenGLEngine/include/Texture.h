@@ -13,5 +13,6 @@ namespace scene {
     Texture();
     Texture(char* filename);
     ~Texture();
+    inline char* GetFileName() const { return filename_; }
   };
 } //namespace scene

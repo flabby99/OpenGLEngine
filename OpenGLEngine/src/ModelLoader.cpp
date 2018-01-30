@@ -100,7 +100,14 @@ namespace core {
   {
     for (size_t i = 0; i < Scene->mNumMaterials; ++i) {
       const aiMaterial* Material = Scene->mMaterials[i];
-      
+      bool skip = false;
+      //If the texture is not loaded, then load it
+      for (auto& texture_ptr : loaded_textures) {
+        if (strcmp(texture_ptr->GetFileName(), //Name of the texture file, aiString) == 0) {
+
+        }
+      }
+      if(!)
     }
     return false;
   }
