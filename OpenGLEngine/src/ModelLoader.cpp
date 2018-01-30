@@ -63,6 +63,7 @@ namespace core {
       CopyVectors();
       ClearVectors();
     }
+    white = new scene::Texture("res/Models/textures/white.jpg");
     if(Scene->HasMaterials())
         return InitMaterials(Scene, Filename);
     has_materials = false;
@@ -131,7 +132,7 @@ namespace core {
                 exit(-1);
             }
         }
-        else object_textures.push_back(NULL);
+        else object_textures.push_back(white);
     }
     return true;
   }
@@ -155,7 +156,7 @@ namespace core {
       if (has_materials) {
           object->SetTexture(object_textures[material_indices[i]]);
       }
-      else object->SetTexture(NULL);
+      else object->SetTexture(white);
       output.push_back(object);
     }
   }

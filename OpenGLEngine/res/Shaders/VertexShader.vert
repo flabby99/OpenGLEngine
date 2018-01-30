@@ -15,6 +15,7 @@ layout(location = 3) uniform mat4 mv_it;
 
 void main() {
   texture_coords = vt;
+  //eye_normal = vNormal;
   //Transform vertex position into eye co-ordinates
   eye_position = vec3(view * model * vec4(vPosition, 1.0)); 
   //Transform vertex normal into eye co-ordinates

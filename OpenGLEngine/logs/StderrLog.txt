@@ -1,7 +1,4 @@
-glew version is not 4.5
 Glm is not forced using radians
 Read 196 meshes from res/Models/piper_pa18.obj
-Error: could not load res/Models/textures\piper_diffuse.jpg
-Error: could not load res/Models/textures\\piper_diffuse.jpg
 Read 1 meshes from res/Models/SimpleKnot.obj
 Read 1 meshes from res/Models/Sphere_eg.obj

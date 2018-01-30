@@ -34,8 +34,9 @@ void main() {
   vec3 direction_to_light = normalize(eye_light_position - eye_position);
   //Consider negative dot product to be 0
   float dot_prod = clamp(dot(direction_to_light, eye_normal), 0.0, 1.0);
+  //vec3 Idiffuse = Ldiffuse * vec3(texture (diffuse_texture, texture_coords)) * dot_prod;
   vec3 Idiffuse = Ldiffuse * Kdiffuse * dot_prod;
-  
+
   //Specular takes the angle between the light the surface and the viewer into account
   vec3 direction_to_viewer = normalize(-eye_position);
   vec3 half_way = normalize(direction_to_light + direction_to_viewer);
@@ -43,8 +44,9 @@ void main() {
   float specular_factor = pow(dot_prod_specular, specular_exp);
   vec3 Ispecular = Lspecular * Kspecular * specular_factor;
   //fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0);
+  //fColour = vec4(colour, 1.0);
+  fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0) * texture (diffuse_texture, texture_coords);
   //Debugs
   //fColour = vec4(eye_normal, 1.0);
-  //fColour = texture (diffuse_texture, texture_coords);
-  fColour = vec4(texture_coords.x, texture_coords.y, 0, 1);
+  //fColour = vec4(texture_coords.x, texture_coords.y, 0, 1);
 }

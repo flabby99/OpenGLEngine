@@ -18,6 +18,7 @@ namespace scene {
     unsigned char* image_data = stbi_load(filename, &x, &y, &n, force_channels);
     if (!image_data) {
       fprintf(stderr, "Error: could not load %s\n", filename);
+      exit(-1);
     }
     //Check if the image is has dimensions which are a power of two
     if ((x & (x - 1) != 0) || y & (y - 1) != 0) {

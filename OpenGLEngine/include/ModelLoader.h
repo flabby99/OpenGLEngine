@@ -39,6 +39,7 @@ namespace core {
     std::vector<scene::Texture*> object_textures;
     std::vector<int> material_indices;
     bool has_materials = true;
+    scene::Texture* white; //TODO could share this among scene infos
 
     //Temp data, can later put this into the functions using them. 
     //They are empty after loading a model
