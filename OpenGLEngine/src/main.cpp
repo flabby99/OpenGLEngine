@@ -439,8 +439,6 @@ void RenderMinnaert() {
       root.SetTranslation(glm::vec3(0.0f, 0.0f, -20.0f));
       root.UpdateModelMatrix();
       scene::Object* plane_root = Scene[0].GetObject_(0);
-      plane_root->SetParent(&root);
-      plane_root->SetModelMatrix(model_transform);
       scene::Object* propellor_centre;
       propellor_centre = Scene[0].GetObject_(29);
       propellor_centre->SetParent(plane_root);
@@ -449,13 +447,10 @@ void RenderMinnaert() {
       //Rendering
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
         scene::Object* obj = Scene[j].GetObject_(i);
-        obj->SetParent(&root);
-        obj->SetModelMatrix(model_transform);
-        obj->SetColour(glm::vec3(0.0f, 0.0f, 1.0f));
         //The centre of the propellor
         if (i == 29) {
-          propellor_centre->RotateAboutPivotPoint(angle, glm::vec3(0.0f, 0.0f, 1.0f));
-          render::Renderer::Draw(*propellor_centre, minnaert);
+          propellor_centre->RotateAboutPivotPoint(0.05f, glm::vec3(0.0f, 0.0f, 1.0f));
+          render::Renderer::Draw(*propellor_centre, minnaert, view);
           continue;
         }
         //The blades of the propellor
@@ -466,9 +461,16 @@ void RenderMinnaert() {
         }
         //The wheels
         else if (i == 82 || i == 106 || i == 116) {
+		      obj->SetParent(&root);
+		      obj->SetModelMatrix(model_transform);
           obj->SetColour(glm::vec3(0.0f));
         }
-        render::Renderer::Draw(*obj, minnaert);
+		    else {
+		      obj->SetParent(&root);
+		      obj->SetModelMatrix(model_transform);
+		      obj->SetColour(glm::vec3(0.0f, 0.0f, 1.0f));
+		    }
+        render::Renderer::Draw(*obj, minnaert, view);
       }
     }
     else if (j == 1) { //Render the knot
@@ -480,7 +482,7 @@ void RenderMinnaert() {
         obj->SetModelMatrix(model_transform * glm::scale(glm::vec3(3.0f)));
         obj->SetParent(&root);
         obj->SetColour(glm::vec3(0.7f, 1.0f, 0.0f));
-        render::Renderer::Draw(*obj, minnaert);
+        render::Renderer::Draw(*obj, minnaert, view);
       }
     }
     else if (j == 2) { //Render the sphere
@@ -492,7 +494,7 @@ void RenderMinnaert() {
         obj->SetModelMatrix(model_transform * glm::scale(glm::vec3(0.3f)));
         obj->SetParent(&root);
         obj->SetColour(glm::vec3(0.0f, 1.0f, 0.0f));
-        render::Renderer::Draw(*obj, minnaert);
+        render::Renderer::Draw(*obj, minnaert, view);
       }
     }
   }
