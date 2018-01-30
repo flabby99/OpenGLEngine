@@ -41,6 +41,13 @@ namespace render {
         Bind();
         vb.Bind();
         GLCall(glEnableVertexAttribArray(index));
-        GLCall(glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, NULL))
+        GLCall(glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, NULL));
+    }
+    void VertexArray::Addbuffer_2f(const VertexBuffer & vb, const GLuint index)
+    {
+      Bind();
+      vb.Bind();
+      GLCall(glEnableVertexAttribArray(index));
+      GLCall(glVertexAttribPointer(index, 2, GL_FLOAT, GL_FALSE, 0, NULL));
     }
 } //namespace render

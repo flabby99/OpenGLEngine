@@ -13,6 +13,7 @@ namespace render {
         void Unbind() const;
         void Addbuffer(const VertexBuffer& vb, const VertexBufferLayout& layout);
         void Addbuffer_3f(const VertexBuffer& vb, const GLuint index);
+        void Addbuffer_2f(const VertexBuffer& vb, const GLuint index);
     private:
         GLuint renderer_id_;
     };

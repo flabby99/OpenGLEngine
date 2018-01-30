@@ -100,7 +100,7 @@ namespace core {
   {
     for (size_t i = 0; i < Scene->mNumMaterials; ++i) {
       const aiMaterial* Material = Scene->mMaterials[i];
-      //load the textures from this
+      
     }
     return false;
   }
