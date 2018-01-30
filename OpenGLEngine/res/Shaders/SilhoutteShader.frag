@@ -3,9 +3,9 @@
 
 out vec4 fColour;
 
-layout(location = 4) uniform vec3 colour; 
+layout(location = 4) uniform vec3 const_colour; 
 
 void main() {
   //Note we can get the z buffer value using gl_Fragcoord.z
-  fColour = vec4(colour, 1.0);
+  fColour = vec4(const_colour, 1.0);
 }
