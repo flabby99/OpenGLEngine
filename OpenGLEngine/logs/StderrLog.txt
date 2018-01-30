@@ -5,4 +5,3 @@ Error: could not load res/Models/textures\piper_diffuse.jpg
 Error: could not load res/Models/textures\\piper_diffuse.jpg
 Read 1 meshes from res/Models/SimpleKnot.obj
 Read 1 meshes from res/Models/Sphere_eg.obj
-Got negative Uniform location for colour in silhouette

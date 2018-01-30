@@ -43,6 +43,7 @@ namespace scene {
     inline Mesh GetMesh() const { return mesh_; }
     inline glm::vec3 GetColour() const { return colour_; }
     inline Object* GetParent() const { return parent_; }
+    inline Texture* GetTexture() const { return texture_; }
     //Returns the model matrix relative to the object heirarchy - recursive
     glm::mat4 GetGlobalModelMatrix() const;
   };
