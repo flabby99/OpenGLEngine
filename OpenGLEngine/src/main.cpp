@@ -92,6 +92,8 @@ void CreateShaders() {
     cel = new render::CommonShader("cel", shaderfile);
     minnaert = new render::CommonShader("minnaert", shaderfile);
     cube_map = new render::Shader("cube_map", shaderfile);
+    cube_map->Bind();
+    cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
 
 void ReloadShaders() {
@@ -99,6 +101,7 @@ void ReloadShaders() {
     silhoutte->Reload();
     cel->Reload();
     minnaert->Reload();
+    cube_map->Reload();
 }
 
 void LoadModels() {
@@ -205,6 +208,7 @@ void RenderWithShader(render::Shader* shader) {
 
 void DrawSkyBox() {
   glDepthMask(GL_FALSE);
+  glDisable(GL_CULL_FACE);
   cube_map->Bind();
   glm::mat4 view;
   if (use_fp_camera) {
@@ -220,6 +224,7 @@ void DrawSkyBox() {
   cube_map->SetUniform4fv("proj", persp_proj);
   render::Renderer::Draw(*sky_box);
   glDepthMask(GL_TRUE);
+  glEnable(GL_CULL_FACE);
 }
 
 void Render() {
@@ -485,6 +490,7 @@ void CleanUp() {
   delete(minnaert);
   delete(cel);
   delete(silhoutte);
+  delete(cube_map);
   for (int i = 0; i < Scene.size(); ++i)
   {
 	  for (int j = 0; j < Scene[i].GetNumMeshes(); ++j) {

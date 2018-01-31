@@ -71,6 +71,7 @@ namespace render {
     void Shader::Reload()
     {
         GLCall(glDeleteProgram(renderer_id_));
+        uniform_location_cache_.clear();
         core::ShaderLoader shaderloader;
         renderer_id_ = shaderloader.CreateProgram(filenames_);
     }
@@ -90,17 +91,17 @@ namespace render {
     GLCall(glUniform1f(GetUniformLocation(name), value));
   }
 
-    GLuint Shader::GetUniformLocation(const std::string name)
-    {
-        if (uniform_location_cache_.find(name) != uniform_location_cache_.end())
-            return uniform_location_cache_[name];
-        GLCall(GLint location = glGetUniformLocation(renderer_id_, name.c_str()));
-        if (location < 0) {
-            fprintf(stderr, "Got negative Uniform location for %s in %s", name.c_str(), name_.c_str());
-        }
-        uniform_location_cache_[name] = location;
-        return location;
-    }
+  GLuint Shader::GetUniformLocation(const std::string name)
+  {
+      if (uniform_location_cache_.find(name) != uniform_location_cache_.end())
+          return uniform_location_cache_[name];
+      GLCall(GLint location = glGetUniformLocation(renderer_id_, name.c_str()));
+      if (location < 0) {
+          fprintf(stderr, "Got negative Uniform location for %s in %s", name.c_str(), name_.c_str());
+      }
+      uniform_location_cache_[name] = location;
+      return location;
+  }
   void CommonShader::SetUniforms(glm::mat4 view, glm::mat4 proj, glm::mat4 model, glm::vec3 colour)
   {
     SetUniform4fv("view", view);
