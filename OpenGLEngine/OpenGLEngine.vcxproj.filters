@@ -139,6 +139,12 @@
     <None Include="res\Shaders\WardShader.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="res\Shaders\ReflectionShader.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="res\Shaders\ReflectionShader.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\Shaders\simpleFragmentShader.txt">

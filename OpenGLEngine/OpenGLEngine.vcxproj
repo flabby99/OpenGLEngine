@@ -56,6 +56,8 @@
     <None Include="res\Shaders\FragmentShaderBlinnPhong.frag" />
     <None Include="res\Shaders\FragmentShaderTest.frag" />
     <None Include="res\Shaders\MinnaertShader.frag" />
+    <None Include="res\Shaders\ReflectionShader.frag" />
+    <None Include="res\Shaders\ReflectionShader.vert" />
     <None Include="res\Shaders\SilhoutteShader.frag" />
     <None Include="res\Shaders\SilhoutteShader.vert" />
     <None Include="res\Shaders\VertexShader.vert" />

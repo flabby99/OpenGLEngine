@@ -48,6 +48,24 @@ bool use_quaternions = false;
 //NOTE it might be more effective to refactor this to Enum and allow many camera types
 bool use_fp_camera = false;
 
+scene::Object* sky_box;
+
+void InitSkyBox() {
+    core::SceneInfo sceneinfo;
+    sceneinfo.LoadModelFromFile("res/Models/cube.obj");
+    sky_box = sceneinfo.GetObject_(0);
+    //TODO set the textures for the sky box
+    std::string dir = "res/Models/textures/Storforsen4";
+    const char* front = (dir + "negz.jpg").c_str();
+    const char* back = (dir + "posz.jpg").c_str();
+    const char* top = (dir + "posy.jpg").c_str();
+    const char* bottom = (dir + "negy.jpg").c_str();
+    const char* left = (dir + "negx.jpg").c_str();
+    const char* right = (dir + "posx.jpg").c_str();
+    scene::Texture* texture = new scene::Texture();
+    texture->CreateCubeMap(front, back, top, bottom, left, right);
+    sky_box->SetTexture(texture);
+}
 
 enum class eRenderType {
   RT_blinn,
@@ -442,6 +460,7 @@ void CleanUp() {
   for (int i = 0; i < Scene.size(); ++i)
   {
 	  for (int j = 0; j < Scene[i].GetNumMeshes(); ++j) {
+      delete(Scene[i].GetObject_(j)->GetTexture());
 		  delete(Scene[i].GetObject_(j));
 	  }
   }
