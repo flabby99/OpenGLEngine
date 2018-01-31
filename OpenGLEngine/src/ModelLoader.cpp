@@ -57,7 +57,7 @@ namespace core {
 
   bool SceneInfo::InitFromScene(const aiScene* Scene, const std::string& Filename) {
     NumMeshes = Scene->mNumMeshes;
-    for (size_t i = 0; i < NumMeshes; ++i) {
+    for (int i = 0; i < NumMeshes; ++i) {
       const aiMesh* aiMesh = Scene->mMeshes[i];
       InitMesh(aiMesh);
       CopyVectors();
@@ -73,7 +73,7 @@ namespace core {
   void SceneInfo::InitMesh(const aiMesh* aiMesh) {
     const aiVector3D zero(0.0f, 0.0f, 0.0f);
     //Extract the vertex positions, normals and texture co-ordinates
-    for (size_t i = 0; i < aiMesh->mNumVertices; ++i) {
+    for (int i = 0; i < aiMesh->mNumVertices; ++i) {
       const aiVector3D* pos = &(aiMesh->mVertices[i]);
       const aiVector3D* normal = &(aiMesh->mNormals[i]);
       const aiVector3D* tex_coord = aiMesh->HasTextureCoords(0) ? &(aiMesh->mTextureCoords[0][i]) : &zero;
@@ -87,7 +87,7 @@ namespace core {
       textures.push_back(tex_coord->y);
     }
 
-    for (size_t i = 0; i < aiMesh->mNumFaces; ++i) {
+    for (int i = 0; i < aiMesh->mNumFaces; ++i) {
       const aiFace& face = aiMesh->mFaces[i];
       //Ensure that the face is indeed a triangle.
       assert(face.mNumIndices == 3);
@@ -101,7 +101,7 @@ namespace core {
   //Placeholder code to deal with materials and textures
   bool SceneInfo::InitMaterials(const aiScene * Scene, const std::string & Filename)
   {
-    for (size_t i = 0; i < Scene->mNumMaterials; ++i) {
+    for (int i = 0; i < Scene->mNumMaterials; ++i) {
         aiMaterial* Material = Scene->mMaterials[i];
         bool skip = false;
         std::string dir = "res/Models/";
@@ -139,7 +139,7 @@ namespace core {
 
   //This lends itself nicely to being able to work with heirarchical transforms
   void SceneInfo::InitBuffersAndArrays() {
-    for (size_t i = 0; i < NumMeshes; ++i)
+    for (int i = 0; i < NumMeshes; ++i)
     {
       render::VertexBuffer points_vbo(meshes[i].positions.data(), meshes[i].positions.size() * sizeof(GLfloat));
       render::VertexBuffer normals_vbo(meshes[i].normals.data(), meshes[i].normals.size() * sizeof(GLfloat));

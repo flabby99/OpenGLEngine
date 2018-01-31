@@ -15,7 +15,7 @@ namespace scene {
     int x, y;
     filename_ = filename;
     type_ = GL_TEXTURE_2D;
-    unsigned char *image_data = LoadTexImage(filename, &x, &y);
+    unsigned char *image_data = LoadTexImage(filename, &x, &y, true);
     //Copy image data into the openGL texture
     GLCall(glGenTextures(1, &texture_id_));
     GLCall(glActiveTexture(GL_TEXTURE0));
@@ -30,7 +30,7 @@ namespace scene {
     stbi_image_free(image_data);
   }
 
-  unsigned char* Texture::LoadTexImage(const char * filename, int* x, int* y)
+  unsigned char* Texture::LoadTexImage(const char * filename, int* x, int* y, bool flip)
   {
       int n; //x is width y is height
       int force_channels = 4;
@@ -40,7 +40,7 @@ namespace scene {
           exit(-1);
       }
       //Check if the image is has dimensions which are a power of two
-      if ((*x & (*x - 1) != 0) || *y & (*y - 1) != 0) {
+      if (((*x & (*x - 1)) != 0) || (*y & (*y - 1)) != 0) {
           fprintf(stderr, "WARNING: texture %s is not power of 2 dimensions\n", filename);
       }
       //Flip the image - openGL expects 0 on the Y-axis to be at the bottom of the texture
@@ -50,6 +50,8 @@ namespace scene {
       unsigned char* bottom = NULL;
       unsigned char temp = 0;
       int half_height = *y / 2;
+
+      if (!flip) return image_data;
 
       for (int row = 0; row < half_height; ++row) {
           top = image_data + row * width_in_bytes;
@@ -89,7 +91,7 @@ namespace scene {
   bool Texture::LoadCubeMapSide(GLenum side_target, const char * filename)
   {
       int x, y;
-      unsigned char* image_data = LoadTexImage(filename, &x, &y);
+      unsigned char* image_data = LoadTexImage(filename, &x, &y, false);
       glTexImage2D(side_target, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
       stbi_image_free(image_data);
       return true;

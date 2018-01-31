@@ -134,7 +134,7 @@ void RenderWithShader(render::Shader* shader) {
   shader->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
   shader->SetUniform4fv("proj", persp_proj);
-  for (size_t j = 0; j != Scene.size(); ++j) {
+  for (int j = 0; j != Scene.size(); ++j) {
     glm::mat4 global1(1.0f);
     if (j == 0) { //Render the plane
       scene::Object root;
@@ -147,7 +147,7 @@ void RenderWithShader(render::Shader* shader) {
       propellor_centre->SetOriginOffset(glm::vec3(0.007894f, 1.238691f, 3.366406f));
       propellor_centre->SetColour(glm::vec3(1.0f, 0.0f, 0.1f));
       //Rendering
-      for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
+      for (int i = 0; i < Scene[j].GetNumMeshes(); ++i) {
         scene::Object* obj = Scene[j].GetObject_(i);
         //The centre of the propellor
         if (i == 29) {
@@ -176,7 +176,7 @@ void RenderWithShader(render::Shader* shader) {
       }
     }
     else if (j == 1) { //Render the knot
-      for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
+      for (int i = 0; i < Scene[j].GetNumMeshes(); ++i) {
         scene::Object* obj = Scene[j].GetObject_(i);
         scene::Object root;
         root.SetTranslation(glm::vec3(10.0f, 1.0f, -20.0f));
@@ -188,7 +188,7 @@ void RenderWithShader(render::Shader* shader) {
       }
     }
     else if (j == 2) { //Render the sphere
-      for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
+      for (int i = 0; i < Scene[j].GetNumMeshes(); ++i) {
         scene::Object* obj = Scene[j].GetObject_(i);
         scene::Object root;
         root.SetTranslation(glm::vec3(-10.0f, -1.0f, -20.0f));
@@ -202,8 +202,29 @@ void RenderWithShader(render::Shader* shader) {
   }
 }
 
+
+void DrawSkyBox() {
+  glDepthMask(GL_FALSE);
+  cube_map->Bind();
+  glm::mat4 view;
+  if (use_fp_camera) {
+    FPcamera.updatePosition(glm::vec3(model_transform * glm::vec4(-0.007894f, 2.238691f, 2.166406f, 1.0f)));
+    FPcamera.updateDirection(glm::vec3(model_transform * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f)));
+    view = FPcamera.getMatrix();
+  }
+  else {
+    view = TPcamera.getMatrix();
+  }
+  cube_map->SetUniform4fv("view", view);
+  glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
+  cube_map->SetUniform4fv("proj", persp_proj);
+  render::Renderer::Draw(*sky_box);
+  glDepthMask(GL_TRUE);
+}
+
 void Render() {
   render::Renderer::Clear();
+  DrawSkyBox();
   switch (render_type) {
     case eRenderType::RT_blinn :
       RenderWithShader(blinn_phong);

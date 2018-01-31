@@ -2,7 +2,7 @@
 
 in vec3 texcoords;
 
-layout(binding=0) samplerCube cube_texture;
+layout(binding=0) uniform samplerCube cube_texture;
 out vec4 fColour;
 
 void main() {

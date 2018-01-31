@@ -17,6 +17,15 @@ namespace render {
 	  shader->SetUniform4fv("mv_it", glm::transpose(glm::inverse(view * model_matrix)));
 	  GLCall(glDrawElements(GL_TRIANGLES, object.GetMesh().ib.GetCount(), GL_UNSIGNED_INT, (void*)0));
   }
+  void Renderer::Draw(scene::Object object)
+  {
+    object.GetMesh().va.Bind();
+    object.GetMesh().ib.Bind();
+    if (object.GetTexture() != NULL) {
+      object.GetTexture()->Bind();
+    }
+    GLCall(glDrawElements(GL_TRIANGLES, object.GetMesh().ib.GetCount(), GL_UNSIGNED_INT, (void*)0));
+  }
   void Renderer::Clear()
   {
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
