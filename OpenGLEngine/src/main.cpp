@@ -52,16 +52,20 @@ scene::Object* sky_box;
 
 void InitSkyBox() {
     core::SceneInfo sceneinfo;
-    sceneinfo.LoadModelFromFile("res/Models/cube.obj");
+    char* filename = "res/Models/cube.obj";
+    if (!sceneinfo.LoadModelFromFile(filename)) {
+        fprintf(stderr, "ERROR: Could not load %s", filename);
+        exit(-1);
+    }
+    sceneinfo.InitBuffersAndArrays();
     sky_box = sceneinfo.GetObject_(0);
     //TODO set the textures for the sky box
-    std::string dir = "res/Models/textures/Storforsen4";
-    const char* front = (dir + "negz.jpg").c_str();
-    const char* back = (dir + "posz.jpg").c_str();
-    const char* top = (dir + "posy.jpg").c_str();
-    const char* bottom = (dir + "negy.jpg").c_str();
-    const char* left = (dir + "negx.jpg").c_str();
-    const char* right = (dir + "posx.jpg").c_str();
+    const char* front = "res/Models/textures/Storforsen4/negz.jpg";
+    const char* back = "res/Models/textures/Storforsen4/posz.jpg";
+    const char* top = "res/Models/textures/Storforsen4/posy.jpg";
+    const char* bottom = "res/Models/textures/Storforsen4/negy.jpg";
+    const char* left = "res/Models/textures/Storforsen4/negx.jpg";
+    const char* right = "res/Models/textures/Storforsen4/posx.jpg";
     scene::Texture* texture = new scene::Texture();
     texture->CreateCubeMap(front, back, top, bottom, left, right);
     sky_box->SetTexture(texture);
@@ -102,7 +106,7 @@ void LoadModels() {
   while (getline(model_names, name)) {
     Scene.push_back(core::SceneInfo());
     if (!Scene[i].LoadModelFromFile(name)) {
-      fprintf(stderr, "Did not correctly read %s\n", name.c_str());
+      fprintf(stderr, "ERROR: Did not correctly read %s\n", name.c_str());
       exit(-1);
     }
     Scene[i].InitBuffersAndArrays();
@@ -449,6 +453,7 @@ void Init() {
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
   LoadModels();
+  InitSkyBox();
   CreateShaders();
 }
 

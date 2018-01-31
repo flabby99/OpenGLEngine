@@ -30,13 +30,13 @@ namespace scene {
     stbi_image_free(image_data);
   }
 
-  unsigned char* Texture::LoadTexImage(char * filename, int* x, int* y)
+  unsigned char* Texture::LoadTexImage(const char * filename, int* x, int* y)
   {
       int n; //x is width y is height
       int force_channels = 4;
       unsigned char* image_data = stbi_load(filename, x, y, &n, force_channels);
       if (!image_data) {
-          fprintf(stderr, "Error: could not load %s\n", filename);
+          fprintf(stderr, "Error: could not load texture image in %s\n", filename);
           exit(-1);
       }
       //Check if the image is has dimensions which are a power of two
@@ -86,10 +86,10 @@ namespace scene {
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   }
 
-  bool Texture::LoadCubeMapSide(GLenum side_target, const char * file_name)
+  bool Texture::LoadCubeMapSide(GLenum side_target, const char * filename)
   {
       int x, y;
-      unsigned char* image_data = LoadTexImage(filename_, &x, &y);
+      unsigned char* image_data = LoadTexImage(filename, &x, &y);
       glTexImage2D(side_target, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
       stbi_image_free(image_data);
       return true;
