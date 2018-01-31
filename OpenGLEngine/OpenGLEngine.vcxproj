@@ -52,22 +52,19 @@
   <ItemGroup>
     <None Include="res\Shaders\CelShader.frag" />
     <None Include="res\Shaders\CelShader.vert" />
-    <None Include="res\Shaders\FragmentShader.frag" />
+    <None Include="res\Shaders\cube_map.frag" />
+    <None Include="res\Shaders\cube_map.vert" />
     <None Include="res\Shaders\FragmentShaderBlinnPhong.frag" />
-    <None Include="res\Shaders\FragmentShaderTest.frag" />
     <None Include="res\Shaders\MinnaertShader.frag" />
     <None Include="res\Shaders\ReflectionShader.frag" />
     <None Include="res\Shaders\ReflectionShader.vert" />
     <None Include="res\Shaders\SilhoutteShader.frag" />
     <None Include="res\Shaders\SilhoutteShader.vert" />
     <None Include="res\Shaders\VertexShader.vert" />
-    <None Include="res\Shaders\VertexShaderTest.vert" />
-    <None Include="res\Shaders\WardShader.frag" />
-    <None Include="res\Shaders\WardShader.vert" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="res\Shaders\simpleFragmentShader.txt" />
-    <Text Include="res\Shaders\simpleVertexShader.txt" />
+    <Text Include="config\modelnames.txt" />
+    <Text Include="config\shadernames.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

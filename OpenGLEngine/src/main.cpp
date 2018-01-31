@@ -83,13 +83,15 @@ render::CommonShader* blinn_phong;
 render::CommonShader* silhoutte;
 render::CommonShader* cel;
 render::CommonShader* minnaert;
+render::Shader* cube_map;
 
 void CreateShaders() {
-    const std::string shaderfile = "shadernames.txt";
+    const std::string shaderfile = "config/shadernames.txt";
     blinn_phong = new render::CommonShader("blinn_phong", shaderfile);
     silhoutte = new render::CommonShader("silhouette", shaderfile);
     cel = new render::CommonShader("cel", shaderfile);
     minnaert = new render::CommonShader("minnaert", shaderfile);
+    cube_map = new render::Shader("cube_map", shaderfile);
 }
 
 void ReloadShaders() {
@@ -100,7 +102,7 @@ void ReloadShaders() {
 }
 
 void LoadModels() {
-  ifstream model_names("modelnames.txt");
+  ifstream model_names("config/modelnames.txt");
   string name;
   int i = 0;
   while (getline(model_names, name)) {

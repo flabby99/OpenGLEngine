@@ -13,3 +13,7 @@ res/Shaders/CelShader.frag
 minnaert
 res/Shaders/VertexShader.vert
 res/Shaders/MinnaertShader.frag
+
+cube_map
+res/Shaders/cube_map.vert
+res/Shaders/cube_map.frag
