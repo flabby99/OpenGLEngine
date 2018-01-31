@@ -146,7 +146,7 @@ void RenderWithShader(render::Shader* shader) {
         else {
           obj->SetParent(&root);
           obj->SetModelMatrix(model_transform);
-          obj->SetColour(glm::vec3(0.05f, 0.05f, 0.05f));
+          obj->SetColour(glm::vec3(0.0f, 0.0f, 1.0f));
         }
         render::Renderer::Draw(*obj, shader, view);
       }

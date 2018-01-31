@@ -43,9 +43,9 @@ void main() {
   float dot_prod_specular = clamp(dot(half_way, eye_normal), 0.0, 1.0);
   float specular_factor = pow(dot_prod_specular, specular_exp);
   vec3 Ispecular = Lspecular * Kspecular * specular_factor;
-  //fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0);
+  fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0);
   //fColour = vec4(colour, 1.0);
-  fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0) * texture (diffuse_texture, texture_coords);
+  //fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0) * texture (diffuse_texture, texture_coords);
   //Debugs
   //fColour = vec4(eye_normal, 1.0);
   //fColour = vec4(texture_coords.x, texture_coords.y, 0, 1);
