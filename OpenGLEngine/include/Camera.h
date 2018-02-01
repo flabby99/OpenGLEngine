@@ -1,6 +1,8 @@
 #pragma once
-#include "glm/glm.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
+#include "glm/glm.hpp"
+#include "glm/gtc/quaternion.hpp"
+#include "glm/gtx/quaternion.hpp"
 
 class Camera
 {  
@@ -8,6 +10,7 @@ class Camera
   glm::vec3 position;
   glm::vec3 viewDirection;
   glm::vec2 mousePosition;
+  glm::quat current_orientation;
   //How fast to rotate and move
   const float rotation_speed = 0.001f;
   const float movement_speed = 0.09f;
@@ -26,5 +29,6 @@ public:
   void updatePosition(const glm::vec3 newPosition);
   void updateDirection(const glm::vec3 newDirection);
   void rotateViewDirection(const glm::mat4 rotation);
+  inline glm::mat4 getRotation() const { return glm::toMat4(current_orientation); }
 };
 

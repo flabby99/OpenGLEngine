@@ -220,10 +220,10 @@ void DrawSkyBox() {
   if (use_fp_camera) {
     FPcamera.updatePosition(glm::vec3(model_transform * glm::vec4(-0.007894f, 2.238691f, 2.166406f, 1.0f)));
     FPcamera.updateDirection(glm::vec3(model_transform * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f)));
-    view = FPcamera.getMatrix();
+    view = FPcamera.getRotation();
   }
   else {
-    view = TPcamera.getMatrix();
+    view = TPcamera.getRotation();
   }
   cube_map->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);

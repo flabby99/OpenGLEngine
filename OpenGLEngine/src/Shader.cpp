@@ -97,7 +97,7 @@ namespace render {
           return uniform_location_cache_[name];
       GLCall(GLint location = glGetUniformLocation(renderer_id_, name.c_str()));
       if (location < 0) {
-          fprintf(stderr, "Got negative Uniform location for %s in %s", name.c_str(), name_.c_str());
+          fprintf(stderr, "Got negative Uniform location for %s in %s\n", name.c_str(), name_.c_str());
       }
       uniform_location_cache_[name] = location;
       return location;

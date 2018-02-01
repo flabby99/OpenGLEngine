@@ -50,6 +50,7 @@
     <ClCompile Include="src\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="res\Shaders\CelShader.frag" />
     <None Include="res\Shaders\CelShader.vert" />
     <None Include="res\Shaders\cube_map.frag" />
