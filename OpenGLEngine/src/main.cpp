@@ -195,7 +195,7 @@ void DrawSkyBox() {
     view = FPcamera.getRotation();
   }
   else {
-    view = TPcamera.getRotation();
+    view = TPcamera.getMatrix();
   }
   cube_map->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
