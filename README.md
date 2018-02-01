@@ -15,3 +15,4 @@ I will attempt to update the code base to follow https://google.github.io/styleg
 * Object oriented design of VBOs, VAOs, Shaders, Renderers - [The ChernoProject](https://www.youtube.com/user/TheChernoProject)
 * Cel shading - [Sun and Black Cat](http://sunandblackcat.com/tipFullView.php?l=eng&topicid=15)
 * Other shading models (blinn phong, minneart, ward) - [Lossaso](http://web.cs.wpi.edu/~emmanuel/courses/cs563/S05/projects/surface_reflection_losasso.pdf) 
+* For some interesting shader implementations in glsl - [Geeks3d](http://www.geeks3d.com/shader-library/)

@@ -4,18 +4,18 @@
 namespace render {
   void Renderer::Draw(scene::Object object, Shader* shader, glm::mat4 view)
   {
-	  shader->Bind();
-	  object.GetMesh().va.Bind();
-	  object.GetMesh().ib.Bind();
-	  //TODO figure out how to update uniforms
-	  glm::mat4 model_matrix = object.GetGlobalModelMatrix();
+    shader->Bind();
+    object.GetMesh().va.Bind();
+    object.GetMesh().ib.Bind();
+    //TODO figure out how to update uniforms
+    glm::mat4 model_matrix = object.GetGlobalModelMatrix();
     if (object.GetTexture() != NULL) {
         object.GetTexture()->Bind();
     }
-	  shader->SetUniform4fv("model", model_matrix);
-	  shader->SetUniform3f("colour", object.GetColour());
-	  shader->SetUniform4fv("mv_it", glm::transpose(glm::inverse(view * model_matrix)));
-	  GLCall(glDrawElements(GL_TRIANGLES, object.GetMesh().ib.GetCount(), GL_UNSIGNED_INT, (void*)0));
+    shader->SetUniform4fv("model", model_matrix);
+    shader->SetUniform3f("colour", object.GetColour());
+    shader->SetUniform4fv("mv_it", glm::transpose(glm::inverse(view * model_matrix)));
+    GLCall(glDrawElements(GL_TRIANGLES, object.GetMesh().ib.GetCount(), GL_UNSIGNED_INT, (void*)0));
   }
   void Renderer::Draw(scene::Object object)
   {

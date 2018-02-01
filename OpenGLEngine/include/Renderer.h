@@ -5,8 +5,8 @@
 namespace render {
   class Renderer {
   public:
-	//Also updates the modelview inverse transpose
-	static void Draw(scene::Object object, Shader* shader, glm::mat4 view);
+  //Also updates the modelview inverse transpose
+  static void Draw(scene::Object object, Shader* shader, glm::mat4 view);
   //Draws an object using the current shader and updates no uniforms
   static void Draw(scene::Object object);
   //Clears the depth and colour buffers

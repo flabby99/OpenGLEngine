@@ -3,6 +3,7 @@
 
 //REFERENCE, I updated the mouse update using http://in2gpu.com/2016/03/14/opengl-fps-camera-quaternion/
 //Another solution is https://github.com/hmazhar/moderngl_camera/blob/master/camera.cpp
+//NOTE the camera currently rolls when the mouse is moved in a circular motion, this is kind of cool but not intended
 
 Camera::Camera()
 {
@@ -23,9 +24,9 @@ Camera::Camera(glm::vec3 pos, glm::vec3 view, glm::vec3 up)
 glm::mat4 Camera::getMatrix() const
 {
     //return glm::lookAt(position, position + viewDirection, upVector);
-    glm::mat4 translate = glm::translate(glm::mat4(1.0f), position);
+    glm::mat4 translate = glm::translate(glm::mat4(1.0f), -position);
     glm::mat4 rotate = glm::toMat4(current_orientation);
-    return rotate * translate;
+    return translate * rotate;
 }
 
 void Camera::mouseUpdate(const glm::vec2 & newMousePosition)
@@ -43,6 +44,7 @@ void Camera::mouseUpdate(const glm::vec2 & newMousePosition)
 
     //order matters,update camera_quat
     current_orientation = glm::normalize(key_quat * current_orientation);
+    viewDirection = current_orientation * glm::vec3(0.0f, 0.0f, -1.0f);
     mousePosition = newMousePosition;
 }
 
