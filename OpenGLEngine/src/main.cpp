@@ -74,7 +74,8 @@ void InitSkyBox() {
 enum class eRenderType {
   RT_blinn,
   RT_cel,
-  RT_minnaert
+  RT_minnaert,
+  RT_reflection
 };
 
 eRenderType render_type = eRenderType::RT_blinn;
@@ -84,6 +85,7 @@ render::CommonShader* silhoutte;
 render::CommonShader* cel;
 render::CommonShader* minnaert;
 render::Shader* cube_map;
+render::CommonShader* reflection;
 
 void CreateShaders() {
     const std::string shaderfile = "config/shadernames.txt";
@@ -91,6 +93,7 @@ void CreateShaders() {
     silhoutte = new render::CommonShader("silhouette", shaderfile);
     cel = new render::CommonShader("cel", shaderfile);
     minnaert = new render::CommonShader("minnaert", shaderfile);
+    reflection = new render::CommonShader("reflection", shaderfile);
     cube_map = new render::Shader("cube_map", shaderfile);
     cube_map->Bind();
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
@@ -101,7 +104,10 @@ void ReloadShaders() {
     silhoutte->Reload();
     cel->Reload();
     minnaert->Reload();
+    reflection->Reload();
     cube_map->Reload();
+    cube_map->Bind();
+    cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
 
 void LoadModels() {
@@ -184,7 +190,7 @@ void RenderWithShader(render::Shader* shader) {
         scene::Object root;
         root.SetTranslation(glm::vec3(10.0f, 1.0f, -20.0f));
         root.UpdateModelMatrix();
-        obj->SetModelMatrix(model_transform * glm::scale(glm::vec3(3.0f)));
+        obj->SetModelMatrix(model_transform * glm::scale(glm::vec3(0.3f)));
         obj->SetParent(&root);
         obj->SetColour(glm::vec3(0.7f, 1.0f, 0.0f));
         render::Renderer::Draw(*obj, shader, view);
@@ -248,6 +254,9 @@ void Render() {
       break;
     case eRenderType::RT_minnaert :
       RenderWithShader(minnaert);
+      break;
+    case eRenderType::RT_reflection :
+      RenderWithShader(reflection);
       break;
     default:
       break;
@@ -410,6 +419,9 @@ void Keyboard(unsigned char key, int x, int y) {
   case 'l':
     render_type = eRenderType::RT_blinn;
     break;
+  case 'L':
+    render_type = eRenderType::RT_reflection;
+    break;
   case 't':
     render_type = eRenderType::RT_cel;
     break;
@@ -491,6 +503,7 @@ void CleanUp() {
   delete(cel);
   delete(silhoutte);
   delete(cube_map);
+  delete(reflection);
   for (int i = 0; i < Scene.size(); ++i)
   {
 	  for (int j = 0; j < Scene[i].GetNumMeshes(); ++j) {

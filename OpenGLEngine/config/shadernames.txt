@@ -17,3 +17,7 @@ res/Shaders/MinnaertShader.frag
 cube_map
 res/Shaders/cube_map.vert
 res/Shaders/cube_map.frag
+
+reflection
+res/Shaders/ReflectionShader.vert
+res/Shaders/ReflectionShader.frag

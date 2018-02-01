@@ -1,5 +1,0 @@
-Glm is not forced using radians
-Read 196 meshes from res/Models/piper_pa18.obj
-Read 1 meshes from res/Models/SimpleKnot.obj
-Read 1 meshes from res/Models/Sphere_eg.obj
-Read 1 meshes from res/Models/cube.obj
