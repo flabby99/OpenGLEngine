@@ -28,11 +28,12 @@ float empirical_fresnel(vec3 I, vec3 N, vec3 f_v) {
 }
 
 void main() {
-  vec3 eye_incident = normalize(eye_position);
+  vec3 eye_incident = normalize(eye_position);  
   //Do reflections
   vec3 I = vec3(inverse (view) * vec4(eye_incident, 0.0));
   vec3 N = vec3(inverse (view) * vec4(eye_normal, 0.0));
   vec3 reflected = reflect(I, N);
+  //vec3 reflected = vec3(inverse (view) * vec4(reflect(eye_incident, eye_normal), 0.0));
   vec3 reflectedColour = texture(cube_texture, reflected).rgb;
 
   //Currently this is set up for air -> glass

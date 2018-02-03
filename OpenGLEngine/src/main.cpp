@@ -183,7 +183,6 @@ void RenderWithShader(render::Shader* shader) {
   }
 }
 
-
 void DrawSkyBox() {
   glDepthMask(GL_FALSE);
   glDisable(GL_CULL_FACE);
