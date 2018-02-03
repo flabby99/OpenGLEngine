@@ -129,7 +129,7 @@ void LoadModels() {
 void RenderWithShader(render::Shader* shader) {
   shader->Bind();
   static float angle = 0.0;
-  angle = fmod(angle + 0.05f, FULLROTATIONINRADIANS);
+  angle = fmod(angle + 0.005f, FULLROTATIONINRADIANS);
   glm::mat4 view;
   //Update view
   if (use_fp_camera) {
@@ -144,13 +144,13 @@ void RenderWithShader(render::Shader* shader) {
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
   shader->SetUniform4fv("proj", persp_proj);
   for (int j = 0; j != Scene.size(); ++j) {
-    if (j == 0) { //Render shoe
+    if (j == 0) { //Render diamond
       for (int i = 0; i < Scene[j].GetNumMeshes(); ++i) {
         scene::Object* obj = Scene[j].GetObject_(i);
         scene::Object root;
         root.SetTranslation(glm::vec3(0.0f, 0.0f, -20.0f));
         root.UpdateModelMatrix();
-        obj->SetModelMatrix(model_transform * glm::scale(glm::vec3(0.5f)));
+        obj->SetModelMatrix(model_transform *  glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(1.5f)));
         obj->SetParent(&root);
         obj->SetColour(glm::vec3(0.7f, 1.0f, 0.0f));
         render::Renderer::Draw(*obj, shader, view);
@@ -160,9 +160,9 @@ void RenderWithShader(render::Shader* shader) {
       for (int i = 0; i < Scene[j].GetNumMeshes(); ++i) {
         scene::Object* obj = Scene[j].GetObject_(i);
         scene::Object root;
-        root.SetTranslation(glm::vec3(10.0f, 1.0f, -20.0f));
+        root.SetTranslation(glm::vec3(8.0f, 1.0f, -20.0f));
         root.UpdateModelMatrix();
-        obj->SetModelMatrix(model_transform * glm::scale(glm::vec3(0.3f)));
+        obj->SetModelMatrix(model_transform * glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(0.25f)));
         obj->SetParent(&root);
         obj->SetColour(glm::vec3(0.7f, 1.0f, 0.0f));
         render::Renderer::Draw(*obj, shader, view);
@@ -174,7 +174,19 @@ void RenderWithShader(render::Shader* shader) {
         scene::Object root;
         root.SetTranslation(glm::vec3(-10.0f, -1.0f, -20.0f));
         root.UpdateModelMatrix();
-        obj->SetModelMatrix(model_transform * glm::scale(glm::vec3(0.3f)));
+        obj->SetModelMatrix(model_transform * glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(0.8f)));
+        obj->SetParent(&root);
+        obj->SetColour(glm::vec3(0.0f, 1.0f, 0.0f));
+        render::Renderer::Draw(*obj, shader, view);
+      }
+    }
+    else if (j == 3) { //Render the teapot
+      for (int i = 0; i < Scene[j].GetNumMeshes(); ++i) {
+        scene::Object* obj = Scene[j].GetObject_(i);
+        scene::Object root;
+        root.SetTranslation(glm::vec3(-4.0f, -8.0f, -20.0f));
+        root.UpdateModelMatrix();
+        obj->SetModelMatrix(model_transform * glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(1.0f)));
         obj->SetParent(&root);
         obj->SetColour(glm::vec3(0.0f, 1.0f, 0.0f));
         render::Renderer::Draw(*obj, shader, view);

@@ -1,3 +1,4 @@
-res/Models/Lshoe.obj
+res/Models/DIAMOND.obj
 res/Models/cube.obj
 res/Models/Sphere_eg.obj
+res/Models/teapot.obj
