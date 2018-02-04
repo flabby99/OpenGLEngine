@@ -15,6 +15,7 @@
 #include "Shader.h"
 #include "Renderer.h"
 #include "Object.h"
+#include "Particle.h"
 
 #include <iostream>
 #include <math.h>
@@ -34,9 +35,6 @@ int mouse_x, mouse_y;
 //A matrix that is updated in the keyboard function, allows moving model around in the scene
 glm::mat4 model_transform = glm::mat4(1.0f);
 
-//TODO this is temp
-glm::mat4 rotation = glm::mat4(1.0f);
-
 //Holds the information loaded from the obj files
 vector<core::SceneInfo> Scene;
 
@@ -48,7 +46,29 @@ bool use_quaternions = false;
 //NOTE it might be more effective to refactor this to Enum and allow many camera types
 bool use_fp_camera = false;
 
+std::vector<physics::Plane* > cube;
+
+void InitCube() {
+  glm::vec3 right(5.0f, 0.0f, 0.0f);
+  glm::vec3 top(0.0f, 5.0f, 0.0f);
+  glm::vec3 front(0.0f, 0.0f, 5.0f);
+  glm::vec3* planes[3] = { &right, &top, &front };
+  for (auto &plane : planes) {
+    physics::Plane* side = new physics::Plane;
+    side->position_ = *plane;
+    side->normal_ = -glm::normalize(*plane);
+    side->threshold_ = 0.02;
+    cube.push_back(side);
+    side = new physics::Plane;
+    side->position_ = -*plane;
+    side->normal_ = glm::normalize(*plane);
+    side->threshold_ = 0.02;
+    cube.push_back(side);
+  }
+}
+
 scene::Object* sky_box;
+scene::Object* particle_mesh;
 
 void InitSkyBox() {
     core::SceneInfo sceneinfo;
@@ -110,89 +130,29 @@ void ReloadShaders() {
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
 
+//TODO change this so that a force knows how to apply itself
+physics::Force gravity(glm::vec3(0.0f, -0.01f, 0.0f));
+//TODO replace this particle with a pool
+physics::Particle particle;
 void LoadModels() {
-  ifstream model_names("config/modelnames.txt");
-  string name;
-  int i = 0;
-  while (getline(model_names, name)) {
-    Scene.push_back(core::SceneInfo());
-    if (!Scene[i].LoadModelFromFile(name)) {
-      fprintf(stderr, "ERROR: Did not correctly read %s\n", name.c_str());
-      exit(-1);
-    }
-    Scene[i].InitBuffersAndArrays();
-    ++i;
+  core::SceneInfo sceneinfo;
+  char* filename = "res/Models/Sphere_eg.obj";
+  if (!sceneinfo.LoadModelFromFile(filename)) {
+    fprintf(stderr, "ERROR: Could not load %s", filename);
+    exit(-1);
   }
-  model_names.close();
-}
-
-void RenderWithShader(render::Shader* shader) {
-  shader->Bind();
-  static float angle = 0.0;
-  angle = fmod(angle + 0.005f, FULLROTATIONINRADIANS);
-  glm::mat4 view;
-  //Update view
-  if (use_fp_camera) {
-    FPcamera.updatePosition(glm::vec3(model_transform * glm::vec4(-0.007894f, 2.238691f, 2.166406f, 1.0f)));
-    FPcamera.updateDirection(glm::vec3(model_transform * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f)));
-    view = FPcamera.getMatrix();
-  }
-  else {
-    view = TPcamera.getMatrix();
-  }
-  shader->SetUniform4fv("view", view);
-  glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
-  shader->SetUniform4fv("proj", persp_proj);
-  for (int j = 0; j != Scene.size(); ++j) {
-    if (j == 0) { //Render diamond
-      for (int i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        scene::Object* obj = Scene[j].GetObject_(i);
-        scene::Object root;
-        root.SetTranslation(glm::vec3(0.0f, 0.0f, -20.0f));
-        root.UpdateModelMatrix();
-        obj->SetModelMatrix(model_transform *  glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(1.5f)));
-        obj->SetParent(&root);
-        obj->SetColour(glm::vec3(0.7f, 1.0f, 0.0f));
-        render::Renderer::Draw(*obj, shader, view);
-      }
-    }
-    else if (j == 1) { //Render the cube
-      for (int i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        scene::Object* obj = Scene[j].GetObject_(i);
-        scene::Object root;
-        root.SetTranslation(glm::vec3(8.0f, 1.0f, -20.0f));
-        root.UpdateModelMatrix();
-        obj->SetModelMatrix(model_transform * glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(0.25f)));
-        obj->SetParent(&root);
-        obj->SetColour(glm::vec3(0.7f, 1.0f, 0.0f));
-        render::Renderer::Draw(*obj, shader, view);
-      }
-    }
-    else if (j == 2) { //Render the sphere
-      for (int i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        scene::Object* obj = Scene[j].GetObject_(i);
-        scene::Object root;
-        root.SetTranslation(glm::vec3(-10.0f, -1.0f, -20.0f));
-        root.UpdateModelMatrix();
-        obj->SetModelMatrix(model_transform * glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(0.8f)));
-        obj->SetParent(&root);
-        obj->SetColour(glm::vec3(0.0f, 1.0f, 0.0f));
-        render::Renderer::Draw(*obj, shader, view);
-      }
-    }
-    else if (j == 3) { //Render the teapot
-      for (int i = 0; i < Scene[j].GetNumMeshes(); ++i) {
-        scene::Object* obj = Scene[j].GetObject_(i);
-        scene::Object root;
-        root.SetTranslation(glm::vec3(-4.0f, -8.0f, -20.0f));
-        root.UpdateModelMatrix();
-        obj->SetModelMatrix(model_transform * glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(1.0f)));
-        obj->SetParent(&root);
-        obj->SetColour(glm::vec3(0.0f, 1.0f, 0.0f));
-        render::Renderer::Draw(*obj, shader, view);
-      }
-    }
-  }
+  sceneinfo.InitBuffersAndArrays();
+  scene::Object* root = new scene::Object();
+  root->SetTranslation(glm::vec3(0.0f, 0.0f, -20.0f));
+  root->UpdateModelMatrix();
+  particle_mesh = sceneinfo.GetObject_(0);
+  particle_mesh->SetColour(glm::vec3(1.0f, 0.0f, 0.0f));
+  particle_mesh->SetParent(root);
+  particle_mesh->SetScale(glm::vec3(0.1f));
+ // particle_mesh->SetScale(glm::vec3(0.3f));
+  particle.SetMesh(particle_mesh);
+  particle.SetMass(1.0f);
+  gravity.AddParticle(&particle);
 }
 
 void DrawSkyBox() {
@@ -214,6 +174,35 @@ void DrawSkyBox() {
   render::Renderer::Draw(*sky_box);
   glDepthMask(GL_TRUE);
   glEnable(GL_CULL_FACE);
+}
+
+void UpdateScene() {
+  // Wait until at least 16ms passed since start of last frame (Effectively caps framerate at ~60fps)
+  static DWORD  last_time = 0;
+  DWORD curr_time = timeGetTime();
+  DWORD delta = (curr_time - last_time);
+  if (delta > 16)
+  {
+    particle.ClearForces();
+    gravity.AccumulateForces();
+    particle.SimpleUpdateStep();
+    particle.HandleCollision(cube);
+    //TODO this is fine for one particle but not for many
+    particle.UpdateMesh();
+    delta = 0;
+    last_time = curr_time;
+    glutPostRedisplay();
+  }
+}
+
+void RenderWithShader(render::Shader* shader) {
+  shader->Bind();
+  glm::mat4 view = TPcamera.getMatrix();
+  shader->SetUniform4fv("view", view);
+  glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
+  shader->SetUniform4fv("proj", persp_proj);
+  //Draw the particles
+  render::Renderer::Draw(*particle.GetMesh(), shader, view);
 }
 
 void Render() {
@@ -245,19 +234,6 @@ void Render() {
       break;
   }
   glutSwapBuffers();
-}
-
-void UpdateScene() {
-  // Wait until at least 16ms passed since start of last frame (Effectively caps framerate at ~60fps)
-  static DWORD  last_time = 0;
-  DWORD  curr_time = timeGetTime();
-  DWORD delta = (curr_time - last_time);
-  if (delta > 16)
-  {
-    delta = 0;
-    last_time = curr_time;
-    glutPostRedisplay();
-  }
 }
 
 void Keyboard(unsigned char key, int x, int y) {
@@ -417,7 +393,6 @@ void Keyboard(unsigned char key, int x, int y) {
   //Apply the changes
   if (changedmatrices) {
     model_transform = translationmatrices.UpdateModelMatrix();
-    rotation = translationmatrices.GetRotationMatrix();
     glutPostRedisplay();
   }
 }
@@ -477,6 +452,7 @@ void Init() {
   glCullFace(GL_BACK);
   LoadModels();
   InitSkyBox();
+  InitCube();
   CreateShaders();
 }
 

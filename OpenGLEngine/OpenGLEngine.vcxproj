@@ -25,6 +25,7 @@
     <ClInclude Include="include\ModelLoader.h" />
     <ClInclude Include="include\ModelMatrixTransformations.h" />
     <ClInclude Include="include\Object.h" />
+    <ClInclude Include="include\Particle.h" />
     <ClInclude Include="include\Renderer.h" />
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\ShaderLoader.h" />
@@ -42,6 +43,7 @@
     <ClCompile Include="src\ModelLoader.cpp" />
     <ClCompile Include="src\ModelMatrixTransformations.cpp" />
     <ClCompile Include="src\Object.cpp" />
+    <ClCompile Include="src\Particle.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderLoader.cpp" />
