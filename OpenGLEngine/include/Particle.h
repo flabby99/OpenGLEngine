@@ -28,7 +28,7 @@ namespace physics {
 
   public:
     inline Particle() : position_(glm::vec3(0.0f)), velocity_(glm::vec3(0.0f)), force_(glm::vec3(0.0f)) {}
-    inline ~Particle() {};
+    inline ~Particle() {}
     inline void ClearForces() { force_ = glm::vec3(0.0f); }
     inline void AddForce(const glm::vec3& force) { force_ += force; }
     inline void SetMesh(scene::Object* mesh) { mesh_ = mesh; }
@@ -39,6 +39,7 @@ namespace physics {
     inline scene::Object* GetMesh() const { return mesh_; }
     void SimpleUpdateStep();
     void HandleCollision(std::vector<Plane*> planes);
+    void HandleCollision(std::vector<Plane*> planes, int ignore_index);
     void UpdateMesh();
   };
 

@@ -57,12 +57,12 @@ void InitCube() {
     physics::Plane* side = new physics::Plane;
     side->position_ = *plane;
     side->normal_ = -glm::normalize(*plane);
-    side->threshold_ = 0.01;
+    side->threshold_ = 0.02;
     cube.push_back(side);
     side = new physics::Plane;
     side->position_ = -*plane;
     side->normal_ = glm::normalize(*plane);
-    side->threshold_ = 0.01;
+    side->threshold_ = 0.02;
     cube.push_back(side);
   }
 }
@@ -136,7 +136,7 @@ physics::Force gravity(glm::vec3(0.0f, -0.01f, 0.0f));
 physics::Particle particle;
 void LoadModels() {
   core::SceneInfo sceneinfo;
-  char* filename = "res/Models/Sphere_eg.obj";
+  char* filename = "res/Models/unit_sphere.obj";
   if (!sceneinfo.LoadModelFromFile(filename)) {
     fprintf(stderr, "ERROR: Could not load %s", filename);
     exit(-1);
@@ -145,15 +145,16 @@ void LoadModels() {
   scene::Object* root = new scene::Object();
   root->SetTranslation(glm::vec3(0.0f, 0.0f, -20.0f));
   root->UpdateModelMatrix();
+  float radius = 1.0f;
   particle_mesh = sceneinfo.GetObject_(0);
   particle_mesh->SetColour(glm::vec3(1.0f, 0.0f, 0.0f));
   particle_mesh->SetParent(root);
-  particle_mesh->SetScale(glm::vec3(0.1f));
+  particle_mesh->SetScale(glm::vec3(radius));
   //TODO move this to elsewhere in the code base
   particle.SetMesh(particle_mesh);
   particle.SetMass(1.0f);
   particle.SetVelocity(glm::vec3(0.2f, 0.3f, 0.0f));
-  particle.SetRadius(0.1f);
+  particle.SetRadius(radius);
   gravity.AddParticle(&particle);
 }
 
@@ -189,8 +190,6 @@ void UpdateScene() {
     gravity.AccumulateForces();
     particle.SimpleUpdateStep();
     particle.HandleCollision(cube);
-    //TODO this is fine for one particle but not for many
-    particle.UpdateMesh();
     delta = 0;
     last_time = curr_time;
     glutPostRedisplay();
@@ -204,6 +203,7 @@ void RenderWithShader(render::Shader* shader) {
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
   shader->SetUniform4fv("proj", persp_proj);
   //Draw the particles
+  particle.UpdateMesh();
   render::Renderer::Draw(*particle.GetMesh(), shader, view);
 }
 
