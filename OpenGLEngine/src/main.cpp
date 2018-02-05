@@ -133,7 +133,7 @@ void ReloadShaders() {
 //TODO change this so that a force knows how to apply itself
 physics::Force gravity(glm::vec3(0.0f, -0.01f, 0.0f));
 //TODO replace this particle with a pool
-physics::Particle particle;
+physics::ParticlePool particle_pool;
 void LoadModels() {
   core::SceneInfo sceneinfo;
   char* filename = "res/Models/unit_sphere.obj";
@@ -151,11 +151,9 @@ void LoadModels() {
   particle_mesh->SetParent(root);
   particle_mesh->SetScale(glm::vec3(radius));
   //TODO move this to elsewhere in the code base
-  particle.SetMesh(particle_mesh);
-  particle.SetMass(1.0f);
-  particle.SetVelocity(glm::vec3(0.2f, 0.3f, 0.0f));
-  particle.SetRadius(radius);
-  gravity.AddParticle(&particle);
+  physics::Particle* particle = particle_pool.Create(glm::vec3(0.0f), glm::vec3(0.2f, 0.3f, 0.0f), 1.0f,
+    radius, 0.7f, 180, particle_mesh);
+  gravity.AddParticle(particle);
 }
 
 void DrawSkyBox() {
@@ -186,10 +184,10 @@ void UpdateScene() {
   DWORD delta = (curr_time - last_time);
   if (delta > 16)
   {
-    particle.ClearForces();
+    particle_pool.ClearForces();
     gravity.AccumulateForces();
-    particle.SimpleUpdateStep();
-    particle.HandleCollision(cube);
+    particle_pool.Update();
+    particle_pool.HandleCollision(cube);
     delta = 0;
     last_time = curr_time;
     glutPostRedisplay();
@@ -203,8 +201,8 @@ void RenderWithShader(render::Shader* shader) {
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
   shader->SetUniform4fv("proj", persp_proj);
   //Draw the particles
-  particle.UpdateMesh();
-  render::Renderer::Draw(*particle.GetMesh(), shader, view);
+  render::Renderer renderer(shader, view);
+  particle_pool.Draw(renderer);
 }
 
 void Render() {

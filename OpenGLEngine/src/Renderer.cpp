@@ -26,6 +26,21 @@ namespace render {
     }
     GLCall(glDrawElements(GL_TRIANGLES, object.GetMesh().ib.GetCount(), GL_UNSIGNED_INT, (void*)0));
   }
+  void Renderer::Render(scene::Object object)
+  {
+    shader_->Bind();
+    object.GetMesh().va.Bind();
+    object.GetMesh().ib.Bind();
+    //TODO figure out how to update uniforms
+    glm::mat4 model_matrix = object.GetGlobalModelMatrix();
+    if (object.GetTexture() != NULL) {
+      object.GetTexture()->Bind();
+    }
+    shader_->SetUniform4fv("model", model_matrix);
+    shader_->SetUniform3f("colour", object.GetColour());
+    shader_->SetUniform4fv("mv_it", glm::transpose(glm::inverse(view_ * model_matrix)));
+    GLCall(glDrawElements(GL_TRIANGLES, object.GetMesh().ib.GetCount(), GL_UNSIGNED_INT, (void*)0));
+  }
   void Renderer::Clear()
   {
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
