@@ -1,4 +1,4 @@
-glew version is not 4.5
 Glm is not forced using radians
 Read 1 meshes from res/Models/unit_sphere.obj
 Read 1 meshes from res/Models/cube.obj
+Got negative Uniform location for colour in reflection

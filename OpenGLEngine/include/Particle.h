@@ -79,6 +79,8 @@ namespace physics {
     inline Force(glm::vec3 force) : force_(force) {}
     inline ~Force() {}
     inline void AddParticle(Particle* particle) { particles_.push_back(particle); }
+    //The best thing to do would probably be a function pointer
+
     //TODO remove forces from particles when they are no longer in use
     inline void AccumulateForces() { 
       for (auto& particle : particles_) 

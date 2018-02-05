@@ -32,6 +32,7 @@
     <ClInclude Include="include\ShaderLoader.h" />
     <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\Texture.h" />
+    <ClInclude Include="include\util.h" />
     <ClInclude Include="include\VertexArray.h" />
     <ClInclude Include="include\VertexBuffer.h" />
     <ClInclude Include="include\VertexBufferLayout.h" />

@@ -52,9 +52,9 @@ bool use_fp_camera = false;
 std::vector<physics::Plane* > cube;
 
 void InitCube() {
-  glm::vec3 right(5.0f, 0.0f, 0.0f);
-  glm::vec3 top(0.0f, 5.0f, 0.0f);
-  glm::vec3 front(0.0f, 0.0f, 5.0f);
+  glm::vec3 right(30.0f, 0.0f, 0.0f);
+  glm::vec3 top(0.0f, 30.0f, 0.0f);
+  glm::vec3 front(0.0f, 0.0f, 30.0f);
   glm::vec3* planes[3] = { &right, &top, &front };
   for (auto &plane : planes) {
     physics::Plane* side = new physics::Plane;
@@ -186,8 +186,8 @@ void DrawSkyBox() {
 
 void Spawn() {
   int max_spawns = 2;
-  int num_spawns = rand() % max_spawns;
-  for (int i = 0; i < max_spawns; ++i) {
+  int num_spawns = rand() % (max_spawns + 1);
+  for (int i = 0; i <= max_spawns; ++i) {
     physics::Particle* particle = sphere_spawner->Spawn();
     gravity.AddParticle(particle);
   }
