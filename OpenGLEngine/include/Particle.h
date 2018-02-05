@@ -1,4 +1,4 @@
-#pragma 
+#pragma once 
 #include "glm\glm.hpp"
 #include "Object.h"
 #include "Renderer.h"
@@ -60,6 +60,8 @@ namespace physics {
     static const int POOL_SIZE = 1000;
     Particle particles_[POOL_SIZE];
   public:
+    inline ParticlePool() {}
+    inline ~ParticlePool() {}
     Particle* Create(glm::vec3 position, glm::vec3 velocity,
       float mass, float radius, float cor,
       int lifetime, scene::Object* mesh);
@@ -77,6 +79,7 @@ namespace physics {
     inline Force(glm::vec3 force) : force_(force) {}
     inline ~Force() {}
     inline void AddParticle(Particle* particle) { particles_.push_back(particle); }
+    //TODO remove forces from particles when they are no longer in use
     inline void AccumulateForces() { 
       for (auto& particle : particles_) 
         particle->AddForce(force_); }

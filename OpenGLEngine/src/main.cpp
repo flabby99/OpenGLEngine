@@ -16,12 +16,15 @@
 #include "Renderer.h"
 #include "Object.h"
 #include "Particle.h"
+#include "ParticleSpawner.h"
 
 #include <iostream>
 #include <math.h>
 #include <fstream>
 #include <string>
 #include <string.h>
+#include <random>
+#include <time.h>
 
 using namespace std;
 
@@ -69,6 +72,7 @@ void InitCube() {
 
 scene::Object* sky_box;
 scene::Object* particle_mesh;
+physics::ParticleSpawner* sphere_spawner;
 
 void InitSkyBox() {
     core::SceneInfo sceneinfo;
@@ -130,10 +134,7 @@ void ReloadShaders() {
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
 
-//TODO change this so that a force knows how to apply itself
-physics::Force gravity(glm::vec3(0.0f, -0.01f, 0.0f));
-//TODO replace this particle with a pool
-physics::ParticlePool particle_pool;
+physics::ParticlePool* particle_pool;
 void LoadModels() {
   core::SceneInfo sceneinfo;
   char* filename = "res/Models/unit_sphere.obj";
@@ -145,14 +146,20 @@ void LoadModels() {
   scene::Object* root = new scene::Object();
   root->SetTranslation(glm::vec3(0.0f, 0.0f, -20.0f));
   root->UpdateModelMatrix();
-  float radius = 1.0f;
   particle_mesh = sceneinfo.GetObject_(0);
   particle_mesh->SetColour(glm::vec3(1.0f, 0.0f, 0.0f));
   particle_mesh->SetParent(root);
+}
+
+//TODO change this so that a force knows how to apply itself
+physics::Force gravity(glm::vec3(0.0f, -0.01f, 0.0f));
+void InitSpawners() {
+  float radius = 0.2f;
   particle_mesh->SetScale(glm::vec3(radius));
+  particle_pool = new physics::ParticlePool();
+  sphere_spawner = new physics::ParticleSpawner(particle_mesh, 0.7f, radius, 1.0f, 5.0f, particle_pool, 60, 300);
   //TODO move this to elsewhere in the code base
-  physics::Particle* particle = particle_pool.Create(glm::vec3(0.0f), glm::vec3(0.2f, 0.3f, 0.0f), 1.0f,
-    radius, 0.7f, 180, particle_mesh);
+  physics::Particle* particle = sphere_spawner->Spawn();
   gravity.AddParticle(particle);
 }
 
@@ -177,6 +184,15 @@ void DrawSkyBox() {
   glEnable(GL_CULL_FACE);
 }
 
+void Spawn() {
+  int max_spawns = 2;
+  int num_spawns = rand() % max_spawns;
+  for (int i = 0; i < max_spawns; ++i) {
+    physics::Particle* particle = sphere_spawner->Spawn();
+    gravity.AddParticle(particle);
+  }
+}
+
 void UpdateScene() {
   // Wait until at least 16ms passed since start of last frame (Effectively caps framerate at ~60fps)
   static DWORD  last_time = 0;
@@ -184,10 +200,11 @@ void UpdateScene() {
   DWORD delta = (curr_time - last_time);
   if (delta > 16)
   {
-    particle_pool.ClearForces();
+    Spawn();
+    particle_pool->ClearForces();
     gravity.AccumulateForces();
-    particle_pool.Update();
-    particle_pool.HandleCollision(cube);
+    particle_pool->Update();
+    particle_pool->HandleCollision(cube);
     delta = 0;
     last_time = curr_time;
     glutPostRedisplay();
@@ -202,7 +219,7 @@ void RenderWithShader(render::Shader* shader) {
   shader->SetUniform4fv("proj", persp_proj);
   //Draw the particles
   render::Renderer renderer(shader, view);
-  particle_pool.Draw(renderer);
+  particle_pool->Draw(renderer);
 }
 
 void Render() {
@@ -453,6 +470,7 @@ void Init() {
   LoadModels();
   InitSkyBox();
   InitCube();
+  InitSpawners();
   CreateShaders();
 }
 
@@ -463,6 +481,9 @@ void CleanUp() {
   delete(silhoutte);
   delete(cube_map);
   delete(reflection);
+  delete(particle_pool);
+  delete(particle_mesh);
+  delete(sphere_spawner);
   for (int i = 0; i < Scene.size(); ++i)
   {
     for (int j = 0; j < Scene[i].GetNumMeshes(); ++j) {
@@ -473,6 +494,7 @@ void CleanUp() {
 }
 
 int main(int argc, char** argv) {
+  srand(time(NULL));
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
   window_width = 1440;

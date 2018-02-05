@@ -26,6 +26,7 @@
     <ClInclude Include="include\ModelMatrixTransformations.h" />
     <ClInclude Include="include\Object.h" />
     <ClInclude Include="include\Particle.h" />
+    <ClInclude Include="include\ParticleSpawner.h" />
     <ClInclude Include="include\Renderer.h" />
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\ShaderLoader.h" />
@@ -37,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\ErrorHandling.cpp" />
+    <ClCompile Include="include\ParticleSpawner.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\main.cpp" />
