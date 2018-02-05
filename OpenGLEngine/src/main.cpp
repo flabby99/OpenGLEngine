@@ -57,12 +57,12 @@ void InitCube() {
     physics::Plane* side = new physics::Plane;
     side->position_ = *plane;
     side->normal_ = -glm::normalize(*plane);
-    side->threshold_ = 0.02;
+    side->threshold_ = 0.01;
     cube.push_back(side);
     side = new physics::Plane;
     side->position_ = -*plane;
     side->normal_ = glm::normalize(*plane);
-    side->threshold_ = 0.02;
+    side->threshold_ = 0.01;
     cube.push_back(side);
   }
 }
@@ -149,9 +149,11 @@ void LoadModels() {
   particle_mesh->SetColour(glm::vec3(1.0f, 0.0f, 0.0f));
   particle_mesh->SetParent(root);
   particle_mesh->SetScale(glm::vec3(0.1f));
- // particle_mesh->SetScale(glm::vec3(0.3f));
+  //TODO move this to elsewhere in the code base
   particle.SetMesh(particle_mesh);
   particle.SetMass(1.0f);
+  particle.SetVelocity(glm::vec3(0.2f, 0.3f, 0.0f));
+  particle.SetRadius(0.1f);
   gravity.AddParticle(&particle);
 }
 

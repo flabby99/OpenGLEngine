@@ -33,6 +33,8 @@ namespace physics {
     inline void AddForce(const glm::vec3& force) { force_ += force; }
     inline void SetMesh(scene::Object* mesh) { mesh_ = mesh; }
     inline void SetMass(float mass) { mass_ = mass; }
+    inline void SetVelocity(glm::vec3 velocity) { velocity_ = velocity; }
+    inline void SetRadius(float radius) { radius_ = radius; }
     inline void Draw() { render::Renderer::Draw(*mesh_); }
     inline scene::Object* GetMesh() const { return mesh_; }
     void SimpleUpdateStep();
