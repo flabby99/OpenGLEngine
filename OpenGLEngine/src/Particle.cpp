@@ -1,4 +1,7 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include "Particle.h"
+#include "glm/gtc/quaternion.hpp"
+#include "glm/gtx/quaternion.hpp"
 
 namespace physics {
   void Particle::Init(glm::vec3 position, glm::vec3 velocity,
@@ -13,6 +16,12 @@ namespace physics {
     frames_remaining_ = lifetime;
     mesh_ = mesh;
     force_ = glm::vec3(0.0f);
+  }
+
+  void Particle::Vortex(glm::vec3 axis, glm::vec3 centre, float magnitude, float tightness)
+  {
+    float angle = magnitude / pow(glm::length(position_ - centre), tightness);
+    position_ = glm::angleAxis(angle, axis) * position_;
   }
 
   //solve dx/dt = v, dv/dt = f/m using euler
@@ -89,6 +98,12 @@ namespace physics {
       }
     }
     return NULL;
+  }
+  void ParticlePool::Vortex(glm::vec3 axis, glm::vec3 centre, float magnitude, float tightness)
+  {
+    for (int i = 0; i < POOL_SIZE; ++i) {
+      particles_[i].Vortex(axis, centre, magnitude, tightness);
+    }
   }
   void ParticlePool::Update()
   {

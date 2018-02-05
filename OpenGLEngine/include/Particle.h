@@ -52,6 +52,7 @@ namespace physics {
       renderer.Render(*mesh_);
     }
     inline scene::Object* GetMesh() const { return mesh_; }
+    void Vortex(glm::vec3 axis, glm::vec3 centre, float magnitude, float tightness);
     void SimpleUpdateStep();
     void LeapFrogUpdateStep();
     void HandleCollision(std::vector<Plane*> planes);
@@ -71,6 +72,7 @@ namespace physics {
       int lifetime, scene::Object* mesh);
     inline int GetSize() { return POOL_SIZE; }
     inline Particle* GetParticle(int index) { return &particles_[index]; }
+    void Vortex(glm::vec3 axis, glm::vec3 centre, float magnitude, float tightness);
     void Update();
     void UpdateLeap();
     void HandleCollision(std::vector<Plane*> planes);

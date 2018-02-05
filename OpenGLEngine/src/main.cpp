@@ -50,6 +50,7 @@ bool use_quaternions = false;
 bool use_fp_camera = false;
 bool use_gravity = true;
 bool use_euler = false;
+bool use_vortex = false;
 
 std::vector<physics::Plane* > cube;
 
@@ -216,7 +217,9 @@ void UpdateScene() {
       particle_pool->Update();
     else
       particle_pool->UpdateLeap();
-      particle_pool->HandleCollision(cube);
+    if(use_vortex)
+     particle_pool->Vortex(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f), 4.0f, 0.8f);
+    particle_pool->HandleCollision(cube);
     delta = 0;
     last_time = curr_time;
     glutPostRedisplay();
@@ -273,9 +276,9 @@ void Keyboard(unsigned char key, int x, int y) {
   switch (key) {
 
   case 13: //Enter key
-    use_fp_camera = !use_fp_camera;
-    if(use_fp_camera) FPcamera.mouseUpdate(glm::vec2(mouse_x, mouse_y));
-    else FPcamera.first_click = false;
+    //use_fp_camera = !use_fp_camera;
+    //if(use_fp_camera) FPcamera.mouseUpdate(glm::vec2(mouse_x, mouse_y));
+    //else FPcamera.first_click = false;
     use_euler = !use_euler;
     cout << "Using euler?" << use_euler << endl;
     break;
@@ -289,6 +292,9 @@ void Keyboard(unsigned char key, int x, int y) {
     use_gravity = !use_gravity;
     changedmatrices = true;
     break;
+  
+  case 9: //Tab key
+    use_vortex = !use_vortex;
 
     //Reload vertex and fragment shaders during runtime
   case 'P':
