@@ -12,6 +12,7 @@ namespace physics {
     force_ = glm::vec3(0.0f);
     frames_remaining_ = lifetime;
     mesh_ = mesh;
+    force_ = glm::vec3(0.0f);
   }
 
   //solve dx/dt = v, dv/dt = f/m using euler
@@ -19,7 +20,6 @@ namespace physics {
     if (!inUse()) return;
     velocity_ += force_ / mass_;
     position_ += velocity_;
-    ClearForces();
     --frames_remaining_;
   }
   void Particle::HandleCollision(std::vector<Plane*> planes)
@@ -80,6 +80,7 @@ namespace physics {
         return &particles_[i];
       }
     }
+    return NULL;
   }
   void ParticlePool::Update()
   {

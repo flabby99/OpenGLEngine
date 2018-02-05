@@ -44,6 +44,7 @@ namespace physics {
     inline void SetRadius(float radius) { radius_ = radius; }
     inline void SetFramesRemaining(int frames) { frames_remaining_ = frames; }
     inline bool inUse() const { return frames_remaining_ > 0; }
+    inline float GetMass() const { return mass_; }
     inline void Draw(render::Renderer renderer) { 
       if (!inUse()) return;
       renderer.Render(*mesh_);
@@ -65,6 +66,8 @@ namespace physics {
     Particle* Create(glm::vec3 position, glm::vec3 velocity,
       float mass, float radius, float cor,
       int lifetime, scene::Object* mesh);
+    inline int GetSize() { return POOL_SIZE; }
+    inline Particle* GetParticle(int index) { return &particles_[index]; }
     void Update();
     void HandleCollision(std::vector<Plane*> planes);
     void Draw(render::Renderer renderer);
@@ -73,17 +76,33 @@ namespace physics {
 
   class Force {
     glm::vec3 force_;
-    std::vector<Particle*> particles_;
+    std::vector<ParticlePool*> particle_pools;
 
   public:
     inline Force(glm::vec3 force) : force_(force) {}
     inline ~Force() {}
-    inline void AddParticle(Particle* particle) { particles_.push_back(particle); }
-    //The best thing to do would probably be a function pointer
-
+    inline glm::vec3 const GetForce() { return force_; }
+    inline void AddPool(ParticlePool* pool) { particle_pools.push_back(pool); }
+    virtual inline glm::vec3 ForceFn(Particle* particle, float time) { return force_; }
     //TODO remove forces from particles when they are no longer in use
-    inline void AccumulateForces() { 
-      for (auto& particle : particles_) 
-        particle->AddForce(force_); }
+    inline void AccumulateForces() {
+      for (auto& particle_pool : particle_pools) {
+        for (int i = 0; i < particle_pool->GetSize(); ++i) {
+          Particle* particle = particle_pool->GetParticle(i);
+          if (particle->inUse()) {
+            glm::vec3 force = ForceFn(particle, 0);
+            particle->AddForce(force);
+          }
+        }
+      }
+    }
+  };
+
+  class Gravity : public Force {
+  public:
+    inline Gravity(glm::vec3 force) : Force(force) {}
+    inline glm::vec3 ForceFn(Particle* particle, float time) override{
+      return particle->GetMass() * GetForce(); 
+    }
   };
 }

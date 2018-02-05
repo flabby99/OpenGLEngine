@@ -151,16 +151,13 @@ void LoadModels() {
   particle_mesh->SetParent(root);
 }
 
-//TODO change this so that a force knows how to apply itself
-physics::Force gravity(glm::vec3(0.0f, -0.01f, 0.0f));
+physics::Gravity gravity(glm::vec3(0.0f, -9.8f / 60.0f, 0.0f));
 void InitSpawners() {
   float radius = 0.2f;
   particle_mesh->SetScale(glm::vec3(radius));
   particle_pool = new physics::ParticlePool();
-  sphere_spawner = new physics::ParticleSpawner(particle_mesh, 0.7f, radius, 1.0f, 5.0f, particle_pool, 60, 300);
-  //TODO move this to elsewhere in the code base
-  physics::Particle* particle = sphere_spawner->Spawn();
-  gravity.AddParticle(particle);
+  sphere_spawner = new physics::ParticleSpawner(particle_mesh, 0.7f, radius, 1.0f, 5.0f, particle_pool, 60, 180);
+  gravity.AddPool(particle_pool);
 }
 
 void DrawSkyBox() {
@@ -189,7 +186,6 @@ void Spawn() {
   int num_spawns = rand() % (max_spawns + 1);
   for (int i = 0; i <= max_spawns; ++i) {
     physics::Particle* particle = sphere_spawner->Spawn();
-    gravity.AddParticle(particle);
   }
 }
 
