@@ -23,6 +23,7 @@ namespace physics {
     glm::vec3 position_;
     glm::vec3 velocity_;
     glm::vec3 force_;
+    glm::vec3 old_acceleration_ = glm::vec3(0.0f);
     scene::Object* mesh_;
     //For a paricle to die, it stores a frames remaining
     int frames_remaining_;
@@ -52,6 +53,7 @@ namespace physics {
     }
     inline scene::Object* GetMesh() const { return mesh_; }
     void SimpleUpdateStep();
+    void LeapFrogUpdateStep();
     void HandleCollision(std::vector<Plane*> planes);
     void HandleCollision(std::vector<Plane*> planes, int ignore_index);
     void UpdateMesh();
@@ -70,6 +72,7 @@ namespace physics {
     inline int GetSize() { return POOL_SIZE; }
     inline Particle* GetParticle(int index) { return &particles_[index]; }
     void Update();
+    void UpdateLeap();
     void HandleCollision(std::vector<Plane*> planes);
     void Draw(render::Renderer renderer);
     void ClearForces();

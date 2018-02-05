@@ -22,6 +22,14 @@ namespace physics {
     position_ += velocity_;
     --frames_remaining_;
   }
+  void Particle::LeapFrogUpdateStep() {
+    glm::vec3 acceleration = force_ / mass_;
+    position_ = position_ + velocity_ + 0.5f * old_acceleration_;
+    velocity_ = velocity_ + 0.5f * (acceleration + old_acceleration_);
+    old_acceleration_ = acceleration;
+    --frames_remaining_;
+  }
+
   void Particle::HandleCollision(std::vector<Plane*> planes)
   {
     if (!inUse()) return;
@@ -86,6 +94,12 @@ namespace physics {
   {
     for (int i = 0; i < POOL_SIZE; ++i) {
       particles_[i].SimpleUpdateStep();
+    }
+  }
+  void ParticlePool::UpdateLeap()
+  {
+    for (int i = 0; i < POOL_SIZE; ++i) {
+      particles_[i].LeapFrogUpdateStep();
     }
   }
   void ParticlePool::HandleCollision(std::vector<Plane*> planes)

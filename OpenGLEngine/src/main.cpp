@@ -48,6 +48,8 @@ bool use_quaternions = false;
 
 //NOTE it might be more effective to refactor this to Enum and allow many camera types
 bool use_fp_camera = false;
+bool use_gravity = true;
+bool use_euler = false;
 
 std::vector<physics::Plane* > cube;
 
@@ -155,7 +157,7 @@ void LoadModels() {
 }
 
 //-9.8f / 60.0f would be correct for framerate of 60
-physics::Gravity gravity(glm::vec3(0.0f, 0.0f, 0.0f));
+physics::Gravity gravity(glm::vec3(0.0f, -0.03f, 0.0f));
 physics::Circulation circle(glm::vec3(0.0f));
 void InitSpawners() {
   float radius = 0.15f;
@@ -206,10 +208,15 @@ void UpdateScene() {
   {
     Spawn();
     particle_pool->ClearForces();
-    gravity.AccumulateForces(0);
-    circle.AccumulateForces(simulation_time);
-    particle_pool->Update();
-    particle_pool->HandleCollision(cube);
+    if(use_gravity)
+      gravity.AccumulateForces(0);
+    else
+      circle.AccumulateForces(simulation_time);
+    if (use_euler)
+      particle_pool->Update();
+    else
+      particle_pool->UpdateLeap();
+      particle_pool->HandleCollision(cube);
     delta = 0;
     last_time = curr_time;
     glutPostRedisplay();
@@ -269,6 +276,8 @@ void Keyboard(unsigned char key, int x, int y) {
     use_fp_camera = !use_fp_camera;
     if(use_fp_camera) FPcamera.mouseUpdate(glm::vec2(mouse_x, mouse_y));
     else FPcamera.first_click = false;
+    use_euler = !use_euler;
+    cout << "Using euler?" << use_euler << endl;
     break;
 
   case 27: //ESC key
@@ -277,6 +286,7 @@ void Keyboard(unsigned char key, int x, int y) {
 
   case 32: //Space key
     use_quaternions = !use_quaternions;
+    use_gravity = !use_gravity;
     changedmatrices = true;
     break;
 

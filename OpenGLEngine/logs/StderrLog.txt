@@ -1,4 +1,0 @@
-Glm is not forced using radians
-Read 1 meshes from res/Models/unit_sphere.obj
-WARNING: texture res/Models/textures/water.jpg is not power of 2 dimensions
-Read 1 meshes from res/Models/cube.obj
