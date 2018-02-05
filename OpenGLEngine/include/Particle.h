@@ -45,6 +45,7 @@ namespace physics {
     inline void SetFramesRemaining(int frames) { frames_remaining_ = frames; }
     inline bool inUse() const { return frames_remaining_ > 0; }
     inline float GetMass() const { return mass_; }
+    inline glm::vec3 GetPosition() const{ return position_; }
     inline void Draw(render::Renderer renderer) { 
       if (!inUse()) return;
       renderer.Render(*mesh_);
@@ -85,12 +86,12 @@ namespace physics {
     inline void AddPool(ParticlePool* pool) { particle_pools.push_back(pool); }
     virtual inline glm::vec3 ForceFn(Particle* particle, float time) { return force_; }
     //TODO remove forces from particles when they are no longer in use
-    inline void AccumulateForces() {
+    inline void AccumulateForces(float time) {
       for (auto& particle_pool : particle_pools) {
         for (int i = 0; i < particle_pool->GetSize(); ++i) {
           Particle* particle = particle_pool->GetParticle(i);
           if (particle->inUse()) {
-            glm::vec3 force = ForceFn(particle, 0);
+            glm::vec3 force = ForceFn(particle, time);
             particle->AddForce(force);
           }
         }
@@ -103,6 +104,16 @@ namespace physics {
     inline Gravity(glm::vec3 force) : Force(force) {}
     inline glm::vec3 ForceFn(Particle* particle, float time) override{
       return particle->GetMass() * GetForce(); 
+    }
+  };
+
+  class Circulation : public Force {
+  public:
+    inline Circulation(glm::vec3 force) : Force(force) {}
+    //If multiplied by position, splits the particles
+    inline glm::vec3 ForceFn(Particle* particle, float time) override {
+      float radian_time = glm::radians(time);
+      return glm::vec3(cos(radian_time), sin(radian_time), sin(radian_time) * cos(radian_time) );
     }
   };
 }

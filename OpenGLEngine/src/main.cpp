@@ -52,9 +52,9 @@ bool use_fp_camera = false;
 std::vector<physics::Plane* > cube;
 
 void InitCube() {
-  glm::vec3 right(30.0f, 0.0f, 0.0f);
-  glm::vec3 top(0.0f, 30.0f, 0.0f);
-  glm::vec3 front(0.0f, 0.0f, 30.0f);
+  glm::vec3 right(35.0f, 0.0f, 0.0f);
+  glm::vec3 top(0.0f, 35.0f, 0.0f);
+  glm::vec3 front(0.0f, 0.0f, 35.0f);
   glm::vec3* planes[3] = { &right, &top, &front };
   for (auto &plane : planes) {
     physics::Plane* side = new physics::Plane;
@@ -147,17 +147,23 @@ void LoadModels() {
   root->SetTranslation(glm::vec3(0.0f, 0.0f, -20.0f));
   root->UpdateModelMatrix();
   particle_mesh = sceneinfo.GetObject_(0);
-  particle_mesh->SetColour(glm::vec3(1.0f, 0.0f, 0.0f));
+  particle_mesh->SetColour(glm::vec3(1.0f, 1.0f, 1.0f));
   particle_mesh->SetParent(root);
+  scene::Texture* texture = new scene::Texture();
+  texture->Load("res/Models/textures/water.jpg");
+  particle_mesh->SetTexture(texture);
 }
 
-physics::Gravity gravity(glm::vec3(0.0f, -9.8f / 60.0f, 0.0f));
+//-9.8f / 60.0f would be correct for framerate of 60
+physics::Gravity gravity(glm::vec3(0.0f, 0.0f, 0.0f));
+physics::Circulation circle(glm::vec3(0.0f));
 void InitSpawners() {
-  float radius = 0.2f;
+  float radius = 0.15f;
   particle_mesh->SetScale(glm::vec3(radius));
   particle_pool = new physics::ParticlePool();
-  sphere_spawner = new physics::ParticleSpawner(particle_mesh, 0.7f, radius, 1.0f, 5.0f, particle_pool, 60, 180);
+  sphere_spawner = new physics::ParticleSpawner(particle_mesh, 0.7f, radius, 1.0f, 5.0f, particle_pool, 60, 300);
   gravity.AddPool(particle_pool);
+  circle.AddPool(particle_pool);
 }
 
 void DrawSkyBox() {
@@ -182,28 +188,32 @@ void DrawSkyBox() {
 }
 
 void Spawn() {
-  int max_spawns = 2;
+  int max_spawns = 3;
   int num_spawns = rand() % (max_spawns + 1);
   for (int i = 0; i <= max_spawns; ++i) {
     physics::Particle* particle = sphere_spawner->Spawn();
+    if (particle == NULL) cout << "Can't spawn any more particles" << endl;
   }
 }
 
 void UpdateScene() {
   // Wait until at least 16ms passed since start of last frame (Effectively caps framerate at ~60fps)
   static DWORD  last_time = 0;
+  static int simulation_time = 0;
   DWORD curr_time = timeGetTime();
   DWORD delta = (curr_time - last_time);
   if (delta > 16)
   {
     Spawn();
     particle_pool->ClearForces();
-    gravity.AccumulateForces();
+    gravity.AccumulateForces(0);
+    circle.AccumulateForces(simulation_time);
     particle_pool->Update();
     particle_pool->HandleCollision(cube);
     delta = 0;
     last_time = curr_time;
     glutPostRedisplay();
+    simulation_time = (simulation_time + 1) % 360;
   }
 }
 
