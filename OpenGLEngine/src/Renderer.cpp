@@ -9,8 +9,8 @@ namespace render {
     object.GetMesh().ib.Bind();
     //TODO figure out how to update uniforms
     glm::mat4 model_matrix = object.GetGlobalModelMatrix();
-    if (object.GetTexture() != NULL) {
-        object.GetTexture()->Bind();
+    if (object.GetDiffuseTexture() != NULL) {
+        object.GetDiffuseTexture()->Bind();
     }
     shader->SetUniform4fv("model", model_matrix);
     shader->SetUniform3f("colour", object.GetColour());
@@ -21,8 +21,8 @@ namespace render {
   {
     object.GetMesh().va.Bind();
     object.GetMesh().ib.Bind();
-    if (object.GetTexture() != NULL) {
-      object.GetTexture()->Bind();
+    if (object.GetDiffuseTexture() != NULL) {
+      object.GetDiffuseTexture()->Bind();
     }
     GLCall(glDrawElements(GL_TRIANGLES, object.GetMesh().ib.GetCount(), GL_UNSIGNED_INT, (void*)0));
   }
@@ -33,8 +33,8 @@ namespace render {
     object.GetMesh().ib.Bind();
     //TODO figure out how to update uniforms
     glm::mat4 model_matrix = object.GetGlobalModelMatrix();
-    if (object.GetTexture() != NULL) {
-      object.GetTexture()->Bind();
+    if (object.GetDiffuseTexture() != NULL) {
+      object.GetDiffuseTexture()->Bind();
     }
     shader_->SetUniform4fv("model", model_matrix);
     shader_->SetUniform3f("colour", object.GetColour());

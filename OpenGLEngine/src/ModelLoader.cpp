@@ -154,9 +154,9 @@ namespace core {
       scene::Object* object = new scene::Object(va, render::IndexBuffer(meshes[i].indices.data(), meshes[i].indices.size()));
       //TODO this will not be the same size as the number of meshes
       if (has_materials) {
-          object->SetTexture(object_textures[material_indices[i]]);
+          object->SetDiffuseTexture(object_textures[material_indices[i]]);
       }
-      else object->SetTexture(white);
+      else object->SetDiffuseTexture(white);
       output.push_back(object);
     }
   }

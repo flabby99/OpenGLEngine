@@ -95,7 +95,7 @@ void InitSkyBox() {
     const char* right = "res/Models/textures/Storforsen4/posx.jpg";
     scene::Texture* texture = new scene::Texture();
     texture->CreateCubeMap(front, back, top, bottom, left, right);
-    sky_box->SetTexture(texture);
+    sky_box->SetDiffuseTexture(texture);
 }
 
 enum class eRenderType {
@@ -154,7 +154,7 @@ void LoadModels() {
   particle_mesh->SetParent(root);
   scene::Texture* texture = new scene::Texture();
   texture->Load("res/Models/textures/water.jpg");
-  particle_mesh->SetTexture(texture);
+  particle_mesh->SetDiffuseTexture(texture);
 }
 
 //-9.8f / 60.0f would be correct for framerate of 60
@@ -509,7 +509,7 @@ void CleanUp() {
   for (int i = 0; i < Scene.size(); ++i)
   {
     for (int j = 0; j < Scene[i].GetNumMeshes(); ++j) {
-      delete(Scene[i].GetObject_(j)->GetTexture());
+      delete(Scene[i].GetObject_(j)->GetDiffuseTexture());
       delete(Scene[i].GetObject_(j));
     }
   }
