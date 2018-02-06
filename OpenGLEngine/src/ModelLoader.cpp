@@ -4,6 +4,7 @@
 #include "ModelLoader.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "util.h"
 
 namespace core {
   SceneInfo::SceneInfo()
@@ -137,6 +138,46 @@ namespace core {
     return true;
   }
 
+  //TODO look at this
+  //this works for a triangle, but we are not using the face information here - need to take it into account
+  //We could do this for each face
+  //alternatively perhaps we could leave it as is, but average over the tangents and bitangents for each vertex
+  //in a face
+  //I believe looping over the faces might be the only appropriate way to do it in our case
+  void SceneInfo::ComputeTangentBasis(
+    const std::vector<GLfloat> &vertices,
+    const std::vector<GLfloat> &uvs,
+    const std::vector<GLfloat> &normals,
+    std::vector<GLfloat>* tangents,
+    std::vector<GLfloat>* bitangents
+  ) {
+    for (int i = 0; i < vertices.size() / 3; i += 3) {
+      glm::vec3 v0 = core::make_vertex3(3 * i, vertices);
+      glm::vec3 v1 = core::make_vertex3(3 * (i + 1), vertices);
+      glm::vec3 v2 = core::make_vertex3(3 * (i + 2), vertices);
+      
+      glm::vec2 uv0 = core::make_vertex2(2 * i, uvs);
+      glm::vec2 uv1 = core::make_vertex2(2 * (i + 1), uvs);
+      glm::vec2 uv2 = core::make_vertex2(2 * (i + 2), uvs);
+
+      //The edges of the triangles including v0
+      glm::vec3 delta_pos1 = v1 - v0;
+      glm::vec3 delta_pos2 = v2 - v0;
+
+      //Get the corresponding uv edges
+      glm::vec2 delta_uv1 = uv1 - uv0;
+      glm::vec2 delta_uv2 = uv2 - uv0;
+
+      //Compute the tangent and the bitangent
+      float r = 1.0f / (delta_uv1.x * delta_uv2.y - delta_uv1.y * delta_uv2.x);
+      glm::vec3 tangent = (delta_pos1 * delta_uv2.y - delta_pos2 * delta_uv1.y)*r;
+      glm::vec3 bitangent = (delta_pos2 * delta_uv1.x - delta_pos1 * delta_uv2.x)*r;
+      
+      //If wanted to, could assert that the 3 vectors, tangent bitangent and normal are orthogonal
+
+    }
+  }
+
   //This lends itself nicely to being able to work with heirarchical transforms
   void SceneInfo::InitBuffersAndArrays() {
     for (int i = 0; i < NumMeshes; ++i)
@@ -150,7 +191,9 @@ namespace core {
           render::VertexBuffer textures_vbo(meshes[i].textures.data(), meshes[i].textures.size() * sizeof(GLfloat));
           va.Addbuffer_2f(textures_vbo, 2);
       }
-      
+      std::vector<GLfloat> tangents;
+      std::vector<GLfloat> bitangents;
+      ComputeTangentBasis(meshes[i].positions, meshes[i].textures, meshes[i].normals, &tangents, &bitangents);
       scene::Object* object = new scene::Object(va, render::IndexBuffer(meshes[i].indices.data(), meshes[i].indices.size()));
       //TODO this will not be the same size as the number of meshes
       if (has_materials) {

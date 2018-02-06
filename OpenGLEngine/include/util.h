@@ -1,5 +1,6 @@
 #pragma once
 #include <random>
+#include "glm/glm.hpp"
 
 namespace core {
   //return +1 / -1 at random
@@ -16,5 +17,10 @@ namespace core {
   inline float frand_s() {
     return rand_sign() * frand();
   }
-
+  inline glm::vec3 make_vertex3(const int index, const std::vector<GLfloat>& vector) {
+    return glm::vec3(vector[index], vector[index + 1], vector[index + 2]);
+  }
+  inline glm::vec2 make_vertex2(const int index, const std::vector<GLfloat>& vector) {
+    return glm::vec2(vector[index], vector[index + 1]);
+  }
 } //namespace core

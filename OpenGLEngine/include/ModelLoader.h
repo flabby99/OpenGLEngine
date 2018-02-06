@@ -55,5 +55,12 @@ namespace core {
     bool InitFromScene(const aiScene* Scene, const std::string& Filename);
     void InitMesh(const aiMesh* aiMesh);
     bool InitMaterials(const aiScene* Scene, const std::string& Filename);
+    void ComputeTangentBasis(
+      const std::vector<GLfloat> &vertices,
+      const std::vector<GLfloat> &uvs,
+      const std::vector<GLfloat> &normals,
+      std::vector<GLfloat>* tangents,
+      std::vector<GLfloat>* bitangents
+    );
   };
 } //namespace core

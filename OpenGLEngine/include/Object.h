@@ -21,6 +21,8 @@ namespace scene {
     glm::vec3 colour_;
     Object* parent_; //Heirarchy
     Texture* texture_diffuse_;
+    Texture* texture_bump_;
+    Texture* texture_normal_;
   public:
     Object();
     Object(const render::VertexArray& va, const render::IndexBuffer& ib);
@@ -36,6 +38,8 @@ namespace scene {
     inline void SetOriginOffset(const glm::vec3& offset) { origin_offset_ = offset; }
     inline void SetColour(const glm::vec3& colour) { colour_ = colour; }
     inline void SetDiffuseTexture(Texture* texture) { texture_diffuse_ = texture; }
+    inline void SetBumpTexture(Texture* texture) { texture_bump_ = texture; }
+    inline void SetNormalTexture(Texture* texture) { texture_normal_ = texture; }
     inline void SetMesh(const render::VertexArray& va, const render::IndexBuffer& ib) {
       mesh_.va = va; mesh_.ib = ib;
     }
@@ -44,6 +48,8 @@ namespace scene {
     inline glm::vec3 GetColour() const { return colour_; }
     inline Object* GetParent() const { return parent_; }
     inline Texture* GetDiffuseTexture() const { return texture_diffuse_; }
+    inline Texture* GetBumpTexture() const { return texture_bump_; }
+    inline Texture* GetNormalTexture() const { return texture_normal_; }
     //Returns the model matrix relative to the object heirarchy - recursive
     glm::mat4 GetGlobalModelMatrix() const;
   };
