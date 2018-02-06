@@ -144,21 +144,26 @@ namespace core {
   //alternatively perhaps we could leave it as is, but average over the tangents and bitangents for each vertex
   //in a face
   //I believe looping over the faces might be the only appropriate way to do it in our case
+
+  //Loop over the faces of the object (so it needs indices)
+  //For each face, get bitangents and store them in respective indice (or += if array init to 0)
+  //Then chuck this into a buffer
   void SceneInfo::ComputeTangentBasis(
     const std::vector<GLfloat> &vertices,
     const std::vector<GLfloat> &uvs,
-    const std::vector<GLfloat> &normals,
-    std::vector<GLfloat>* tangents,
-    std::vector<GLfloat>* bitangents
+    const std::vector<GLuint> &indices,
+    glm::vec3* tangents,
+    glm::vec3* bitangents
   ) {
-    for (int i = 0; i < vertices.size() / 3; i += 3) {
-      glm::vec3 v0 = core::make_vertex3(3 * i, vertices);
-      glm::vec3 v1 = core::make_vertex3(3 * (i + 1), vertices);
-      glm::vec3 v2 = core::make_vertex3(3 * (i + 2), vertices);
-      
-      glm::vec2 uv0 = core::make_vertex2(2 * i, uvs);
-      glm::vec2 uv1 = core::make_vertex2(2 * (i + 1), uvs);
-      glm::vec2 uv2 = core::make_vertex2(2 * (i + 2), uvs);
+    assert(indices.size() % 3 == 0);
+    for (int i = 0; i < indices.size() / 3; i += 3) {
+      glm::vec3 v0 = core::make_vertex3(3 * indices[i], vertices);
+      glm::vec3 v1 = core::make_vertex3(3 * indices[i + 1], vertices);
+      glm::vec3 v2 = core::make_vertex3(3 * indices[i + 2], vertices);
+
+      glm::vec2 uv0 = core::make_vertex2(2 * indices[i], uvs);
+      glm::vec2 uv1 = core::make_vertex2(2 * indices[i + 1], uvs);
+      glm::vec2 uv2 = core::make_vertex2(2 * indices[i + 2], uvs);
 
       //The edges of the triangles including v0
       glm::vec3 delta_pos1 = v1 - v0;
@@ -172,9 +177,13 @@ namespace core {
       float r = 1.0f / (delta_uv1.x * delta_uv2.y - delta_uv1.y * delta_uv2.x);
       glm::vec3 tangent = (delta_pos1 * delta_uv2.y - delta_pos2 * delta_uv1.y)*r;
       glm::vec3 bitangent = (delta_pos2 * delta_uv1.x - delta_pos1 * delta_uv2.x)*r;
-      
-      //If wanted to, could assert that the 3 vectors, tangent bitangent and normal are orthogonal
+      tangents[indices[i]] += tangent;
+      tangents[indices[i + 1]] += tangent;
+      tangents[indices[i + 2]] += tangent;
 
+      bitangents[indices[i]] += bitangent;
+      bitangents[indices[i + 1]] += bitangent;
+      bitangents[indices[i + 2]] += bitangent;
     }
   }
 
@@ -193,7 +202,13 @@ namespace core {
       }
       std::vector<GLfloat> tangents;
       std::vector<GLfloat> bitangents;
-      ComputeTangentBasis(meshes[i].positions, meshes[i].textures, meshes[i].normals, &tangents, &bitangents);
+      //Can't remember how to do new, also how to init to zero
+      //These should be vec3, so need to load them into the buffer correctly
+      GLfloat* tangents = new[] GLfloat[meshes[i].positions.size()];
+      GLfloat* bitangents new[] GLfloat[meshes[i].positions.size()];
+      core::vec3_array_to_float_array(tangents, positions.size());
+      //Then make a vbo for this and load it into the vbo
+      ComputeTangentBasis(meshes[i].positions, meshes[i].textures, meshes[i].indices, &tangents, &bitangents);
       scene::Object* object = new scene::Object(va, render::IndexBuffer(meshes[i].indices.data(), meshes[i].indices.size()));
       //TODO this will not be the same size as the number of meshes
       if (has_materials) {
@@ -201,6 +216,8 @@ namespace core {
       }
       else object->SetDiffuseTexture(white);
       output.push_back(object);
+      delete[]tangents;
+      delete[]bitangents;
     }
   }
 

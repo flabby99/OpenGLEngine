@@ -1,5 +1,6 @@
 #pragma once
 #include <random>
+#include "glew\glew.h"
 #include "glm/glm.hpp"
 
 namespace core {
@@ -22,5 +23,14 @@ namespace core {
   }
   inline glm::vec2 make_vertex2(const int index, const std::vector<GLfloat>& vector) {
     return glm::vec2(vector[index], vector[index + 1]);
+  }
+  inline GLfloat* vec3_array_to_float_array(const glm::vec3* vectors, int num_vectors) {
+    GLfloat* float_array = new(num_vectors * 3);
+    for (int i = 0; i < num_vectors; ++i) {
+      float_array[3 * i] = vectors[i].x;
+      float_array[3 * i + 1] = vectors[i].y;
+      float_array[3 * i + 2] = vectors[i].z;
+    }
+    return float_array;
   }
 } //namespace core
