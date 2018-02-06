@@ -9,6 +9,7 @@
 *.jpg
 *.png
 *.JPEG
+OpenGLEngine/logs/
 
 # User-specific files
 *.suo
