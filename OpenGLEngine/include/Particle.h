@@ -26,7 +26,7 @@ namespace physics {
     glm::vec3 old_acceleration_ = glm::vec3(0.0f);
     scene::Object* mesh_;
     //For a paricle to die, it stores a frames remaining
-    int frames_remaining_;
+    int frames_remaining_ = 0;
 
   public:
     inline Particle() : position_(glm::vec3(0.0f)), velocity_(glm::vec3(0.0f)), force_(glm::vec3(0.0f)) {}
