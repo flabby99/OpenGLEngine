@@ -51,13 +51,14 @@ bool use_fp_camera = false;
 bool use_gravity = true;
 bool use_euler = false;
 bool use_vortex = false;
+bool use_box = true;
 
 std::vector<physics::Plane* > cube;
 
 void InitCube() {
-  glm::vec3 right(35.0f, 0.0f, 0.0f);
-  glm::vec3 top(0.0f, 35.0f, 0.0f);
-  glm::vec3 front(0.0f, 0.0f, 35.0f);
+  glm::vec3 right(100.f, 0.0f, 0.0f);
+  glm::vec3 top(0.0f, 100.f, 0.0f);
+  glm::vec3 front(0.0f, 0.0f, 100.f);
   glm::vec3* planes[3] = { &right, &top, &front };
   for (auto &plane : planes) {
     physics::Plane* side = new physics::Plane;
@@ -158,7 +159,7 @@ void LoadModels() {
   particle_mesh->SetDiffuseTexture(texture);
   scene::Texture* normal_texture = new scene::Texture();
   normal_texture->SetSlot(GL_TEXTURE1);
-  normal_texture->Load("res/Models/textures/golf_test.jpg");
+  normal_texture->Load("res/Models/textures/snow.jpg");
   particle_mesh->SetNormalTexture(normal_texture);
 }
 
@@ -166,7 +167,7 @@ void LoadModels() {
 physics::Gravity gravity(glm::vec3(0.0f, -0.03f, 0.0f));
 physics::Circulation circle(glm::vec3(0.0f));
 void InitSpawners() {
-  float radius = 0.15f;
+  float radius = 0.05f;
   particle_mesh->SetScale(glm::vec3(radius));
   particle_pool = new physics::ParticlePool();
   sphere_spawner = new physics::ParticleSpawner(particle_mesh, 0.7f, radius, 1.0f, 5.0f, particle_pool, 60, 300);
@@ -196,7 +197,7 @@ void DrawSkyBox() {
 }
 
 void Spawn() {
-  int max_spawns = 3;
+  int max_spawns = 5;
   int num_spawns = rand() % (max_spawns + 1);
   for (int i = 0; i <= max_spawns; ++i) {
     physics::Particle* particle = sphere_spawner->Spawn();
@@ -224,7 +225,8 @@ void UpdateScene() {
       particle_pool->UpdateLeap();
     if(use_vortex)
      particle_pool->Vortex(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f), 4.0f, 0.8f);
-    particle_pool->HandleCollision(cube);
+    if(use_box)
+      particle_pool->HandleCollision(cube);
     delta = 0;
     last_time = curr_time;
     glutPostRedisplay();
@@ -300,6 +302,11 @@ void Keyboard(unsigned char key, int x, int y) {
   
   case 9: //Tab key
     use_vortex = !use_vortex;
+    break;
+
+  case 'o':
+    use_box = !use_box;
+    break;
 
     //Reload vertex and fragment shaders during runtime
   case 'P':

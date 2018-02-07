@@ -78,6 +78,7 @@ namespace physics {
           glm::vec3 positional_correction = (radius_ + plane->threshold_ - perpendicular_distance + 0.001f) * plane->normal_;
           position_ += positional_correction;
           HandleCollision(planes, i);
+          break;
         }
       }
     }
