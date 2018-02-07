@@ -19,10 +19,10 @@ namespace scene {
     glm::mat4 model_matrix_;
     glm::vec3 origin_offset_;
     glm::vec3 colour_;
-    Object* parent_; //Heirarchy
-    Texture* texture_diffuse_;
-    Texture* texture_bump_;
-    Texture* texture_normal_;
+    Object* parent_ = NULL; //Heirarchy
+    Texture* texture_diffuse_ = NULL;
+    Texture* texture_bump_ = NULL;
+    Texture* texture_normal_ = NULL;
   public:
     Object();
     Object(const render::VertexArray& va, const render::IndexBuffer& ib);

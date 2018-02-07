@@ -1,6 +1,6 @@
 blinn_phong
-res/Shaders/VertexShader.vert
-res/Shaders/FragmentShaderBlinnPhong.frag
+res/Shaders/NormalMapShader.vert
+res/Shaders/NormalMapShader.frag
 
 silhouette
 res/Shaders/SilhoutteShader.vert

@@ -58,6 +58,7 @@ namespace core {
     void ComputeTangentBasis(
       const std::vector<GLfloat> &vertices,
       const std::vector<GLfloat> &uvs,
+      const std::vector<GLfloat> &normals,
       const std::vector<GLuint> &indices,
       glm::vec3* tangents,
       glm::vec3* bitangents

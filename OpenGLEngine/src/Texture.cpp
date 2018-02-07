@@ -7,6 +7,7 @@
 namespace scene {
   void Texture::Bind()
   {
+    glActiveTexture(slot_);
     GLCall(glBindTexture(type_, texture_id_));
   }
 
@@ -18,7 +19,7 @@ namespace scene {
     unsigned char *image_data = LoadTexImage(filename, &x, &y, true);
     //Copy image data into the openGL texture
     GLCall(glGenTextures(1, &texture_id_));
-    GLCall(glActiveTexture(GL_TEXTURE0));
+    GLCall(glActiveTexture(slot_));
     GLCall(glBindTexture(GL_TEXTURE_2D, texture_id_));
     //TODO, think of what will happen if we are reading a RGB image
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);

@@ -153,8 +153,13 @@ void LoadModels() {
   particle_mesh->SetColour(glm::vec3(1.0f, 1.0f, 1.0f));
   particle_mesh->SetParent(root);
   scene::Texture* texture = new scene::Texture();
-  texture->Load("res/Models/textures/water.jpg");
+  texture->SetSlot(GL_TEXTURE0);
+  texture->Load("res/Models/textures/white.jpg");
   particle_mesh->SetDiffuseTexture(texture);
+  scene::Texture* normal_texture = new scene::Texture();
+  normal_texture->SetSlot(GL_TEXTURE1);
+  normal_texture->Load("res/Models/textures/golf_test.jpg");
+  particle_mesh->SetNormalTexture(normal_texture);
 }
 
 //-9.8f / 60.0f would be correct for framerate of 60

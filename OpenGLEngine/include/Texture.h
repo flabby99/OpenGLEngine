@@ -8,6 +8,7 @@ namespace scene {
     GLuint texture_id_;
     char* filename_;
     GLenum type_;
+    GLenum slot_ = GL_TEXTURE0;
 
   public:
     void Bind();
@@ -25,5 +26,6 @@ namespace scene {
     Texture(char* filename);
     ~Texture();
     inline char* GetFileName() const { return filename_; }
+    inline void SetSlot(GLenum slot) { slot_ = slot; }
   };
 } //namespace scene

@@ -12,6 +12,12 @@ namespace render {
     if (object.GetDiffuseTexture() != NULL) {
         object.GetDiffuseTexture()->Bind();
     }
+    if (object.GetBumpTexture() != NULL) {
+      object.GetBumpTexture()->Bind();
+    }
+    if (object.GetNormalTexture() != NULL) {
+      object.GetNormalTexture()->Bind();
+    }
     shader->SetUniform4fv("model", model_matrix);
     shader->SetUniform3f("colour", object.GetColour());
     shader->SetUniform4fv("mv_it", glm::transpose(glm::inverse(view * model_matrix)));

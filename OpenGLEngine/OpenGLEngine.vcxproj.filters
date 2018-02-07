@@ -155,6 +155,12 @@
       <Filter>Resource Files\Shaders</Filter>
     </None>
     <None Include="ClassDiagram.cd" />
+    <None Include="res\Shaders\NormalMapShader.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="res\Shaders\NormalMapShader.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="config\modelnames.txt">

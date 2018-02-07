@@ -151,12 +151,13 @@ namespace core {
   void SceneInfo::ComputeTangentBasis(
     const std::vector<GLfloat> &vertices,
     const std::vector<GLfloat> &uvs,
+    const std::vector<GLfloat> &normals,
     const std::vector<GLuint> &indices,
     glm::vec3* tangents,
     glm::vec3* bitangents
   ) {
     assert(indices.size() % 3 == 0);
-    for (int i = 0; i < indices.size() / 3; i += 3) {
+    for (int i = 0; i < indices.size(); i += 3) {
       glm::vec3 v0 = core::make_vertex3(3 * indices[i], vertices);
       glm::vec3 v1 = core::make_vertex3(3 * indices[i + 1], vertices);
       glm::vec3 v2 = core::make_vertex3(3 * indices[i + 2], vertices);
@@ -177,6 +178,9 @@ namespace core {
       float r = 1.0f / (delta_uv1.x * delta_uv2.y - delta_uv1.y * delta_uv2.x);
       glm::vec3 tangent = (delta_pos1 * delta_uv2.y - delta_pos2 * delta_uv1.y)*r;
       glm::vec3 bitangent = (delta_pos2 * delta_uv1.x - delta_pos1 * delta_uv2.x)*r;
+      glm::vec3 normal = core::make_vertex3(3 * indices[i], normals);
+      tangent = glm::normalize(tangent - normal * glm::dot(normal, tangent));
+      bitangent = glm::normalize(bitangent);
       tangents[indices[i]] += tangent;
       tangents[indices[i + 1]] += tangent;
       tangents[indices[i + 2]] += tangent;
@@ -200,24 +204,28 @@ namespace core {
           render::VertexBuffer textures_vbo(meshes[i].textures.data(), meshes[i].textures.size() * sizeof(GLfloat));
           va.Addbuffer_2f(textures_vbo, 2);
       }
-      std::vector<GLfloat> tangents;
-      std::vector<GLfloat> bitangents;
       //Can't remember how to do new, also how to init to zero
       //These should be vec3, so need to load them into the buffer correctly
-      GLfloat* tangents = new[] GLfloat[meshes[i].positions.size()];
-      GLfloat* bitangents new[] GLfloat[meshes[i].positions.size()];
-      core::vec3_array_to_float_array(tangents, positions.size());
+      auto tangents = new glm::vec3[meshes[i].positions.size() / 3] ();
+      auto bitangents =  new glm::vec3[meshes[i].positions.size() / 3] ();
+      ComputeTangentBasis(meshes[i].positions, meshes[i].textures, meshes[i].normals, meshes[i].indices, tangents, bitangents);
+      auto tangents_f = core::vec3_array_to_float_array(tangents, meshes[i].positions.size() / 3);
+      auto bitangents_f = core::vec3_array_to_float_array(bitangents, meshes[i].positions.size() / 3);
+      delete[] tangents;
+      delete[] bitangents;
+      render::VertexBuffer tangents_vbo(tangents_f, meshes[i].positions.size() * sizeof(GLfloat));
+      va.Addbuffer_3f(tangents_vbo, 3);
+      delete[] tangents_f;
+      render::VertexBuffer bitangents_vbo(bitangents_f, meshes[i].positions.size() * sizeof(GLfloat));
+      va.Addbuffer_3f(bitangents_vbo, 4);
+      delete[] bitangents_f;
       //Then make a vbo for this and load it into the vbo
-      ComputeTangentBasis(meshes[i].positions, meshes[i].textures, meshes[i].indices, &tangents, &bitangents);
       scene::Object* object = new scene::Object(va, render::IndexBuffer(meshes[i].indices.data(), meshes[i].indices.size()));
-      //TODO this will not be the same size as the number of meshes
       if (has_materials) {
           object->SetDiffuseTexture(object_textures[material_indices[i]]);
       }
       else object->SetDiffuseTexture(white);
       output.push_back(object);
-      delete[]tangents;
-      delete[]bitangents;
     }
   }
 

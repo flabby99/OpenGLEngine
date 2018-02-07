@@ -25,7 +25,7 @@ namespace core {
     return glm::vec2(vector[index], vector[index + 1]);
   }
   inline GLfloat* vec3_array_to_float_array(const glm::vec3* vectors, int num_vectors) {
-    GLfloat* float_array = new(num_vectors * 3);
+    GLfloat* float_array = new GLfloat[num_vectors * 3];
     for (int i = 0; i < num_vectors; ++i) {
       float_array[3 * i] = vectors[i].x;
       float_array[3 * i + 1] = vectors[i].y;
