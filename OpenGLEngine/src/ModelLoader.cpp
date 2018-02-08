@@ -177,17 +177,23 @@ namespace core {
       //Compute the tangent and the bitangent
       float r = 1.0f / (delta_uv1.x * delta_uv2.y - delta_uv1.y * delta_uv2.x);
       glm::vec3 tangent = (delta_pos1 * delta_uv2.y - delta_pos2 * delta_uv1.y)*r;
-      glm::vec3 bitangent = (delta_pos2 * delta_uv1.x - delta_pos1 * delta_uv2.x)*r;
-      glm::vec3 normal = core::make_vertex3(3 * indices[i], normals);
-      tangent = glm::normalize(tangent - normal * glm::dot(normal, tangent));
-      bitangent = glm::normalize(bitangent);
+      //glm::vec3 bitangent = (delta_pos2 * delta_uv1.x - delta_pos1 * delta_uv2.x)*r;
+      
       tangents[indices[i]] += tangent;
       tangents[indices[i + 1]] += tangent;
       tangents[indices[i + 2]] += tangent;
 
+  /*    bitangent = glm::cross(tangent, normal);
       bitangents[indices[i]] += bitangent;
       bitangents[indices[i + 1]] += bitangent;
-      bitangents[indices[i + 2]] += bitangent;
+      bitangents[indices[i + 2]] += bitangent;*/
+    }
+    for (int i = 0; i < indices.size(); ++i) {
+      glm::vec3 tangent = tangents[indices[i]];
+      glm::vec3 normal = core::make_vertex3(3 * indices[i], normals);
+      tangents[indices[i]] = glm::normalize(tangent - normal * glm::dot(normal, tangent));
+      assert(glm::dot(tangents[indices[i]], normal) < 0.01f);
+      bitangents[indices[i]] = glm::cross(normal, tangent);
     }
   }
 

@@ -9,6 +9,7 @@ layout(location=4) in vec3 vBitangent;
 out vec3 eye_position;
 out vec2 texture_coords;
 out vec3 eye_tangent;
+out vec3 eye_bitangent;
 out mat3 TBN;
 
 layout(location = 0) uniform mat4 view;
@@ -21,6 +22,7 @@ void main() {
   eye_position = vec3(view * model * vec4(vPosition, 1.0)); 
   vec3 eye_normal = normalize(vec3(mv_it * vec4 (vNormal, 0.0))); 
   eye_tangent = normalize(vec3(mv_it * vec4 (vTangent, 0.0))); 
+  eye_bitangent = normalize(vec3(mv_it * vec4 (vBitangent, 0.0))); 
   vec3 eye_bitangent = normalize(vec3(mv_it * vec4 (vBitangent, 0.0))); 
   TBN = transpose(mat3(eye_tangent, eye_bitangent, eye_normal));
   gl_Position =  proj * vec4 (eye_position, 1.0);

@@ -159,7 +159,7 @@ void LoadModels() {
   particle_mesh->SetDiffuseTexture(texture);
   scene::Texture* normal_texture = new scene::Texture();
   normal_texture->SetSlot(GL_TEXTURE1);
-  normal_texture->Load("res/Models/textures/snow.jpg");
+  normal_texture->Load("res/Models/textures/golf_test.jpg");
   particle_mesh->SetNormalTexture(normal_texture);
 }
 
@@ -197,7 +197,7 @@ void DrawSkyBox() {
 }
 
 void Spawn() {
-  int max_spawns = 5;
+  int max_spawns = 4;
   int num_spawns = rand() % (max_spawns + 1);
   for (int i = 0; i <= max_spawns; ++i) {
     physics::Particle* particle = sphere_spawner->Spawn();

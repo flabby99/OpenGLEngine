@@ -2,7 +2,9 @@
 
 in vec3 eye_position;
 in vec2 texture_coords;
+//For debugging
 in vec3 eye_tangent;
+in vec3 eye_bitangent;
 in mat3 TBN;
 
 //To bring world light position to the eye space
@@ -54,4 +56,5 @@ void main() {
   //fColour = vec4(dot_prod, dot_prod, dot_prod, 1.0);
   //fColour = vec4(texture_coords.x, texture_coords.y, 0, 1);
   //fColour = vec4(eye_tangent, 1);
+  //fColour = vec4(eye_bitangent, 1);
 }
