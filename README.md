@@ -18,3 +18,5 @@ I will attempt to update the code base to follow https://google.github.io/styleg
 * For some interesting shader implementations in glsl - [Geeks3d](http://www.geeks3d.com/shader-library/)
 * Particle pools - [Bob Nystrom](http://gameprogrammingpatterns.com/)
 * Normal mapping - [OpenGL tutorial](http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/)
+* Changing texture filtering over time - [OpenGL redbook] (https://github.com/openglredbook/examples/blob/master/src/06-mipfilters/06-mipfilters.cpp)
+* Automatic mipmap generation - [OpenGL wiki] (https://www.khronos.org/opengl/wiki/Common_Mistakes#Automatic_mipmap_generation)

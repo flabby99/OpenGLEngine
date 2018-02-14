@@ -48,35 +48,10 @@ bool use_quaternions = false;
 
 //NOTE it might be more effective to refactor this to Enum and allow many camera types
 bool use_fp_camera = false;
-bool use_gravity = true;
-bool use_euler = false;
-bool use_vortex = false;
-bool use_box = true;
-
-std::vector<physics::Plane* > cube;
-
-void InitCube() {
-  glm::vec3 right(100.f, 0.0f, 0.0f);
-  glm::vec3 top(0.0f, 100.f, 0.0f);
-  glm::vec3 front(0.0f, 0.0f, 100.f);
-  glm::vec3* planes[3] = { &right, &top, &front };
-  for (auto &plane : planes) {
-    physics::Plane* side = new physics::Plane;
-    side->position_ = *plane;
-    side->normal_ = -glm::normalize(*plane);
-    side->threshold_ = 0.02;
-    cube.push_back(side);
-    side = new physics::Plane;
-    side->position_ = -*plane;
-    side->normal_ = glm::normalize(*plane);
-    side->threshold_ = 0.02;
-    cube.push_back(side);
-  }
-}
+bool use_mip = true;
 
 scene::Object* sky_box;
 scene::Object* plane_mesh;
-physics::ParticleSpawner* sphere_spawner;
 
 void InitSkyBox() {
     core::SceneInfo sceneinfo;
@@ -138,6 +113,18 @@ void ReloadShaders() {
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
 
+scene::Texture* texture;
+scene::Texture* no_mip_texture;
+
+void LoadTextures() {
+  texture = new scene::Texture();
+  texture->SetSlot(GL_TEXTURE0);
+  texture->Load("res/Models/textures/checker.jpg");
+  no_mip_texture = new scene::Texture();
+  no_mip_texture->SetSlot(GL_TEXTURE0);
+  no_mip_texture->LoadNoMip("res/Models/textures/checker.jpg");
+}
+
 void LoadModels() {
   core::SceneInfo sceneinfo;
   char* filename = "res/Models/flat_plane.obj";
@@ -151,9 +138,6 @@ void LoadModels() {
   root->UpdateModelMatrix();
   plane_mesh = sceneinfo.GetObject_(0);
   plane_mesh->SetParent(root);
-  scene::Texture* texture = new scene::Texture();
-  texture->SetSlot(GL_TEXTURE0);
-  texture->Load("res/Models/textures/checker.jpg");
   plane_mesh->SetDiffuseTexture(texture);
 }
 
@@ -178,16 +162,51 @@ void DrawSkyBox() {
   glEnable(GL_CULL_FACE);
 }
 
+//REFERENCE The changing of filtering methods over time is based on https://github.com/openglredbook/examples/blob/master/src/06-mipfilters/06-mipfilters.cpp
 void UpdateScene() {
   // Wait until at least 16ms passed since start of last frame (Effectively caps framerate at ~60fps)
+  static const DWORD start_time = timeGetTime();
   static DWORD  last_time = 0;
   static int simulation_time = 0;
+  static bool first1 = true;
+  static bool first2 = true;
   DWORD curr_time = timeGetTime();
   DWORD delta = (curr_time - last_time);
+  DWORD t;
+  const DWORD time_reset = 7680;
   if (delta > 16)
   {
     delta = 0;
     last_time = curr_time;
+    t = (curr_time - start_time) % time_reset;
+    if ((t < (time_reset / 4)) && first1)
+    {
+      first1 = false;
+      first2 = true;
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+      cout << "using texture filtering " << "Nearest both" << endl;
+    }
+    else if ((t < (time_reset / 2)) && t >= (time_reset / 4) && first2)
+    {
+      first1 = true;
+      first2 = false;
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+      cout << "using texture filtering " << "Linear tex, nearest mip" << endl;
+    }
+    else if ((t < (3 * time_reset / 4)) && t >= (time_reset / 2) && first1)
+    {
+      first1 = false;
+      first2 = true;
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+      cout << "using texture filtering " << "Nearest tex, linear mip" << endl;
+    }
+    else if (t >= (3 * time_reset / 4) && first2)
+    {
+      first1 = true;
+      first2 = false;
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      cout << "using texture filtering " << "Linear both" << endl;
+    }
     glutPostRedisplay();
   }
 }
@@ -243,8 +262,6 @@ void Keyboard(unsigned char key, int x, int y) {
     //use_fp_camera = !use_fp_camera;
     //if(use_fp_camera) FPcamera.mouseUpdate(glm::vec2(mouse_x, mouse_y));
     //else FPcamera.first_click = false;
-    use_euler = !use_euler;
-    cout << "Using euler?" << use_euler << endl;
     break;
 
   case 27: //ESC key
@@ -253,16 +270,18 @@ void Keyboard(unsigned char key, int x, int y) {
 
   case 32: //Space key
     use_quaternions = !use_quaternions;
-    use_gravity = !use_gravity;
     changedmatrices = true;
     break;
   
   case 9: //Tab key
-    use_vortex = !use_vortex;
     break;
 
   case 'o':
-    use_box = !use_box;
+    use_mip = !use_mip;
+    cout << "using mipmaps = " << use_mip << endl;
+    if (use_mip) plane_mesh->SetDiffuseTexture(texture);
+    else plane_mesh->SetDiffuseTexture(no_mip_texture);
+    glutPostRedisplay();
     break;
 
     //Reload vertex and fragment shaders during runtime
@@ -458,9 +477,9 @@ void Init() {
   glDepthFunc(GL_LESS);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
-  LoadModels();
   InitSkyBox();
-  InitCube();
+  LoadTextures();
+  LoadModels();
   CreateShaders();
 }
 
@@ -471,7 +490,6 @@ void CleanUp() {
   delete(silhoutte);
   delete(cube_map);
   delete(reflection);
-  delete(sphere_spawner);
   for (int i = 0; i < Scene.size(); ++i)
   {
     for (int j = 0; j < Scene[i].GetNumMeshes(); ++j) {

@@ -13,6 +13,8 @@ namespace scene {
     GLCall(glBindTexture(type_, texture_id_));
   }
 
+
+  //REFERENCE mipmap generation is from https://www.khronos.org/opengl/wiki/Common_Mistakes#Automatic_mipmap_generation
   void Texture::Load(char* filename)
   {
     int x, y;
@@ -24,16 +26,43 @@ namespace scene {
     GLCall(glActiveTexture(slot_));
     GLCall(glBindTexture(GL_TEXTURE_2D, texture_id_));
     //TODO, think of what will happen if we are reading a RGB image
-    std::cout << "Texture " << filename << " has " << log2(x) << " layers" << std::endl;
-    glTexStorage2D(GL_TEXTURE_2D, log2(x), GL_RGBA8, x, y);
+    std::cout << "Texture " << filename << " has " << log2(x) + 1 << " layers" << std::endl;
+    glTexStorage2D(GL_TEXTURE_2D, log2(x) + 1, GL_RGBA8, x, y);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, x, y, GL_BGRA, GL_UNSIGNED_BYTE, image_data);
     glGenerateMipmap(GL_TEXTURE_2D);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+    
+    //Optional LOD bias
+    //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, 3.0f);
+
+    //Good for anti-aliasing and safe wrapping
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    stbi_image_free(image_data);
+  }
+
+  void Texture::LoadNoMip(char* filename)
+  {
+    int x, y;
+    filename_ = filename;
+    type_ = GL_TEXTURE_2D;
+    unsigned char *image_data = LoadTexImage(filename, &x, &y, true);
+    //Copy image data into the openGL texture
+    GLCall(glGenTextures(1, &texture_id_));
+    GLCall(glActiveTexture(slot_));
+    GLCall(glBindTexture(GL_TEXTURE_2D, texture_id_));
+    //TODO, think of what will happen if we are reading a RGB image
+    std::cout << "Texture " << filename << " has " << log2(x) + 1 << " layers" << std::endl;
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, x, y);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, x, y, GL_BGRA, GL_UNSIGNED_BYTE, image_data);
     //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
     //Good for anti-aliasing and safe wrapping
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     stbi_image_free(image_data);
   }
 

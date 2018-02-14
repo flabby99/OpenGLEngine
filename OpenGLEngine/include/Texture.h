@@ -13,6 +13,7 @@ namespace scene {
   public:
     void Bind();
     void Load(char* filename);
+    void LoadNoMip(char* filename);
     //Loads the tex image in filename, storing the dimensions in x and y
     unsigned char* LoadTexImage(const char* filename, int* x, int* y, bool flip);
     void CreateCubeMap(const char* front,
