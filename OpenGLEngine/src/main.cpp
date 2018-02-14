@@ -75,7 +75,7 @@ void InitCube() {
 }
 
 scene::Object* sky_box;
-scene::Object* particle_mesh;
+scene::Object* plane_mesh;
 physics::ParticleSpawner* sphere_spawner;
 
 void InitSkyBox() {
@@ -138,41 +138,23 @@ void ReloadShaders() {
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
 
-physics::ParticlePool* particle_pool;
 void LoadModels() {
   core::SceneInfo sceneinfo;
-  char* filename = "res/Models/unit_sphere.obj";
+  char* filename = "res/Models/flat_plane.obj";
   if (!sceneinfo.LoadModelFromFile(filename)) {
     fprintf(stderr, "ERROR: Could not load %s", filename);
     exit(-1);
   }
   sceneinfo.InitBuffersAndArrays();
   scene::Object* root = new scene::Object();
-  root->SetTranslation(glm::vec3(0.0f, 0.0f, -20.0f));
+  root->SetTranslation(glm::vec3(0.0f, -20.0f, -20.0f));
   root->UpdateModelMatrix();
-  particle_mesh = sceneinfo.GetObject_(0);
-  particle_mesh->SetColour(glm::vec3(1.0f, 1.0f, 1.0f));
-  particle_mesh->SetParent(root);
+  plane_mesh = sceneinfo.GetObject_(0);
+  plane_mesh->SetParent(root);
   scene::Texture* texture = new scene::Texture();
   texture->SetSlot(GL_TEXTURE0);
-  texture->Load("res/Models/textures/white.jpg");
-  particle_mesh->SetDiffuseTexture(texture);
-  scene::Texture* normal_texture = new scene::Texture();
-  normal_texture->SetSlot(GL_TEXTURE1);
-  normal_texture->Load("res/Models/textures/golf_test.jpg");
-  particle_mesh->SetNormalTexture(normal_texture);
-}
-
-//-9.8f / 60.0f would be correct for framerate of 60
-physics::Gravity gravity(glm::vec3(0.0f, -0.03f, 0.0f));
-physics::Circulation circle(glm::vec3(0.0f));
-void InitSpawners() {
-  float radius = 0.05f;
-  particle_mesh->SetScale(glm::vec3(radius));
-  particle_pool = new physics::ParticlePool();
-  sphere_spawner = new physics::ParticleSpawner(particle_mesh, 0.7f, radius, 1.0f, 5.0f, particle_pool, 60, 300);
-  gravity.AddPool(particle_pool);
-  circle.AddPool(particle_pool);
+  texture->Load("res/Models/textures/checker.jpg");
+  plane_mesh->SetDiffuseTexture(texture);
 }
 
 void DrawSkyBox() {
@@ -196,15 +178,6 @@ void DrawSkyBox() {
   glEnable(GL_CULL_FACE);
 }
 
-void Spawn() {
-  int max_spawns = 4;
-  int num_spawns = rand() % (max_spawns + 1);
-  for (int i = 0; i <= max_spawns; ++i) {
-    physics::Particle* particle = sphere_spawner->Spawn();
-    if (particle == NULL) cout << "Can't spawn any more particles" << endl;
-  }
-}
-
 void UpdateScene() {
   // Wait until at least 16ms passed since start of last frame (Effectively caps framerate at ~60fps)
   static DWORD  last_time = 0;
@@ -213,24 +186,9 @@ void UpdateScene() {
   DWORD delta = (curr_time - last_time);
   if (delta > 16)
   {
-    Spawn();
-    particle_pool->ClearForces();
-    if(use_gravity)
-      gravity.AccumulateForces(0);
-    else
-      circle.AccumulateForces(simulation_time);
-    if (use_euler)
-      particle_pool->Update();
-    else
-      particle_pool->UpdateLeap();
-    if(use_vortex)
-     particle_pool->Vortex(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f), 4.0f, 0.8f);
-    if(use_box)
-      particle_pool->HandleCollision(cube);
     delta = 0;
     last_time = curr_time;
     glutPostRedisplay();
-    simulation_time = (simulation_time + 1) % 360;
   }
 }
 
@@ -238,16 +196,15 @@ void RenderWithShader(render::Shader* shader) {
   shader->Bind();
   glm::mat4 view = TPcamera.getMatrix();
   shader->SetUniform4fv("view", view);
-  glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
+  glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
   shader->SetUniform4fv("proj", persp_proj);
   //Draw the particles
-  render::Renderer renderer(shader, view);
-  particle_pool->Draw(renderer);
+  render::Renderer::Draw(*plane_mesh, shader, view);
 }
 
 void Render() {
   render::Renderer::Clear();
-  DrawSkyBox();
+  //DrawSkyBox();
   switch (render_type) {
     case eRenderType::RT_blinn :
       RenderWithShader(blinn_phong);
@@ -504,7 +461,6 @@ void Init() {
   LoadModels();
   InitSkyBox();
   InitCube();
-  InitSpawners();
   CreateShaders();
 }
 
@@ -515,8 +471,6 @@ void CleanUp() {
   delete(silhoutte);
   delete(cube_map);
   delete(reflection);
-  delete(particle_pool);
-  delete(particle_mesh);
   delete(sphere_spawner);
   for (int i = 0; i < Scene.size(); ++i)
   {
