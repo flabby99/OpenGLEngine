@@ -19,7 +19,7 @@ float schlick_fresnel(vec3 I, vec3 N) {
     return r_0 + (1 - r_0) * pow(1 - dot(I, N), 5);
 }
 
-//See http://developer.download.nvidia.com/CgTutorial/cg_tutorial_chapter07.html
+//REFERENCE See http://developer.download.nvidia.com/CgTutorial/cg_tutorial_chapter07.html
 float empirical_fresnel(vec3 I, vec3 N, vec3 f_v) {
     float bias = f_v.x;
     float scale = f_v.y;

@@ -78,7 +78,7 @@ enum class eRenderType {
   RT_reflection
 };
 
-eRenderType render_type = eRenderType::RT_blinn;
+eRenderType render_type = eRenderType::RT_reflection;
 
 render::CommonShader* blinn_phong;
 render::CommonShader* silhoutte;
@@ -503,7 +503,7 @@ int main(int argc, char** argv) {
   window_height = 810;
   glutInitWindowPosition(100, 100);//optional
   glutInitWindowSize(window_width, window_height); //optional
-  glutCreateWindow("Plane Rotations - Sean Martin 13319354");
+  glutCreateWindow("Transmitance Effects Rendering 2 - Sean Martin 13319354");
 
   glewExperimental = GL_TRUE;
   GLenum res = glewInit();
