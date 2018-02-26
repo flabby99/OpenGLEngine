@@ -1,6 +1,5 @@
-glew version is not 4.5
 Glm is not forced using radians
 Read 196 meshes from res/Models/piper_pa18.obj
 Read 1 meshes from res/Models/SimpleKnot.obj
 Read 1 meshes from res/Models/Sphere_eg.obj
-Got negative Uniform location for colour in silhouette
+Got negative Uniform location for num_shades in blinn_phongGot negative Uniform location for ambient in blinn_phongGot negative Uniform location for spec_exp in silhouetteGot negative Uniform location for num_shades in silhouetteGot negative Uniform location for ambient in silhouetteGot negative Uniform location for colour in silhouetteGot negative Uniform location for spec_exp in celGot negative Uniform location for ambient in celGot negative Uniform location for spec_exp in minnaertGot negative Uniform location for num_shades in minnaert

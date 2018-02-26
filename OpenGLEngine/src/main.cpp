@@ -113,6 +113,9 @@ void RenderWithShader(render::Shader* shader) {
   for (size_t j = 0; j != Scene.size(); ++j) {
     glm::mat4 global1(1.0f);
     if (j == 0) { //Render the plane
+      shader->SetUniform1f("spec_exp", 8.0f);
+      shader->SetUniform1f("num_shades", 15);
+      shader->SetUniform3f("ambient", glm::vec3(1.0f));
       scene::Object root;
       root.SetTranslation(glm::vec3(0.0f, 0.0f, -20.0f));
       root.UpdateModelMatrix();
@@ -153,6 +156,9 @@ void RenderWithShader(render::Shader* shader) {
     }
     else if (j == 1) { //Render the knot
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
+        shader->SetUniform1f("spec_exp", 10.0f);
+        shader->SetUniform1f("num_shades", 3);
+        shader->SetUniform3f("ambient", glm::vec3(0.5f));
         scene::Object* obj = Scene[j].GetObject_(i);
         scene::Object root;
         root.SetTranslation(glm::vec3(10.0f, 1.0f, -20.0f));
@@ -164,6 +170,9 @@ void RenderWithShader(render::Shader* shader) {
       }
     }
     else if (j == 2) { //Render the sphere
+      shader->SetUniform1f("spec_exp", 3.0f);
+      shader->SetUniform1f("num_shades", 8);
+      shader->SetUniform3f("ambient", glm::vec3(0.1f, 0.1f, 1.0f));
       for (size_t i = 0; i < Scene[j].GetNumMeshes(); ++i) {
         scene::Object* obj = Scene[j].GetObject_(i);
         scene::Object root;
@@ -247,27 +256,27 @@ void Keyboard(unsigned char key, int x, int y) {
 
     //Rotations
   case 'i':
-    translationmatrices.UpdateRotate(glm::vec3(glm::radians(10.0f), 0.0f, 0.0f), use_quaternions);
+    translationmatrices.UpdateRotate(glm::vec3(glm::radians(2.5f), 0.0f, 0.0f), use_quaternions);
     changedmatrices = true;
     break;
   case 'I':
-    translationmatrices.UpdateRotate(glm::vec3(glm::radians(-10.0f), 0.0f, 0.0f), use_quaternions);
+    translationmatrices.UpdateRotate(glm::vec3(glm::radians(-2.5f), 0.0f, 0.0f), use_quaternions);
     changedmatrices = true;
     break;
   case 'j':
-    translationmatrices.UpdateRotate(glm::vec3(0.0f, glm::radians(10.0f), 0.0f), use_quaternions);
+    translationmatrices.UpdateRotate(glm::vec3(0.0f, glm::radians(2.5f), 0.0f), use_quaternions);
     changedmatrices = true;
     break;
   case 'J':
-    translationmatrices.UpdateRotate(glm::vec3(0.0f, glm::radians(-10.0f), 0.0f), use_quaternions);
+    translationmatrices.UpdateRotate(glm::vec3(0.0f, glm::radians(-2.5f), 0.0f), use_quaternions);
     changedmatrices = true;
     break;
   case 'k':
-    translationmatrices.UpdateRotate(glm::vec3(0.0f, 0.0f, glm::radians(10.0f)), use_quaternions);
+    translationmatrices.UpdateRotate(glm::vec3(0.0f, 0.0f, glm::radians(2.5f)), use_quaternions);
     changedmatrices = true;
     break;
   case 'K':
-    translationmatrices.UpdateRotate(glm::vec3(0.0f, 0.0f, glm::radians(-10.0f)), use_quaternions);
+    translationmatrices.UpdateRotate(glm::vec3(0.0f, 0.0f, glm::radians(-2.5f)), use_quaternions);
     changedmatrices = true;
     break;
 
@@ -307,27 +316,27 @@ void Keyboard(unsigned char key, int x, int y) {
 
   //Camera Translations
   case 'd':
-    TPcamera.Move(glm::vec3(1.0f, 0.0f, 0.0f));
+    TPcamera.Move(glm::vec3(0.3f, 0.0f, 0.0f));
     changedmatrices = true;
     break;
   case 'a':
-    TPcamera.Move(glm::vec3(-1.0f, 0.0f, 0.0f));
+    TPcamera.Move(glm::vec3(-0.3f, 0.0f, 0.0f));
     changedmatrices = true;
     break;
   case 'w':
-    TPcamera.Move(glm::vec3(0.0f, 1.0f, 0.0f));
+    TPcamera.Move(glm::vec3(0.0f, 0.3f, 0.0f));
     changedmatrices = true;
     break;
   case 's':
-    TPcamera.Move(glm::vec3(0.0f, -1.0f, 0.0f));
+    TPcamera.Move(glm::vec3(0.0f, -0.3f, 0.0f));
     changedmatrices = true;
     break;
   case 'q':
-    TPcamera.Move(glm::vec3(0.0f, 0.0f, -1.0f));
+    TPcamera.Move(glm::vec3(0.0f, 0.0f, -0.3f));
     changedmatrices = true;
     break;
   case 'e':
-    TPcamera.Move(glm::vec3(0.0f, 0.0f, 1.0f));
+    TPcamera.Move(glm::vec3(0.0f, 0.0f, 0.3f));
     changedmatrices = true;
     break;
 
@@ -454,7 +463,7 @@ int main(int argc, char** argv) {
   window_height = 810;
   glutInitWindowPosition(100, 100);//optional
   glutInitWindowSize(window_width, window_height); //optional
-  glutCreateWindow("Plane Rotations - Sean Martin 13319354");
+  glutCreateWindow("Rendering 1, Shaders - Sean Martin 13319354");
 
   glewExperimental = GL_TRUE;
   GLenum res = glewInit();

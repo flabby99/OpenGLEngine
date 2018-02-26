@@ -8,6 +8,8 @@ in vec2 texture_coords;
 uniform mat4 view;
 
 layout(location = 4) uniform vec3 colour;
+//This will be used to set the specular exponent
+layout(location = 7) uniform float spec_exp;
 layout(binding = 0) uniform sampler2D diffuse_texture;
 
 //fixed point light properties - could make them uniform if want to change them
@@ -20,7 +22,7 @@ vec3 Lambient = vec3(0.15, 0.15, 0.15); //Grey ambience
 vec3 Kdiffuse = colour;
 vec3 Kspecular = vec3(0.5, 0.5, 0.5); //fully reflect specular light
 vec3 Kambient = vec3(1.0, 1.0, 1.0);
-float specular_exp = 8.0; 
+float specular_exp = spec_exp;
 
 out vec4 fColour;
 
@@ -44,6 +46,8 @@ void main() {
   float specular_factor = pow(dot_prod_specular, specular_exp);
   vec3 Ispecular = Lspecular * Kspecular * specular_factor;
   fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0);
+
+  //If using textures this is relevant
   //fColour = vec4(colour, 1.0);
   //fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0) * texture (diffuse_texture, texture_coords);
   //Debugs
