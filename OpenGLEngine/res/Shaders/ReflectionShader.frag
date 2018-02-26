@@ -8,6 +8,8 @@ uniform mat4 view;
 
 layout(location = 4) uniform vec3 colour;
 layout(binding = 0) uniform samplerCube cube_texture;
+layout(location = 5) uniform int type;
+layout(location = 6) uniform float off = 0.03;
 
 float air_refraction_index = 1;
 float glass_refraction_index = 1.517;
@@ -32,14 +34,13 @@ void main() {
   //Do reflections
   vec3 I = vec3(inverse (view) * vec4(eye_incident, 0.0));
   vec3 N = vec3(inverse (view) * vec4(eye_normal, 0.0));
-  //vec3 reflected = reflect(I, N);
-  vec3 reflected = vec3(inverse (view) * vec4(reflect(eye_incident, eye_normal), 0.0));
+  vec3 reflected = reflect(I, N);
   vec3 reflectedColour = texture(cube_texture, reflected).rgb;
 
   //Currently this is set up for air -> glass
   float ratio = air_refraction_index / glass_refraction_index;
   //Chromatic dispersion refraction
-  float offset = 0.01f;
+  float offset = off;
   //The refraction indices of most transparent materials decrease with increasing wavelength lambda
   vec3 Tr = refract(I, N, ratio - offset);
   vec3 Tg = refract(I, N, ratio);
@@ -51,5 +52,19 @@ void main() {
 
   float fresnel = clamp(empirical_fresnel(I, N, vec3(0.05f, 1.0f, 0.8f)), 0, 1);
   
+  //The whole shibang
+  if (type == 0)
   fColour =  vec4((reflectedColour * fresnel) + (refractedColour * (1.0f - fresnel)), 1.0f);
+  //Just reflection
+  else if (type == 1)
+  fColour = vec4(reflectedColour, 1.0f);
+  //Just refraction
+  else if (type == 2) 
+  fColour = vec4(texture(cube_texture, refract(I, N, ratio)).rgb, 1.0f);
+  //Just Chromatic refraction
+  else if (type == 3)
+  fColour = vec4(refractedColour, 1.0f);
+  //Visualising fresnel
+  else if (type == 4)
+  fColour = vec4(fresnel, 0.0f, 0.0f, 1.0f);
 }

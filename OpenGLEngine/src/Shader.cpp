@@ -91,6 +91,11 @@ namespace render {
     GLCall(glUniform1f(GetUniformLocation(name), value));
   }
 
+  void Shader::SetUniform1i(const std::string name, int value)
+  {
+    GLCall(glUniform1i(GetUniformLocation(name), value));
+  }
+
   GLuint Shader::GetUniformLocation(const std::string name)
   {
       if (uniform_location_cache_.find(name) != uniform_location_cache_.end())

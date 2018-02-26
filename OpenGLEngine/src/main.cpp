@@ -263,6 +263,9 @@ void UpdateScene() {
 void Keyboard(unsigned char key, int x, int y) {
   static ModelMatrixTransformations translationmatrices;
   static GLfloat xtranslate = -0.3f;
+  static int reflection_type = 0;
+  static float dispersion = 0.1f;
+  int num_types = 5;
   bool changedmatrices = false;
   switch (key) {
 
@@ -285,6 +288,24 @@ void Keyboard(unsigned char key, int x, int y) {
   case 'P':
     ReloadShaders();
     std::cout << "Reloaded shaders" << endl;
+    break;
+
+  //Change reflection shader visuals
+  case 'o':
+    reflection_type = (reflection_type + 1) % num_types;
+    reflection->SetUniform1i("type", reflection_type);
+    break;
+
+  case 'h':
+    dispersion -= 0.01f;
+    if (dispersion < 0) dispersion = 0.f;
+    reflection->SetUniform1f("off", dispersion);
+    break;
+
+  case 'H':
+    dispersion += 0.01f;
+    if (dispersion < 0) dispersion = 0.f;
+    reflection->SetUniform1f("off", dispersion);
     break;
 
     //Rotations
