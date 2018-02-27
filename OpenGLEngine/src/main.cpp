@@ -503,8 +503,8 @@ int main(int argc, char** argv) {
   srand(time(NULL));
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-  window_width = 1440;
-  window_height = 810;
+  window_width = 1600;
+  window_height = 900;
   glutInitWindowPosition(100, 100);//optional
   glutInitWindowSize(window_width, window_height); //optional
   glutCreateWindow("Plane Rotations - Sean Martin 13319354");
