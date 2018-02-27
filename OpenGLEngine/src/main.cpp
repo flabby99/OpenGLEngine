@@ -53,30 +53,7 @@ bool use_euler = false;
 bool use_vortex = false;
 bool use_box = true;
 
-std::vector<physics::Plane* > cube;
-
-void InitCube() {
-  glm::vec3 right(100.f, 0.0f, 0.0f);
-  glm::vec3 top(0.0f, 100.f, 0.0f);
-  glm::vec3 front(0.0f, 0.0f, 100.f);
-  glm::vec3* planes[3] = { &right, &top, &front };
-  for (auto &plane : planes) {
-    physics::Plane* side = new physics::Plane;
-    side->position_ = *plane;
-    side->normal_ = -glm::normalize(*plane);
-    side->threshold_ = 0.02;
-    cube.push_back(side);
-    side = new physics::Plane;
-    side->position_ = -*plane;
-    side->normal_ = glm::normalize(*plane);
-    side->threshold_ = 0.02;
-    cube.push_back(side);
-  }
-}
-
 scene::Object* sky_box;
-scene::Object* particle_mesh;
-physics::ParticleSpawner* sphere_spawner;
 
 void InitSkyBox() {
     core::SceneInfo sceneinfo;
@@ -103,12 +80,14 @@ enum class eRenderType {
   RT_blinn,
   RT_cel,
   RT_minnaert,
-  RT_reflection
+  RT_reflection,
+  RT_normal
 };
 
 eRenderType render_type = eRenderType::RT_blinn;
 
 render::CommonShader* blinn_phong;
+render::CommonShader* normal;
 render::CommonShader* silhoutte;
 render::CommonShader* cel;
 render::CommonShader* minnaert;
@@ -118,6 +97,7 @@ render::CommonShader* reflection;
 void CreateShaders() {
     const std::string shaderfile = "config/shadernames.txt";
     blinn_phong = new render::CommonShader("blinn_phong", shaderfile);
+    normal = new render::CommonShader("normal", shaderfile);
     silhoutte = new render::CommonShader("silhouette", shaderfile);
     cel = new render::CommonShader("cel", shaderfile);
     minnaert = new render::CommonShader("minnaert", shaderfile);
@@ -133,46 +113,81 @@ void ReloadShaders() {
     cel->Reload();
     minnaert->Reload();
     reflection->Reload();
+    normal->Reload();
     cube_map->Reload();
     cube_map->Bind();
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
 
-physics::ParticlePool* particle_pool;
+scene::Object* chair;
+scene::Object* rock;
+scene::Object* grass;
+
 void LoadModels() {
-  core::SceneInfo sceneinfo;
-  char* filename = "res/Models/unit_sphere.obj";
-  if (!sceneinfo.LoadModelFromFile(filename)) {
+
+  //Load the chair
+  core::SceneInfo sceneinfo_chair;
+  char* filename = "res/Models/chair/Models/Chair_01_OBJ.obj";
+  if (!sceneinfo_chair.LoadModelFromFile(filename)) {
     fprintf(stderr, "ERROR: Could not load %s", filename);
     exit(-1);
   }
-  sceneinfo.InitBuffersAndArrays();
-  scene::Object* root = new scene::Object();
-  root->SetTranslation(glm::vec3(0.0f, 0.0f, -20.0f));
-  root->UpdateModelMatrix();
-  particle_mesh = sceneinfo.GetObject_(0);
-  particle_mesh->SetColour(glm::vec3(1.0f, 1.0f, 1.0f));
-  particle_mesh->SetParent(root);
-  scene::Texture* texture = new scene::Texture();
-  texture->SetSlot(GL_TEXTURE0);
-  texture->Load("res/Models/textures/white.jpg");
-  particle_mesh->SetDiffuseTexture(texture);
-  scene::Texture* normal_texture = new scene::Texture();
-  normal_texture->SetSlot(GL_TEXTURE1);
-  normal_texture->Load("res/Models/textures/golf_test.jpg");
-  particle_mesh->SetNormalTexture(normal_texture);
-}
+  sceneinfo_chair.InitBuffersAndArrays();
+  scene::Object* chair_root = new scene::Object();
+  chair_root->SetTranslation(glm::vec3(5.0f, -2.0f, -20.0f));
+  chair_root->UpdateModelMatrix();
+  chair = sceneinfo_chair.GetObject_(0);
+  chair->SetParent(chair_root);
+  scene::Texture* normal_texture_chair = new scene::Texture();
+  normal_texture_chair->SetSlot(GL_TEXTURE1);
+  normal_texture_chair->Load("res/Models/chair/Textures/Chair_01_Normal.tga");
+  chair->SetNormalTexture(normal_texture_chair);
 
-//-9.8f / 60.0f would be correct for framerate of 60
-physics::Gravity gravity(glm::vec3(0.0f, -0.03f, 0.0f));
-physics::Circulation circle(glm::vec3(0.0f));
-void InitSpawners() {
-  float radius = 0.05f;
-  particle_mesh->SetScale(glm::vec3(radius));
-  particle_pool = new physics::ParticlePool();
-  sphere_spawner = new physics::ParticleSpawner(particle_mesh, 0.7f, radius, 1.0f, 5.0f, particle_pool, 60, 300);
-  gravity.AddPool(particle_pool);
-  circle.AddPool(particle_pool);
+  //Load the rock
+  core::SceneInfo sceneinfo_rock;
+  filename = "res/Models/rock/rock.obj";
+  if (!sceneinfo_rock.LoadModelFromFile(filename)) {
+    fprintf(stderr, "ERROR: Could not load %s", filename);
+    exit(-1);
+  }
+  sceneinfo_rock.InitBuffersAndArrays();
+  scene::Object* rock_root = new scene::Object();
+  rock_root->SetTranslation(glm::vec3(-5.0f, -2.0f, -20.0f));
+  rock_root->UpdateModelMatrix();
+  rock = sceneinfo_rock.GetObject_(0);
+  rock->SetParent(rock_root);
+  scene::Texture* rock_texture = new scene::Texture();
+  rock_texture->SetSlot(GL_TEXTURE0);
+  rock_texture->Load("res/Models/rock/rock-diff.png");
+  rock->SetDiffuseTexture(rock_texture);
+  scene::Texture* normal_texture_rock = new scene::Texture();
+  normal_texture_rock->SetSlot(GL_TEXTURE1);
+  normal_texture_rock->Load("res/Models/rock/rock-norm.png");
+  rock->SetNormalTexture(normal_texture_rock);
+
+  //Load the grass
+  core::SceneInfo sceneinfo_grass;
+  filename = "res/Models/flat_plane.obj";
+  if (!sceneinfo_grass.LoadModelFromFile(filename)) {
+    fprintf(stderr, "ERROR: Could not load %s", filename);
+    exit(-1);
+  }
+  sceneinfo_grass.InitBuffersAndArrays();
+  scene::Object* grass_root = new scene::Object();
+  grass_root->SetTranslation(glm::vec3(0.0f, -2.0f, -20.0f));
+  grass_root->UpdateModelMatrix();
+  grass = sceneinfo_grass.GetObject_(0);
+  grass->SetScale(glm::vec3(0.3f));
+  grass->UpdateModelMatrix();
+  grass->SetParent(grass_root);
+  scene::Texture* grass_texture = new scene::Texture();
+  grass_texture->SetSlot(GL_TEXTURE0);
+  grass_texture->Load("res/Models/textures/grass.jpg");
+  grass->SetDiffuseTexture(grass_texture);
+  scene::Texture* normal_texture_grass = new scene::Texture();
+  normal_texture_grass->SetSlot(GL_TEXTURE1);
+  normal_texture_grass->Load("res/Models/textures/grass/grass01_n.jpg");
+  grass->SetNormalTexture(normal_texture_grass);
 }
 
 void DrawSkyBox() {
@@ -196,15 +211,6 @@ void DrawSkyBox() {
   glEnable(GL_CULL_FACE);
 }
 
-void Spawn() {
-  int max_spawns = 4;
-  int num_spawns = rand() % (max_spawns + 1);
-  for (int i = 0; i <= max_spawns; ++i) {
-    physics::Particle* particle = sphere_spawner->Spawn();
-    if (particle == NULL) cout << "Can't spawn any more particles" << endl;
-  }
-}
-
 void UpdateScene() {
   // Wait until at least 16ms passed since start of last frame (Effectively caps framerate at ~60fps)
   static DWORD  last_time = 0;
@@ -213,24 +219,8 @@ void UpdateScene() {
   DWORD delta = (curr_time - last_time);
   if (delta > 16)
   {
-    Spawn();
-    particle_pool->ClearForces();
-    if(use_gravity)
-      gravity.AccumulateForces(0);
-    else
-      circle.AccumulateForces(simulation_time);
-    if (use_euler)
-      particle_pool->Update();
-    else
-      particle_pool->UpdateLeap();
-    if(use_vortex)
-     particle_pool->Vortex(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f), 4.0f, 0.8f);
-    if(use_box)
-      particle_pool->HandleCollision(cube);
-    delta = 0;
     last_time = curr_time;
     glutPostRedisplay();
-    simulation_time = (simulation_time + 1) % 360;
   }
 }
 
@@ -240,9 +230,10 @@ void RenderWithShader(render::Shader* shader) {
   shader->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
   shader->SetUniform4fv("proj", persp_proj);
-  //Draw the particles
-  render::Renderer renderer(shader, view);
-  particle_pool->Draw(renderer);
+
+  render::Renderer::Draw(*chair, shader, view);
+  render::Renderer::Draw(*rock, shader, view);
+  render::Renderer::Draw(*grass, shader, view);
 }
 
 void Render() {
@@ -267,8 +258,8 @@ void Render() {
     case eRenderType::RT_minnaert :
       RenderWithShader(minnaert);
       break;
-    case eRenderType::RT_reflection :
-      RenderWithShader(reflection);
+    case eRenderType::RT_normal :
+      RenderWithShader(normal);
       break;
     default:
       break;
@@ -298,14 +289,6 @@ void Keyboard(unsigned char key, int x, int y) {
     use_quaternions = !use_quaternions;
     use_gravity = !use_gravity;
     changedmatrices = true;
-    break;
-  
-  case 9: //Tab key
-    use_vortex = !use_vortex;
-    break;
-
-  case 'o':
-    use_box = !use_box;
     break;
 
     //Reload vertex and fragment shaders during runtime
@@ -430,7 +413,7 @@ void Keyboard(unsigned char key, int x, int y) {
     render_type = eRenderType::RT_blinn;
     break;
   case 'L':
-    render_type = eRenderType::RT_reflection;
+    render_type = eRenderType::RT_normal;
     break;
   case 't':
     render_type = eRenderType::RT_cel;
@@ -503,8 +486,6 @@ void Init() {
   glCullFace(GL_BACK);
   LoadModels();
   InitSkyBox();
-  InitCube();
-  InitSpawners();
   CreateShaders();
 }
 
@@ -515,9 +496,9 @@ void CleanUp() {
   delete(silhoutte);
   delete(cube_map);
   delete(reflection);
-  delete(particle_pool);
-  delete(particle_mesh);
-  delete(sphere_spawner);
+  delete(grass);
+  delete(rock);
+  delete(chair);
   for (int i = 0; i < Scene.size(); ++i)
   {
     for (int j = 0; j < Scene[i].GetNumMeshes(); ++j) {

@@ -9,6 +9,12 @@
 *.jpg
 *.png
 *.JPEG
+*.3ds
+*.ase
+*.dae
+*.max
+*.hdr
+*.db
 OpenGLEngine/logs/*
 
 # User-specific files

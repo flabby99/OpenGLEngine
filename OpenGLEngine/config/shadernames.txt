@@ -1,4 +1,4 @@
-blinn_phong
+normal
 res/Shaders/NormalMapShader.vert
 res/Shaders/NormalMapShader.frag
 
@@ -21,3 +21,7 @@ res/Shaders/cube_map.frag
 reflection
 res/Shaders/ReflectionShader.vert
 res/Shaders/ReflectionShader.frag
+
+blinn_phong
+res/Shaders/VertexShader.vert
+res/Shaders/FragmentShaderBlinnPhong.frag

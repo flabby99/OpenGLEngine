@@ -15,7 +15,7 @@ layout(binding = 0) uniform sampler2D diffuse_texture;
 layout(binding = 1) uniform sampler2D normal_texture;
 
 //fixed point light properties - could make them uniform if want to change them
-vec3 world_light_position = vec3(0.0, 0.0, 10.0);
+vec3 world_light_position = vec3(0.0, 10.0, 10.0);
 vec3 Lspecular = vec3(1.0, 1.0, 1.0);
 vec3 Ldiffuse = vec3(1.0, 1.0, 1.0);
 vec3 Lambient = vec3(0.15, 0.15, 0.15); //Grey ambience
