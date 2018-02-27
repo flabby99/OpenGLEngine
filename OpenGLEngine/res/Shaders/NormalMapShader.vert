@@ -26,5 +26,4 @@ void main() {
   vec3 eye_bitangent = normalize(vec3(mv_it * vec4 (vBitangent, 0.0))); 
   TBN = transpose(mat3(eye_tangent, eye_bitangent, eye_normal));
   gl_Position =  proj * vec4 (eye_position, 1.0);
-  //gl_Position = proj * view * model * vec4(vBitangent, 1.0);
 }

@@ -23,6 +23,7 @@ namespace render {
         void SetUniform3f(const std::string name, glm::vec3 value);
         void SetUniform4fv(const std::string name, glm::mat4 value);
         void SetUniform1f(const std::string name, float value);
+        void SetUniform1i(const std::string name, int value);
     private:
         GLint renderer_id_;
         std::string name_;

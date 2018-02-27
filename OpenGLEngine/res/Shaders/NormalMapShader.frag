@@ -13,6 +13,9 @@ uniform mat4 view;
 layout(location = 4) uniform vec3 colour;
 layout(binding = 0) uniform sampler2D diffuse_texture;
 layout(binding = 1) uniform sampler2D normal_texture;
+layout(location = 5) uniform int type = 0;
+layout(location = 6) uniform int exaggerate = 0;
+layout(location = 7) uniform float power = 1.5f;
 
 //fixed point light properties - could make them uniform if want to change them
 vec3 world_light_position = vec3(0.0, 10.0, 10.0);
@@ -38,6 +41,8 @@ void main() {
   vec3 eye_light_position = vec3(view * vec4(world_light_position, 1.0));
   vec3 direction_to_light = normalize(eye_light_position - eye_position);
   vec3 ts_direction_to_light = normalize(TBN * direction_to_light);
+  //More intense normals
+  if(exaggerate == 1) ts_normal = ts_normal * glm::vec3(power, power, 1.0f);
   float dot_prod = clamp(dot(ts_direction_to_light, ts_normal), 0.0, 1.0);
   vec3 Idiffuse = Ldiffuse * vec3(texture (diffuse_texture, texture_coords)) * dot_prod;
 
@@ -47,13 +52,20 @@ void main() {
   float specular_factor = pow(dot_prod_specular, specular_exp);
   vec3 Ispecular = Lspecular * Kspecular * specular_factor;
 
+  //Render it all
+  if(type == 0)
   fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0);
+  //Just show the normals
+  else if(type == 1)
+  fColour = vec4(ts_normal, 1.0);
+  
+
+
+  //Debugging
   //fColour = vec4(Iambient, 1.0);
   //fColour = vec4(Idiffuse, 1.0);
   //fColour = vec4(Ispecular, 1.0);
   //fColour = texture (diffuse_texture, texture_coords);
-  //fColour = vec4(ts_normal, 1.0);
-  //fColour = vec4(dot_prod, dot_prod, dot_prod, 1.0);
   //fColour = vec4(texture_coords.x, texture_coords.y, 0, 1);
   //fColour = vec4(eye_tangent, 1);
   //fColour = vec4(eye_bitangent, 1);

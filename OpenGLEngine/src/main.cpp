@@ -226,11 +226,18 @@ void UpdateScene() {
 
 void RenderWithShader(render::Shader* shader) {
   shader->Bind();
+  static float angle = -0.005f;
+  angle = fmod(angle + 0.005f, FULLROTATIONINRADIANS);
   glm::mat4 view = TPcamera.getMatrix();
   shader->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
   shader->SetUniform4fv("proj", persp_proj);
 
+  glm::mat4 rotation = glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f));
+  chair->SetRotation(rotation);
+  chair->UpdateModelMatrix();
+  rock->SetRotation(rotation);
+  rock->UpdateModelMatrix();
   render::Renderer::Draw(*chair, shader, view);
   render::Renderer::Draw(*rock, shader, view);
   render::Renderer::Draw(*grass, shader, view);
@@ -270,6 +277,9 @@ void Render() {
 void Keyboard(unsigned char key, int x, int y) {
   static ModelMatrixTransformations translationmatrices;
   static GLfloat xtranslate = -0.3f;
+  static int type = 0;
+  static int exaggerate = 0;
+  static float power = 1.5f;
   bool changedmatrices = false;
   switch (key) {
 
@@ -295,6 +305,31 @@ void Keyboard(unsigned char key, int x, int y) {
   case 'P':
     ReloadShaders();
     std::cout << "Reloaded shaders" << endl;
+    break;
+  
+  case 'H':
+    type = 1 - type;
+    normal->SetUniform1i("type", type);
+    blinn_phong->SetUniform1i("type", type);
+    break;
+
+  case 'h':
+    exaggerate = 1 - exaggerate;
+    normal->SetUniform1i("exaggerate", exaggerate);
+    blinn_phong->SetUniform1i("type", type);
+    break;
+
+  case 'o':
+    power -= 0.1f;
+    if (power < 0.0f) power = 0.f;
+    normal->SetUniform1f("power", power);
+    blinn_phong->SetUniform1f("power", power);
+    break;
+
+  case 'O':
+    power += 0.1f;
+    normal->SetUniform1f("power", power);
+    blinn_phong->SetUniform1f("power", power);
     break;
 
     //Rotations
@@ -512,11 +547,11 @@ int main(int argc, char** argv) {
   srand(time(NULL));
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-  window_width = 1440;
-  window_height = 810;
+  window_width = 1600;
+  window_height = 900;
   glutInitWindowPosition(100, 100);//optional
   glutInitWindowSize(window_width, window_height); //optional
-  glutCreateWindow("Plane Rotations - Sean Martin 13319354");
+  glutCreateWindow("Normal mapping - Rendering 3 - Sean Martin 13319354");
 
   glewExperimental = GL_TRUE;
   GLenum res = glewInit();
