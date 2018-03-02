@@ -28,7 +28,7 @@ namespace scene {
     GLCall(glActiveTexture(slot_));
     GLCall(glBindTexture(GL_TEXTURE_2D, texture_id_));
     std::cout << "Texture " << filename << " has " << log2(x) + 1 << " layers" << std::endl;
-    glTexStorage2D(GL_TEXTURE_2D, log2(x) + 1, GL_RGBA8, x, y);
+    glTexStorage2D(GL_TEXTURE_2D, (int)log2(x) + 1, GL_RGBA8, x, y);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, x, y, GL_BGRA, GL_UNSIGNED_BYTE, image_data);
     glGenerateMipmap(GL_TEXTURE_2D);
     //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);

@@ -52,7 +52,7 @@ namespace core {
   bool SceneInfo::InitFromScene(const aiScene* Scene, const std::string& Filename) {
     if(!white_) white_ = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
     has_materials_ = Scene->HasMaterials();
-    for (int i = 0; i < Scene->mNumMeshes; ++i) {
+    for (unsigned int i = 0; i < Scene->mNumMeshes; ++i) {
       const aiMesh* aiMesh = Scene->mMeshes[i];
       if (!aiMesh->HasNormals()) fprintf(stderr, "WARNING: Model %d in %s has no normals\n", i, Filename.c_str());
       if (!aiMesh->HasTextureCoords(0)) fprintf(stderr, "WARNING: Model %d in %s has no tex coords\n", i, Filename.c_str());
@@ -68,7 +68,7 @@ namespace core {
     const aiVector3D zero(0.0f, 0.0f, 0.0f);
     std::unique_ptr<VertexData[]> vertices = std::make_unique<VertexData[]>(aiMesh->mNumVertices);
     //Extract the vertex positions, normals and texture co-ordinates
-    for (int i = 0; i < aiMesh->mNumVertices; ++i) {
+    for (unsigned int i = 0; i < aiMesh->mNumVertices; ++i) {
 
       const aiVector3D* pos = &(aiMesh->mVertices[i]);
       const aiVector3D* normal = &(aiMesh->mNormals[i]);
@@ -95,7 +95,7 @@ namespace core {
     va.Addbuffer(vb, vertex_buffer_layout_);
 
     std::unique_ptr<unsigned int[]> indices = std::make_unique<unsigned int[]>(3 * aiMesh->mNumFaces);
-    for (int i = 0; i < aiMesh->mNumFaces; ++i) {
+    for (unsigned int i = 0; i < aiMesh->mNumFaces; ++i) {
       const aiFace& face = aiMesh->mFaces[i];
       //Ensure that the face is indeed a triangle.
       assert(face.mNumIndices == 3);

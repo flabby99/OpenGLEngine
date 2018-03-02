@@ -506,7 +506,7 @@ void CleanUp() {
 }
 
 int main(int argc, char** argv) {
-  srand(time(NULL));
+  srand((unsigned int)time(NULL));
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
   window_width = 1600;
