@@ -49,4 +49,8 @@ namespace scene {
     }
     return global;
   }
+
+  void Object::AddMaterialData(const core::MaterialData& material_data) {
+    texture_diffuse_ = material_data.diffuse_texture;
+  }
 } //namespace scene

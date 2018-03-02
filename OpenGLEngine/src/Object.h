@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "glm/glm.hpp"
 #include "Texture.h"
+#include "ModelLoader.h"
 
 namespace scene {
   struct Mesh {
@@ -14,6 +15,7 @@ namespace scene {
   class Object {
   private:
     Mesh mesh_;
+    unsigned int num_indices_;
     glm::mat4 rotation_;
     glm::vec3 scale_;
     glm::vec3 translation_;
@@ -30,22 +32,25 @@ namespace scene {
     ~Object();
     void UpdateModelMatrix();
     //Rotates the model about its pivot point using an angle and an axis
+    void AddMaterialData(const core::MaterialData& material_data);
     void RotateAboutPivotPoint(float angle, glm::vec3 axis);
-    inline void SetParent(std::shared_ptr<Object> parent) { parent_ = parent; }
+    inline void SetNumIndices(const unsigned int& value) { num_indices_ = value; }
+    inline void SetParent(const std::shared_ptr<Object>& parent) { parent_ = parent; }
     inline void SetRotation(const glm::mat4& rotation) { rotation_ = rotation; }
     inline void SetTranslation(const glm::vec3& translation) { translation_ = translation; }
     inline void SetScale(const glm::vec3& scale) { scale_ = scale; }
     inline void SetModelMatrix(const glm::mat4& model) { model_matrix_ = model; }
     inline void SetOriginOffset(const glm::vec3& offset) { origin_offset_ = offset; }
     inline void SetColour(const glm::vec3& colour) { colour_ = colour; }
-    inline void SetDiffuseTexture(std::shared_ptr<Texture> texture) { texture_diffuse_ = texture; }
-    inline void SetBumpTexture(std::shared_ptr<Texture> texture) { texture_bump_ = texture; }
-    inline void SetNormalTexture(std::shared_ptr<Texture> texture) { texture_normal_ = texture; }
+    inline void SetDiffuseTexture(const std::shared_ptr<Texture>& texture) { texture_diffuse_ = texture; }
+    inline void SetBumpTexture(const std::shared_ptr<Texture>& texture) { texture_bump_ = texture; }
+    inline void SetNormalTexture(const std::shared_ptr<Texture>& texture) { texture_normal_ = texture; }
     inline void SetMesh(const render::VertexArray& va, const render::IndexBuffer& ib) {
       mesh_.va = va; mesh_.ib = ib;
     }
     inline glm::mat4 GetLocalModelMatrix() const { return model_matrix_; }
     inline Mesh GetMesh() const { return mesh_; }
+    inline unsigned int GetNumIndices() const { return num_indices_; }
     inline glm::vec3 GetColour() const { return colour_; }
     inline std::shared_ptr<Object> GetParent() const { return parent_; }
     inline std::shared_ptr<Texture> GetDiffuseTexture() const { return texture_diffuse_; }

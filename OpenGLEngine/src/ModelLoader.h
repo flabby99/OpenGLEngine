@@ -6,62 +6,52 @@
 #include "Object.h"
 #include "IndexBuffer.h"
 #include "Texture.h"
+#include "VertexBufferLayout.h"
 
 //Forward declare structs
 struct aiScene;
 struct aiMesh;
 
+
+//The basic idea is that we should read everything into the buffers as we go to avoid storing
 namespace core {
-  //Holds the positions, normals, textures and indices of a mesh
-  struct MeshInfo {
-    std::vector<GLfloat> positions;
-    std::vector<GLfloat> normals;
-    std::vector<GLfloat> textures;
-    std::vector<GLuint> indices;
+  struct VertexData {
+    GLfloat pos_x_, pos_y_, pos_z_;
+    GLfloat normal_x_, normal_y_, normal_z_;
+    GLfloat tex_coord_x_, tex_coord_y_;
+    GLfloat tangent_x_, tangent_y_, tangent_z_;
+  };
+
+  //Could make this a class, and overwrite the class based on the model loaded
+  struct MaterialData {
+    std::shared_ptr<scene::Texture> diffuse_texture;
   };
 
   //Handles loading a model from a file
-  //After loading stores a vector of VAO index VBO pairs for each mesh, and the number of meshes, and mesh data
+  //After loading stores a vector of Objects
   class SceneInfo {
   public:
     SceneInfo();
+    inline SceneInfo(std::string base_dir) {
+      SceneInfo();
+      base_dir_ = base_dir;
+    }
     ~SceneInfo();
     bool LoadModelFromFile(const std::string& Filename);
-    void InitBuffersAndArrays();
-    int GetNumMeshes();
-    int GetNumIndices(int index);
-    scene::Object* GetObject_(int index);
+    std::shared_ptr<scene::Object> GetObject_(int index);
   private:
+    std::string base_dir_ = "res/Models/";
     //Data that is later retrieved in main
-    std::vector<scene::Object*> output;
-    unsigned int NumMeshes = 0;
+    render::VertexBufferLayout vertex_buffer_layout_;
+    std::vector<std::shared_ptr<scene::Object>> objects_;
     std::vector<std::shared_ptr<scene::Texture>> loaded_textures;
-    std::vector<std::shared_ptr<scene::Texture>> object_textures;
-    std::vector<int> material_indices;
-    bool has_materials = true;
-    std::shared_ptr<scene::Texture> white; //TODO could share this among scene infos
-
-    //Temp data, can later put this into the functions using them. 
-    //They are empty after loading a model
-    std::vector<GLfloat> positions;
-    std::vector<GLfloat> normals;
-    std::vector<GLfloat> textures;
-    std::vector<GLuint> indices;
-    std::vector<MeshInfo> meshes;
+    bool has_materials_;
+    std::shared_ptr<scene::Texture> white_;
 
     //Private functions
-    void CopyVectors();
-    void ClearVectors();
     bool InitFromScene(const aiScene* Scene, const std::string& Filename);
-    void InitMesh(const aiMesh* aiMesh);
-    bool InitMaterials(const aiScene* Scene, const std::string& Filename);
-    void ComputeTangentBasis(
-      const std::vector<GLfloat> &vertices,
-      const std::vector<GLfloat> &uvs,
-      const std::vector<GLfloat> &normals,
-      const std::vector<GLuint> &indices,
-      glm::vec3* tangents,
-      glm::vec3* bitangents
-    );
+    std::shared_ptr<scene::Object> InitMesh(const aiMesh* aiMesh);
+    //NOTE could consider Loading all the materials at start, storing these, then just getting them
+    MaterialData LoadMaterial(const aiScene* Scene, const unsigned int& material_index);
   };
 } //namespace core

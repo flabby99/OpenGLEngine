@@ -27,6 +27,9 @@
 #include <random>
 #include <time.h>
 
+//TODO store a white texture among all model loaders
+//Could even do this by pointing to a unique pointer
+
 using namespace std;
 
 Camera FPcamera(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -52,8 +55,8 @@ bool use_fp_camera = false;
 bool use_mip = true;
 bool do_rotate = false;
 
-scene::Object* sky_box;
-scene::Object* plane_mesh;
+std::shared_ptr<scene::Object> sky_box;
+std::shared_ptr<scene::Object> plane_mesh;
 
 void InitSkyBox() {
     core::SceneInfo sceneinfo;
@@ -62,7 +65,6 @@ void InitSkyBox() {
         fprintf(stderr, "ERROR: Could not load %s", filename);
         exit(-1);
     }
-    sceneinfo.InitBuffersAndArrays();
     sky_box = sceneinfo.GetObject_(0);
     //TODO set the textures for the sky box
     const char* front = "res/Models/textures/Storforsen4/negz.jpg";
@@ -134,7 +136,6 @@ void LoadModels() {
     fprintf(stderr, "ERROR: Could not load %s", filename);
     exit(-1);
   }
-  sceneinfo.InitBuffersAndArrays();
   std::shared_ptr<scene::Object> root = std::make_shared<scene::Object>();
   root->SetTranslation(glm::vec3(0.0f, -200.0f, -20.0f));
   root->UpdateModelMatrix();
@@ -501,12 +502,6 @@ void CleanUp() {
   delete(silhoutte);
   delete(cube_map);
   delete(reflection);
-  for (int i = 0; i < Scene.size(); ++i)
-  {
-    for (int j = 0; j < Scene[i].GetNumMeshes(); ++j) {
-      delete(Scene[i].GetObject_(j));
-    }
-  }
 }
 
 int main(int argc, char** argv) {

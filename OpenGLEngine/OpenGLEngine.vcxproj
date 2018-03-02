@@ -38,6 +38,7 @@
     <ClInclude Include="src\VertexBufferLayout.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Deprecated.cpp" />
     <ClCompile Include="src\ErrorHandling.cpp" />
     <ClCompile Include="src\ParticleSpawner.cpp" />
     <ClCompile Include="src\Camera.cpp" />
