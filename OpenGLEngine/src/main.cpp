@@ -49,6 +49,7 @@ bool use_quaternions = false;
 //NOTE it might be more effective to refactor this to Enum and allow many camera types
 bool use_fp_camera = false;
 bool use_mip = true;
+bool do_rotate = false;
 
 scene::Object* sky_box;
 scene::Object* plane_mesh;
@@ -173,7 +174,7 @@ void UpdateScene() {
   DWORD curr_time = timeGetTime();
   DWORD delta = (curr_time - last_time);
   DWORD t;
-  const DWORD time_reset = 7680;
+  const DWORD time_reset = 7680 * 4;
   if (delta > 16)
   {
     delta = 0;
@@ -213,11 +214,16 @@ void UpdateScene() {
 
 void RenderWithShader(render::Shader* shader) {
   shader->Bind();
+  static float angle = -0.003f;
   glm::mat4 view = TPcamera.getMatrix();
   shader->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
   shader->SetUniform4fv("proj", persp_proj);
-  //Draw the particles
+  if (do_rotate) {
+    angle = fmod(angle + 0.003f, FULLROTATIONINRADIANS);
+    plane_mesh->SetRotation(glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f)));
+    plane_mesh->UpdateModelMatrix();  
+  }
   render::Renderer::Draw(*plane_mesh, shader, view);
 }
 
@@ -288,6 +294,10 @@ void Keyboard(unsigned char key, int x, int y) {
   case 'P':
     ReloadShaders();
     std::cout << "Reloaded shaders" << endl;
+    break;
+
+  case 'h':
+    do_rotate = !do_rotate;
     break;
 
     //Rotations
