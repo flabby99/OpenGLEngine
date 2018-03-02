@@ -130,6 +130,7 @@ void LoadTextures() {
 }
 
 void LoadModels() {
+  std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
   core::SceneInfo sceneinfo;
   char* filename = "res/Models/flat_plane.obj";
   if (!sceneinfo.LoadModelFromFile(filename)) {
@@ -137,7 +138,7 @@ void LoadModels() {
     exit(-1);
   }
   std::shared_ptr<scene::Object> root = std::make_shared<scene::Object>();
-  root->SetTranslation(glm::vec3(0.0f, -200.0f, -20.0f));
+  root->SetTranslation(glm::vec3(0.0f, -20.0f, -20.0f));
   root->UpdateModelMatrix();
   plane_mesh = sceneinfo.GetObject_(0);
   plane_mesh->SetParent(root);

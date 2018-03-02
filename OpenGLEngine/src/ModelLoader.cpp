@@ -8,7 +8,8 @@
 #include "Object.h"
 
 namespace core {
-  SceneInfo::SceneInfo()
+  SceneInfo::SceneInfo(std::string base_dir, std::shared_ptr<scene::Texture> white):
+    base_dir_(base_dir), white_(white)
   {
     vertex_buffer_layout_ = render::VertexBufferLayout();
     //Three position co ords
@@ -49,7 +50,7 @@ namespace core {
   }
 
   bool SceneInfo::InitFromScene(const aiScene* Scene, const std::string& Filename) {
-    white_ = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
+    if(!white_) white_ = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
     has_materials_ = Scene->HasMaterials();
     for (int i = 0; i < Scene->mNumMeshes; ++i) {
       const aiMesh* aiMesh = Scene->mMeshes[i];

@@ -32,16 +32,19 @@ namespace core {
   //After loading stores a vector of Objects
   class SceneInfo {
   public:
-    SceneInfo();
-    inline SceneInfo(std::string base_dir) {
-      SceneInfo();
-      base_dir_ = base_dir;
-    }
+    //Delegating constructors here
+    //Base - intiliases base directory for model assets and the white texture
+    SceneInfo(std::string base_dir, std::shared_ptr<scene::Texture> white);
+    inline SceneInfo() 
+      : SceneInfo("res/Models/", nullptr) {}
+    //Initialise the white texture to avoid loading again
+    inline SceneInfo(std::shared_ptr<scene::Texture> white) 
+      : SceneInfo("res/Models/", white) {}
     ~SceneInfo();
     bool LoadModelFromFile(const std::string& Filename);
     std::shared_ptr<scene::Object> GetObject_(int index);
   private:
-    std::string base_dir_ = "res/Models/";
+    std::string base_dir_;
     //Data that is later retrieved in main
     render::VertexBufferLayout vertex_buffer_layout_;
     std::vector<std::shared_ptr<scene::Object>> objects_;
