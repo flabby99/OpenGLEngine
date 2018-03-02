@@ -19,27 +19,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Camera.h" />
-    <ClInclude Include="include\ErrorHandling.h" />
-    <ClInclude Include="include\IndexBuffer.h" />
-    <ClInclude Include="include\ModelLoader.h" />
-    <ClInclude Include="include\ModelMatrixTransformations.h" />
-    <ClInclude Include="include\Object.h" />
-    <ClInclude Include="include\Particle.h" />
-    <ClInclude Include="include\ParticleSpawner.h" />
-    <ClInclude Include="include\Renderer.h" />
-    <ClInclude Include="include\Shader.h" />
-    <ClInclude Include="include\ShaderLoader.h" />
-    <ClInclude Include="include\stb_image.h" />
-    <ClInclude Include="include\Texture.h" />
-    <ClInclude Include="include\util.h" />
-    <ClInclude Include="include\VertexArray.h" />
-    <ClInclude Include="include\VertexBuffer.h" />
-    <ClInclude Include="include\VertexBufferLayout.h" />
+    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\ErrorHandling.h" />
+    <ClInclude Include="src\IndexBuffer.h" />
+    <ClInclude Include="src\ModelLoader.h" />
+    <ClInclude Include="src\ModelMatrixTransformations.h" />
+    <ClInclude Include="src\Object.h" />
+    <ClInclude Include="src\Particle.h" />
+    <ClInclude Include="src\ParticleSpawner.h" />
+    <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\ShaderLoader.h" />
+    <ClInclude Include="src\stb_image.h" />
+    <ClInclude Include="src\Texture.h" />
+    <ClInclude Include="src\util.h" />
+    <ClInclude Include="src\VertexArray.h" />
+    <ClInclude Include="src\VertexBuffer.h" />
+    <ClInclude Include="src\VertexBufferLayout.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\ErrorHandling.cpp" />
-    <ClCompile Include="include\ParticleSpawner.cpp" />
+    <ClCompile Include="src\ErrorHandling.cpp" />
+    <ClCompile Include="src\ParticleSpawner.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\main.cpp" />

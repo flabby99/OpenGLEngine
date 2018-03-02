@@ -1,4 +1,4 @@
-#include "..\include\Object.h"
+#include "Object.h"
 #include "glm/gtc/matrix_transform.hpp"
 
 namespace scene {
