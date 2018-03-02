@@ -18,8 +18,6 @@ namespace scene {
   void Texture::Load(const char* filename)
   {
     int x, y;
-    //Could use a unique pointer for filename_ and set it some memory
-    //something like this
     filename_ = std::make_unique<char[]>(std::strlen(filename) + 1);
     errno_t copy_error = strcpy_s(filename_.get(), std::strlen(filename) + 1, filename);
     if (copy_error) fprintf(stderr, "error copying %s with errno %d", filename, copy_error);
@@ -29,7 +27,6 @@ namespace scene {
     GLCall(glGenTextures(1, &texture_id_));
     GLCall(glActiveTexture(slot_));
     GLCall(glBindTexture(GL_TEXTURE_2D, texture_id_));
-    //TODO, think of what will happen if we are reading a RGB image
     std::cout << "Texture " << filename << " has " << log2(x) + 1 << " layers" << std::endl;
     glTexStorage2D(GL_TEXTURE_2D, log2(x) + 1, GL_RGBA8, x, y);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, x, y, GL_BGRA, GL_UNSIGNED_BYTE, image_data);
