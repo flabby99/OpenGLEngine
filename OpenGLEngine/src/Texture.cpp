@@ -15,10 +15,14 @@ namespace scene {
 
 
   //REFERENCE mipmap generation is from https://www.khronos.org/opengl/wiki/Common_Mistakes#Automatic_mipmap_generation
-  void Texture::Load(char* filename)
+  void Texture::Load(const char* filename)
   {
     int x, y;
-    filename_ = filename;
+    //Could use a unique pointer for filename_ and set it some memory
+    //something like this
+    filename_ = std::make_unique<char[]>(std::strlen(filename) + 1);
+    errno_t copy_error = strcpy_s(filename_.get(), std::strlen(filename) + 1, filename);
+    if (copy_error) fprintf(stderr, "error copying %s with errno %d", filename, copy_error);
     type_ = GL_TEXTURE_2D;
     unsigned char *image_data = LoadTexImage(filename, &x, &y, true);
     //Copy image data into the openGL texture
@@ -43,10 +47,12 @@ namespace scene {
     stbi_image_free(image_data);
   }
 
-  void Texture::LoadNoMip(char* filename)
+  void Texture::LoadNoMip(const char* filename)
   {
     int x, y;
-    filename_ = filename;
+    filename_ = std::make_unique<char[]>(std::strlen(filename) + 1);
+    errno_t copy_error = strcpy_s(filename_.get(), std::strlen(filename) + 1, filename);
+    if (copy_error) fprintf(stderr, "error copying %s with errno %d", filename, copy_error);
     type_ = GL_TEXTURE_2D;
     unsigned char *image_data = LoadTexImage(filename, &x, &y, true);
     //Copy image data into the openGL texture
@@ -138,7 +144,7 @@ namespace scene {
    
   }
 
-  Texture::Texture(char* filename)
+  Texture::Texture(const char* filename)
   {
     Load(filename);
   }

@@ -35,11 +35,11 @@ namespace core {
     //Data that is later retrieved in main
     std::vector<scene::Object*> output;
     unsigned int NumMeshes = 0;
-    std::vector<scene::Texture*> loaded_textures;
-    std::vector<scene::Texture*> object_textures;
+    std::vector<std::shared_ptr<scene::Texture>> loaded_textures;
+    std::vector<std::shared_ptr<scene::Texture>> object_textures;
     std::vector<int> material_indices;
     bool has_materials = true;
-    scene::Texture* white; //TODO could share this among scene infos
+    std::shared_ptr<scene::Texture> white; //TODO could share this among scene infos
 
     //Temp data, can later put this into the functions using them. 
     //They are empty after loading a model

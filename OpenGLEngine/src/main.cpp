@@ -18,6 +18,7 @@
 #include "Particle.h"
 #include "ParticleSpawner.h"
 
+#include <memory>
 #include <iostream>
 #include <math.h>
 #include <fstream>
@@ -70,7 +71,7 @@ void InitSkyBox() {
     const char* bottom = "res/Models/textures/Storforsen4/negy.jpg";
     const char* left = "res/Models/textures/Storforsen4/negx.jpg";
     const char* right = "res/Models/textures/Storforsen4/posx.jpg";
-    scene::Texture* texture = new scene::Texture();
+    std::shared_ptr<scene::Texture> texture = std::make_shared<scene::Texture>();
     texture->CreateCubeMap(front, back, top, bottom, left, right);
     sky_box->SetDiffuseTexture(texture);
 }
@@ -114,14 +115,14 @@ void ReloadShaders() {
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
 
-scene::Texture* texture;
-scene::Texture* no_mip_texture;
+std::shared_ptr<scene::Texture> texture;
+std::shared_ptr<scene::Texture> no_mip_texture;
 
 void LoadTextures() {
-  texture = new scene::Texture();
+  texture = std::make_shared<scene::Texture>();
   texture->SetSlot(GL_TEXTURE0);
   texture->Load("res/Models/textures/checker.jpg");
-  no_mip_texture = new scene::Texture();
+  no_mip_texture = std::make_shared<scene::Texture>();
   no_mip_texture->SetSlot(GL_TEXTURE0);
   no_mip_texture->LoadNoMip("res/Models/textures/checker.jpg");
 }
@@ -134,8 +135,8 @@ void LoadModels() {
     exit(-1);
   }
   sceneinfo.InitBuffersAndArrays();
-  scene::Object* root = new scene::Object();
-  root->SetTranslation(glm::vec3(0.0f, -20.0f, -20.0f));
+  std::shared_ptr<scene::Object> root = std::make_shared<scene::Object>();
+  root->SetTranslation(glm::vec3(0.0f, -200.0f, -20.0f));
   root->UpdateModelMatrix();
   plane_mesh = sceneinfo.GetObject_(0);
   plane_mesh->SetParent(root);
@@ -503,7 +504,6 @@ void CleanUp() {
   for (int i = 0; i < Scene.size(); ++i)
   {
     for (int j = 0; j < Scene[i].GetNumMeshes(); ++j) {
-      delete(Scene[i].GetObject_(j)->GetDiffuseTexture());
       delete(Scene[i].GetObject_(j));
     }
   }

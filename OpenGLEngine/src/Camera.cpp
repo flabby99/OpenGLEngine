@@ -53,10 +53,10 @@ void Camera::mouseMove(const glm::vec2 & newMousePosition)
 void Camera::Move(const glm::vec3 movement) {
   if (movement.x != 0) {
     glm::vec3 rightVector = glm::normalize(glm::cross(viewDirection, upVector));
-    position += movement_speed * 10 * rightVector * movement.x;
+    position += movement_speed * 4 * rightVector * movement.x;
   }
-  if (movement.y != 0) position += movement_speed * 10 * viewDirection * movement.y;
-  if (movement.z != 0) position += movement_speed * 10 * upVector * movement.z;
+  if (movement.y != 0) position += movement_speed * 4 * viewDirection * movement.y;
+  if (movement.z != 0) position += movement_speed * 4 * upVector * movement.z;
 }
 
 void Camera::updatePosition(const glm::vec3 newPosition)

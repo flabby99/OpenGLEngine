@@ -21,6 +21,10 @@ namespace render {
         GLCall(glBindVertexArray(0));
     }
 
+    /*
+    ** Permits adding a vertex buffer with each vertice stored continuously with the information
+    ** identified by layout - eg. vertice consists of float, float, float, unsigned int, unsigned int.
+    */
     void VertexArray::Addbuffer(const VertexBuffer& vb, const VertexBufferLayout& layout)
     {
         Bind();
@@ -37,12 +41,15 @@ namespace render {
         }
     }
 
+    //Add a vertex buffer with 3 floats for each vertice at an array index 
     void VertexArray::Addbuffer_3f(const VertexBuffer& vb, const GLuint index) {
         Bind();
         vb.Bind();
         GLCall(glEnableVertexAttribArray(index));
         GLCall(glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, NULL));
     }
+
+    //Add a vertex buffer with 2 floats for each vertice at an array index 
     void VertexArray::Addbuffer_2f(const VertexBuffer & vb, const GLuint index)
     {
       Bind();

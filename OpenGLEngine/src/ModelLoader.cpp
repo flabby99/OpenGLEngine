@@ -64,7 +64,7 @@ namespace core {
       CopyVectors();
       ClearVectors();
     }
-    white = new scene::Texture("res/Models/textures/white.jpg");
+    white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
     if(Scene->HasMaterials())
         return InitMaterials(Scene, Filename);
     has_materials = false;
@@ -123,7 +123,7 @@ namespace core {
                         fprintf(stderr, "Error copying string %s", full_path.c_str());
                         exit(-1);
                     }
-                    scene::Texture *texture = new scene::Texture(cstr);
+                    std::shared_ptr<scene::Texture> texture = std::make_shared<scene::Texture>(cstr);
                     loaded_textures.push_back(texture);
                     object_textures.push_back(texture);
                 }
