@@ -5,6 +5,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "util.h"
+#include "Object.h"
 
 namespace core {
   SceneInfo::SceneInfo()
@@ -52,7 +53,7 @@ namespace core {
     has_materials_ = Scene->HasMaterials();
     for (int i = 0; i < Scene->mNumMeshes; ++i) {
       const aiMesh* aiMesh = Scene->mMeshes[i];
-      if (!aiMesh->HasNormals) fprintf(stderr, "WARNING: Model %d in %s has no normals\n", i, Filename.c_str());
+      if (!aiMesh->HasNormals()) fprintf(stderr, "WARNING: Model %d in %s has no normals\n", i, Filename.c_str());
       if (!aiMesh->HasTextureCoords(0)) fprintf(stderr, "WARNING: Model %d in %s has no tex coords\n", i, Filename.c_str());
       std::shared_ptr<scene::Object> object = InitMesh(aiMesh);
       MaterialData material_data = LoadMaterial(Scene, aiMesh->mMaterialIndex);
@@ -134,6 +135,7 @@ namespace core {
           }
           std::shared_ptr<scene::Texture> texture = std::make_shared<scene::Texture>(cstr);
           loaded_textures.push_back(texture);
+          material_data.diffuse_texture = texture;
         }
       }
       else {
@@ -142,6 +144,7 @@ namespace core {
       }
     }
     else material_data.diffuse_texture = white_;
+    return material_data;
   }
 
   std::shared_ptr<scene::Object> SceneInfo::GetObject_(int index)

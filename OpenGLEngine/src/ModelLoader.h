@@ -3,7 +3,6 @@
 #include <vector>
 #include "glew/glew.h"
 #include "VertexArray.h"
-#include "Object.h"
 #include "IndexBuffer.h"
 #include "Texture.h"
 #include "VertexBufferLayout.h"
@@ -11,7 +10,9 @@
 //Forward declare structs
 struct aiScene;
 struct aiMesh;
-
+namespace scene {
+  class Object;
+}
 
 //The basic idea is that we should read everything into the buffers as we go to avoid storing
 namespace core {

@@ -5,7 +5,10 @@
 #include "Shader.h"
 #include "glm/glm.hpp"
 #include "Texture.h"
-#include "ModelLoader.h"
+
+namespace core {
+  struct MaterialData;
+}
 
 namespace scene {
   struct Mesh {

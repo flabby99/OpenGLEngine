@@ -1,4 +1,5 @@
 #include "Object.h"
+#include "ModelLoader.h"
 #include "glm/gtc/matrix_transform.hpp"
 
 namespace scene {
