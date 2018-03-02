@@ -129,20 +129,21 @@ void LoadTextures() {
   no_mip_texture->LoadNoMip("res/Models/textures/checker.jpg");
 }
 
+std::shared_ptr<core::SceneInfo> peter;
+
 void LoadModels() {
   std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
-  core::SceneInfo sceneinfo;
-  char* filename = "res/Models/flat_plane.obj";
-  if (!sceneinfo.LoadModelFromFile(filename)) {
-    fprintf(stderr, "ERROR: Could not load %s", filename);
-    exit(-1);
-  }
+  core::SceneInfo sceneinfo("flat_plane.obj", white);
   std::shared_ptr<scene::Object> root = std::make_shared<scene::Object>();
   root->SetTranslation(glm::vec3(0.0f, -20.0f, -20.0f));
   root->UpdateModelMatrix();
   plane_mesh = sceneinfo.GetObject_(0);
   plane_mesh->SetParent(root);
   plane_mesh->SetDiffuseTexture(texture);
+
+  std::string base_dir = "res/Models/Peter/";
+  std::string peter_filename = "peter.obj";
+  peter = std::make_shared<core::SceneInfo>(base_dir, peter_filename, white);
 }
 
 void DrawSkyBox() {
@@ -228,6 +229,9 @@ void RenderWithShader(render::Shader* shader) {
     plane_mesh->UpdateModelMatrix();  
   }
   render::Renderer::Draw(*plane_mesh, shader, view);
+  for (unsigned int i = 0; i < peter->GetNumMeshes(); ++i) {
+    render::Renderer::Draw(*peter->GetObject_(i), shader, view);
+  }
 }
 
 void Render() {

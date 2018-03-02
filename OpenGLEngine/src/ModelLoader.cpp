@@ -6,9 +6,10 @@
 #include "IndexBuffer.h"
 #include "util.h"
 #include "Object.h"
+#include <iostream>
 
 namespace core {
-  SceneInfo::SceneInfo(std::string base_dir, std::shared_ptr<scene::Texture> white):
+  SceneInfo::SceneInfo(std::string base_dir, std::string name, std::shared_ptr<scene::Texture> white):
     base_dir_(base_dir), white_(white)
   {
     vertex_buffer_layout_ = render::VertexBufferLayout();
@@ -20,6 +21,12 @@ namespace core {
     vertex_buffer_layout_.Push<float>(2);
     //Three tangent co ords
     vertex_buffer_layout_.Push<float>(3);
+
+    std::string filename = base_dir + name;
+    if (!LoadModelFromFile(filename)) {
+      fprintf(stderr, "ERROR: Could not load %s", filename);
+      exit(-1);
+    }
   }
 
   SceneInfo::~SceneInfo()
@@ -73,7 +80,7 @@ namespace core {
       const aiVector3D* pos = &(aiMesh->mVertices[i]);
       const aiVector3D* normal = &(aiMesh->mNormals[i]);
       const aiVector3D* tex_coord = aiMesh->HasTextureCoords(0) ? &(aiMesh->mTextureCoords[0][i]) : &zero;
-      const aiVector3D* tangent = aiMesh->mTangents;
+      const aiVector3D* tangent = aiMesh->HasTextureCoords(0) ? &aiMesh->mTangents[i] : &zero;
       vertices[i].pos_x_ = pos->x;
       vertices[i].pos_y_ = pos->y;
       vertices[i].pos_z_ = pos->z;
@@ -119,7 +126,8 @@ namespace core {
       aiString Path;
       if (Material->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
         bool skip = false;
-        std::string full_path = base_dir_ + Path.data;
+        std::string full_path = Path.data;
+        if(Path.data[1] != ':') full_path += base_dir_;
         //If the texture is not loaded, then load it
         for (auto& texture_ptr : loaded_textures) {
           if (strcmp(texture_ptr->GetFileName(), full_path.c_str()) == 0) {
@@ -129,14 +137,10 @@ namespace core {
           }
         }
         if (!skip) {
-          char * cstr = new char[full_path.length() + 1];
-          if (strcpy_s(cstr, full_path.length() + 1, full_path.c_str())) {
-            fprintf(stderr, "Error copying string %s", full_path.c_str());
-            exit(-1);
-          }
-          std::shared_ptr<scene::Texture> texture = std::make_shared<scene::Texture>(cstr);
+          std::shared_ptr<scene::Texture> texture = std::make_shared<scene::Texture>(full_path.c_str());
           loaded_textures.push_back(texture);
           material_data.diffuse_texture = texture;
+          std::cout << "got here!" << std::endl;
         }
       }
       else {
