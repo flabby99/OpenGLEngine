@@ -24,7 +24,7 @@ namespace core {
 
     std::string filename = base_dir + name;
     if (!LoadModelFromFile(filename)) {
-      fprintf(stderr, "ERROR: Could not load %s", filename);
+      fprintf(stderr, "ERROR: Could not load %s", filename.c_str());
       exit(-1);
     }
   }

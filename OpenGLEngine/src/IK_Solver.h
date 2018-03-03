@@ -1,4 +1,8 @@
 #pragma once
+#include <memory>
+
+class BoneChain;
+
 namespace IK
 {
   //Required parameters are the num iterations and an error tolerance for target position
@@ -17,7 +21,7 @@ namespace IK
     //@param chain - the bone chain that should be moved
     //Note that glm has an rotation between vectors function that returns a quat
     //NOTE also has a look at which I can use to finally fix my camera
-    void Solve
+    void Solve(std::shared_ptr<BoneChain>, glm::vec3 target);
 
   private:
     unsigned int max_iterations_ = 100;
@@ -27,4 +31,3 @@ namespace IK
 
   };
 } //namespace IK
-

@@ -75,7 +75,10 @@
     <ClInclude Include="src\IK_Solver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Bone.h">
+    <ClInclude Include="src\Bone.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Maths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -131,7 +134,10 @@
     <ClCompile Include="src\IK_Solver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Bone.cpp">
+    <ClCompile Include="src\Bone.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Maths.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
