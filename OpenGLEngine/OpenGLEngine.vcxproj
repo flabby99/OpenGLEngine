@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bone.h" />
+    <ClInclude Include="src\IK_Solver.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\ErrorHandling.h" />
     <ClInclude Include="src\IndexBuffer.h" />
@@ -38,6 +40,8 @@
     <ClInclude Include="src\VertexBufferLayout.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Bone.cpp" />
+    <ClCompile Include="src\IK_Solver.cpp" />
     <ClCompile Include="src\Deprecated.cpp" />
     <ClCompile Include="src\ErrorHandling.cpp" />
     <ClCompile Include="src\ParticleSpawner.cpp" />
