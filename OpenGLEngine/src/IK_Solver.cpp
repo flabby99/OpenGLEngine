@@ -4,6 +4,7 @@
 #include "Maths.h"
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtx/quaternion.hpp"
+#include <iostream>
 
 namespace IK
 {
@@ -27,31 +28,35 @@ namespace IK
     float improvement = 0.f;
     float distance = glm::distance(chain->GetEndEffector(), target);
     std::shared_ptr<Bone> current_bone = nullptr;
-    while ((iterations < this->max_iterations_) && (distance < error_tolerance_)) {
+    while ((iterations < this->max_iterations_) && (distance > error_tolerance_)) {
       //Iterate over the chain and perform CCD calculation
-      do {
+      current_bone = chain->MoveUpOneBone();
+      while (current_bone != nullptr) {
         //Get current end effector position
         glm::vec3 end_effector = chain->GetEndEffector();
-
-        //Get the next bone to use
-        current_bone = chain->MoveUpOneBone();
 
         glm::vec3 bone_base = current_bone->GetBase();
         glm::vec3 base_to_target = target - bone_base;
         glm::vec3 base_to_end = end_effector - bone_base;
 
         glm::quat desired_rot = core::Maths::RotationBetweenVectors(base_to_end, base_to_target);
-
+        glm::vec3 end_eff_vec = desired_rot * base_to_end;
         //Apply this rotation to the bone
         current_bone->UpdateOrientation(desired_rot);
-      } while (current_bone != nullptr);  
+        glm::vec3 end_eff = chain->GetEndEffector();
+        current_bone = chain->MoveUpOneBone();
+      } 
       ++iterations;
       improvement = distance;
       distance = glm::distance(chain->GetEndEffector(), target);
       improvement -= distance;
       if (improvement < required_iteration_improvement_) {
+        std::cout << "Did not improve, breaking ccd" << std::endl;
         break;
       }
+    }
+    if (iterations == this->max_iterations_) {
+      std::cout << " Ran out of iterations, breaking ccd" << std::endl;
     }
   }
 

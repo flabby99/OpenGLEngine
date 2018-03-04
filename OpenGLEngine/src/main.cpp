@@ -17,6 +17,8 @@
 #include "Object.h"
 #include "Particle.h"
 #include "ParticleSpawner.h"
+#include "Bone.h"
+#include "IK_Solver.h"
 
 #include <memory>
 #include <iostream>
@@ -27,6 +29,8 @@
 #include <random>
 #include <time.h>
 
+
+#if 0
 //TODO store a white texture among all model loaders
 //Could even do this by pointing to a unique pointer
 
@@ -547,3 +551,46 @@ int main(int argc, char** argv) {
   CleanUp();
   return 0;
 }
+#endif
+
+int main(int argc, char** argv) {
+  //TODO could make a bone chain by giving a list of connection points!
+
+  //Create a bone chain and test it.
+  std::shared_ptr<IK::Bone> bone_base =
+    std::make_shared<IK::Bone>(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 0.0f, 0.0f));
+  std::shared_ptr<IK::Bone> bone_end =
+    std::make_shared<IK::Bone>(glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.0f, -1.0f, 0.0f));
+
+  bone_base->AddChild(bone_end);
+  std::shared_ptr<IK::BoneChain> chain =
+    std::make_shared<IK::BoneChain>(bone_base, bone_end);
+
+  IK::CCD_Solver ccd(1000, 0.01f, 0.001f);
+
+  ccd.Solve(chain, glm::vec3(2.1f, 0.0f, 0.f));
+
+  glm::vec3 ef = chain->GetEndEffector();
+  std::cout << ef.x << " " << ef.y << " " << ef.z << std::endl;
+
+  std::cin.ignore();
+
+
+  std::vector<glm::vec3> test_points;
+  test_points.push_back(glm::vec3(27, -7, 4));
+  test_points.push_back(glm::vec3(30, 10, 3));
+  test_points.push_back(glm::vec3(45, 2, 4));
+  test_points.push_back(glm::vec3(-10, 15, -30));
+  std::shared_ptr<IK::BoneChain> test_chain = std::make_shared<IK::BoneChain>();
+  std::vector<std::shared_ptr<IK::Bone>> test_bones;
+  test_bones = test_chain->MakeChain(test_points);
+  ccd.Solve(test_chain, glm::vec3(25, -18.2, -24));
+
+  ef = test_chain->GetEndEffector();
+  std::cout << ef.x << " " << ef.y << " " << ef.z << std::endl;
+
+  std::cin.ignore();
+
+  return 0;
+}
+
