@@ -1,7 +1,11 @@
 #pragma once
 #include <memory>
+#include "glm\glm.hpp"
 
-class BoneChain;
+namespace IK {
+  class BoneChain;
+}
+
 
 namespace IK
 {
@@ -19,9 +23,7 @@ namespace IK
     //Solve for a chain to reach an end effector using CCD
     //@param target - target position for the end effector
     //@param chain - the bone chain that should be moved
-    //Note that glm has an rotation between vectors function that returns a quat
-    //NOTE also has a look at which I can use to finally fix my camera
-    void Solve(std::shared_ptr<BoneChain>, glm::vec3 target);
+    void Solve(std::shared_ptr<BoneChain> chain, glm::vec3 target);
 
   private:
     unsigned int max_iterations_ = 100;

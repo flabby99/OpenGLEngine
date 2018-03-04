@@ -1,4 +1,4 @@
-//THIS CLASS DOES NOTHING
+//THIS FILE DOES NOTHING
 //It simply holds deprecated code that is correct, but not currently in use
 
 #if 0

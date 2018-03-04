@@ -14,7 +14,7 @@ namespace core
   }
 
   // Returns a quaternion such that q*start = dest
-  glm::quat RotationBetweenVectors(glm::vec3 start, glm::vec3 dest) {
+  glm::quat Maths::RotationBetweenVectors(glm::vec3 start, glm::vec3 dest) {
     start = normalize(start);
     dest = normalize(dest);
 

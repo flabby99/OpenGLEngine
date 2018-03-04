@@ -24,4 +24,12 @@ namespace IK
     if (current_bone_ == nullptr) fprintf(stderr, "WARNING: null parent reached in chain before reaching start of chain");
     return current_bone_;
   }
+
+  const glm::quat Bone::GetGlobalOrientation() {
+    glm::quat global = orientation_;
+      if (parent_ != nullptr) {
+        global = parent_->GetGlobalOrientation() * orientation_;
+      }
+      return global;
+  }
 } //namespace IK
