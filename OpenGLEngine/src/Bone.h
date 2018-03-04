@@ -7,6 +7,10 @@
 #include <memory>
 #include <list>
 
+namespace scene {
+  class Object;
+}
+
 namespace IK
 {
   //Limits for angles, expressed in radians
@@ -27,6 +31,11 @@ namespace IK
     glm::quat orientation_ = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     AngleLimits angle_limits_;
     std::shared_ptr<Bone> parent_ = nullptr;
+
+    //TODO set this up so that objects have parents
+    //When done update objects rotations!
+    //Make sure to set object origins to the bone starts
+    std::shared_ptr<scene::Object> object_ = nullptr;
     std::list<std::weak_ptr<Bone>> children_;
     void UpdateChildren(glm::vec3 origin, glm::quat orientation);
 

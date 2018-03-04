@@ -575,7 +575,6 @@ int main(int argc, char** argv) {
 
   std::cin.ignore();
 
-
   std::vector<glm::vec3> test_points;
   test_points.push_back(glm::vec3(27, -7, 4));
   test_points.push_back(glm::vec3(30, 10, 3));
