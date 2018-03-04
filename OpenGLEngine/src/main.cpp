@@ -30,8 +30,6 @@
 //TODO store a white texture among all model loaders
 //Could even do this by pointing to a unique pointer
 
-using namespace std;
-
 Camera FPcamera(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 Camera TPcamera;
 
@@ -43,7 +41,7 @@ int mouse_x, mouse_y;
 glm::mat4 model_transform = glm::mat4(1.0f);
 
 //Holds the information loaded from the obj files
-vector<core::SceneInfo> Scene;
+std::vector<core::SceneInfo> Scene;
 
 //Modified in the mouse function
 bool left_mouse_down;
@@ -189,28 +187,28 @@ void UpdateScene() {
       first1 = false;
       first2 = true;
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-      cout << "using texture filtering " << "Nearest both" << endl;
+      std::cout << "using texture filtering " << "Nearest both" << std::endl;
     }
     else if ((t < (time_reset / 2)) && t >= (time_reset / 4) && first2)
     {
       first1 = true;
       first2 = false;
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-      cout << "using texture filtering " << "Linear tex, nearest mip" << endl;
+      std::cout << "using texture filtering " << "Linear tex, nearest mip" << std::endl;
     }
     else if ((t < (3 * time_reset / 4)) && t >= (time_reset / 2) && first1)
     {
       first1 = false;
       first2 = true;
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-      cout << "using texture filtering " << "Nearest tex, linear mip" << endl;
+      std::cout << "using texture filtering " << "Nearest tex, linear mip" << std::endl;
     }
     else if (t >= (3 * time_reset / 4) && first2)
     {
       first1 = true;
       first2 = false;
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      cout << "using texture filtering " << "Linear both" << endl;
+      std::cout << "using texture filtering " << "Linear both" << std::endl;
     }
     glutPostRedisplay();
   }
@@ -291,7 +289,7 @@ void Keyboard(unsigned char key, int x, int y) {
 
   case 'o':
     use_mip = !use_mip;
-    cout << "using mipmaps = " << use_mip << endl;
+    std::cout << "using mipmaps = " << use_mip << std::endl;
     if (use_mip) plane_mesh->SetDiffuseTexture(texture);
     else plane_mesh->SetDiffuseTexture(no_mip_texture);
     glutPostRedisplay();
@@ -300,7 +298,7 @@ void Keyboard(unsigned char key, int x, int y) {
     //Reload vertex and fragment shaders during runtime
   case 'P':
     ReloadShaders();
-    std::cout << "Reloaded shaders" << endl;
+    std::cout << "Reloaded shaders" << std::endl;
     break;
 
   case 'h':
@@ -527,9 +525,9 @@ int main(int argc, char** argv) {
     return 1;
   }
   //Make sure which version of openGL you can use!
-  if (glewIsSupported("GL_VERSION_4_5")) std::cout << "GLEW version supports 4.5" << endl;
+  if (glewIsSupported("GL_VERSION_4_5")) std::cout << "GLEW version supports 4.5" << std::endl;
   else fprintf(stderr, "glew version is not 4.5\n");
-  if (glewIsSupported("GL_VERSION_4_3")) std::cout << "GLEW version supports 4.3" << endl;
+  if (glewIsSupported("GL_VERSION_4_3")) std::cout << "GLEW version supports 4.3" << std::endl;
   else fprintf(stderr, "glew version is not 4.3\n");
 
   #ifdef GLM_FORCE_RADIANS
