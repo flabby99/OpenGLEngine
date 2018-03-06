@@ -50,7 +50,6 @@ namespace IK
       distance = glm::distance(chain->GetEndEffector(), target);
       improvement -= distance;
       if (improvement < required_iteration_improvement_) {
-        std::cout << "Did not improve, breaking ccd" << std::endl;
         break;
       }
     }

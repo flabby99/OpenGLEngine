@@ -62,8 +62,16 @@ bool use_mip = true;
 bool do_rotate = false;
 
 std::shared_ptr<core::CathmullRomChain> CMRchain;
-glm::vec3 target = glm::vec3(0.0f);
-std::shared_ptr<IK::BoneChain> cone_chain;
+std::shared_ptr<core::CathmullRomChain> rleg_chain;
+std::shared_ptr<core::CathmullRomChain> lleg_chain;
+glm::vec3 rarm_target = glm::vec3(0.0f);
+glm::vec3 larm_target = glm::vec3(0.0f);
+glm::vec3 rleg_target = glm::vec3(0.0f);
+glm::vec3 lleg_target = glm::vec3(0.0f);
+std::shared_ptr<IK::BoneChain> right_arm;
+std::shared_ptr<IK::BoneChain> left_arm;
+std::shared_ptr<IK::BoneChain> right_leg;
+std::shared_ptr<IK::BoneChain> left_leg;
 std::shared_ptr<scene::Object> sky_box;
 std::vector<std::shared_ptr<IK::Bone>> cone_bones;
 
@@ -93,7 +101,7 @@ enum class eRenderType {
   RT_reflection
 };
 
-eRenderType render_type = eRenderType::RT_blinn;
+eRenderType render_type = eRenderType::RT_cel;
 
 render::CommonShader* blinn_phong;
 render::CommonShader* silhoutte;
@@ -179,6 +187,8 @@ void UpdateScene() {
   static const DWORD start_time = timeGetTime();
   static DWORD last_time = 0;
   static float simulation_time = 0.f;
+  static float rleg_time = 0.f;
+  static float rleg_increment = 0.008f;
   static float increment = 0.008f;
   static bool first1 = true;
   static bool first2 = true;
@@ -196,9 +206,22 @@ void UpdateScene() {
       simulation_time = 0;
       increment = 0.008f;
     }
-    target = CMRchain->GetPoint(simulation_time);
+    rarm_target = CMRchain->GetPoint(simulation_time);
     IK::CCD_Solver ccd(1000, 0.01f, 0.001f);
-    ccd.Solve(cone_chain, target);
+    ccd.Solve(right_arm, rarm_target);
+
+    if (rleg_time - 1 > rleg_chain->GetNumSplines()) {
+      rleg_increment = -0.008f;
+    }
+    if (rleg_time < 0) {
+      rleg_time = 0;
+      rleg_increment = 0.008f;
+    }
+    rleg_target = rleg_chain->GetPoint(rleg_time);
+    rleg_time += rleg_increment;
+    ccd.Solve(right_leg, rleg_target);
+    ccd.Solve(left_arm, larm_target);
+    ccd.Solve(left_leg, lleg_target);
     simulation_time += increment;
     glutPostRedisplay();
   }
@@ -225,11 +248,31 @@ void RenderWithShader(render::Shader* shader) {
     render::Renderer::Draw(*cone, shader, view);
   }
   sphere->SetColour(glm::vec3(0.f, 1.f, 0.f));
-  sphere->SetTranslation(glm::vec3(target));
+  sphere->SetTranslation(glm::vec3(rarm_target));
   sphere->UpdateModelMatrix();
   render::Renderer::Draw(*sphere, shader, view);
+  sphere->SetTranslation(glm::vec3(larm_target));
+  sphere->UpdateModelMatrix();
+  render::Renderer::Draw(*sphere, shader, view);
+  sphere->SetTranslation(glm::vec3(lleg_target));
+  sphere->UpdateModelMatrix();
+  render::Renderer::Draw(*sphere, shader, view);
+  sphere->SetTranslation(glm::vec3(rleg_target));
+  sphere->UpdateModelMatrix();
+  render::Renderer::Draw(*sphere, shader, view);
+
+
   sphere->SetColour(glm::vec3(0.f, 0.f, 1.f));
-  sphere->SetTranslation(glm::vec3(cone_chain->GetEndEffector()));
+  sphere->SetTranslation(glm::vec3(right_arm->GetEndEffector()));
+  sphere->UpdateModelMatrix();
+  render::Renderer::Draw(*sphere, shader, view);
+  sphere->SetTranslation(glm::vec3(left_arm->GetEndEffector()));
+  sphere->UpdateModelMatrix();
+  render::Renderer::Draw(*sphere, shader, view);
+  sphere->SetTranslation(glm::vec3(left_leg->GetEndEffector()));
+  sphere->UpdateModelMatrix();
+  render::Renderer::Draw(*sphere, shader, view);
+  sphere->SetTranslation(glm::vec3(right_leg->GetEndEffector()));
   sphere->UpdateModelMatrix();
   render::Renderer::Draw(*sphere, shader, view);
 }
@@ -269,7 +312,7 @@ void Keyboard(unsigned char key, int x, int y) {
   static ModelMatrixTransformations translationmatrices;
   static GLfloat xtranslate = -0.3f;
   bool changedmatrices = false;
-  static glm::vec3 first_target = target;
+  static glm::vec3 first_target = larm_target;
   switch (key) {
 
   case 13: //Enter key
@@ -430,7 +473,7 @@ void Keyboard(unsigned char key, int x, int y) {
   //Apply the changes
   if (changedmatrices) {
     model_transform = translationmatrices.UpdateModelMatrix();
-    //target = glm::vec3(model_transform * glm::vec4(first_target, 1.0f));
+    larm_target = glm::vec3(model_transform * glm::vec4(first_target, 1.0f));
     glutPostRedisplay();
   }
 }
@@ -502,17 +545,82 @@ void CleanUp() {
   delete(reflection);
 }
 
+std::shared_ptr<IK::Bone> SetupBone(const glm::vec3 start, const glm::vec3 end) {
+  std::shared_ptr<IK::Bone> bone;
+  bone = std::make_shared<IK::Bone>(start, end);
+  bone->SetObject(std::make_shared<scene::Object>(*sphere));
+  return bone;
+}
 
 void InitBones() {
-  target = glm::vec3(1.0f, 8.0f, 0.0f);
+  std::shared_ptr<IK::Bone> spine;
+  std::shared_ptr<IK::Bone> rshoulder;
+  std::shared_ptr<IK::Bone> lshoulder;
+  std::shared_ptr<IK::Bone> rhip;
+  std::shared_ptr<IK::Bone> lhip;
+  std::shared_ptr<IK::Bone> head1;
+  std::shared_ptr<IK::Bone> head2;
+  std::shared_ptr<IK::Bone> head3;
+  spine = SetupBone(glm::vec3(0.f, 5.f, 0.f), glm::vec3(0.f, -1.f, 0.f));
+  rshoulder = SetupBone(glm::vec3(0.f, 5.f, 0.f), glm::vec3(-2.0f, 5.f, 0.f));
+  lshoulder = SetupBone(glm::vec3(0.f, 5.f, 0.f), glm::vec3(2.0f, 5.f, 0.f));
+  rhip = SetupBone(glm::vec3(0.f, -1.f, 0.f), glm::vec3(-1.0f, -1.f, 0.f));
+  lhip = SetupBone(glm::vec3(0.f, -1.f, 0.f), glm::vec3(1.0f, -1.f, 0.f));
+  head1 = SetupBone(glm::vec3(0.f, 5.f, 0.f), glm::vec3(-1.5f, 7.f, 0.f));
+  head2 = SetupBone(glm::vec3(1.5f, 7.f, 0.f), glm::vec3(0.f, 5.f, 0.f));
+  head3 = SetupBone(glm::vec3(-1.5f, 7.f, 0.f), glm::vec3(1.5f, 7.f, 0.f));
+
+  rarm_target = glm::vec3(1.0f, 8.0f, 0.0f);
+
   std::vector<glm::vec3> cone_points;
-  cone_points.push_back(glm::vec3(0.0f));
-  cone_points.push_back(glm::vec3(0.0f, 4.0f, 0.0f));
-  cone_points.push_back(glm::vec3(0.0f, 7.0f, 0.0f));
-  cone_points.push_back(glm::vec3(0.0f, 10.0f, 0.0f));
-  cone_points.push_back(glm::vec3(0.0f, 15.0f, 0.0f));
-  cone_chain = std::make_shared<IK::BoneChain>();
-  cone_bones = cone_chain->MakeChain(cone_points, sphere);
+  cone_points.push_back(glm::vec3(-2.f, 5.f, 0.f));
+  cone_points.push_back(glm::vec3(-4.0f, 3.0f, -1.0f));
+  cone_points.push_back(glm::vec3(-4.0f, 5.0f, 2.0f));
+  cone_points.push_back(glm::vec3(-4.2f, 5.f, 2.1f));
+  right_arm = std::make_shared<IK::BoneChain>();
+  cone_bones = right_arm->MakeChain(cone_points, sphere);
+
+  larm_target = glm::vec3(3.0f, 2.0f, 1.0f);
+
+  std::vector<glm::vec3> larm_points;
+  std::vector<std::shared_ptr<IK::Bone>> larm_bones;
+  larm_points.push_back(glm::vec3(2.f, 5.f, 0.f));
+  larm_points.push_back(glm::vec3(4.0f, 3.0f, -1.0f));
+  larm_points.push_back(glm::vec3(4.0f, 5.0f, 2.0f));
+  larm_points.push_back(glm::vec3(4.2f, 5.f, 2.1f));
+  left_arm = std::make_shared<IK::BoneChain>();
+  larm_bones = left_arm->MakeChain(larm_points, sphere);
+
+  std::vector<glm::vec3> rleg_points;
+  std::vector<std::shared_ptr<IK::Bone>> rleg_bones;
+  rleg_points.push_back(glm::vec3(-1.0f, -1.f, 0.f));
+  rleg_points.push_back(glm::vec3(-2.0f, -2.0f, -1.0f));
+  rleg_points.push_back(glm::vec3(-3.0f, -5.0f, -1.0f));
+  //rleg_points.push_back(glm::vec3(-3.f, -5.4f, -1.f));
+  right_leg = std::make_shared<IK::BoneChain>();
+  rleg_bones = right_leg->MakeChain(rleg_points, sphere);
+
+  lleg_target = glm::vec3(1.5f, -5.3f, 0.f);
+  std::vector<glm::vec3> lleg_points;
+  std::vector<std::shared_ptr<IK::Bone>> lleg_bones;
+  lleg_points.push_back(glm::vec3(1.0f, -1.f, 0.f));
+  lleg_points.push_back(glm::vec3(2.0f, -2.0f, -1.0f));
+  lleg_points.push_back(glm::vec3(3.0f, -5.0f, -1.0f));
+  //lleg_points.push_back(glm::vec3(3.f, -5.4f, -1.f));
+  left_leg = std::make_shared<IK::BoneChain>();
+  lleg_bones = left_leg->MakeChain(lleg_points, sphere);
+
+  cone_bones.insert(cone_bones.end(), larm_bones.begin(), larm_bones.end());
+  cone_bones.insert(cone_bones.end(), rleg_bones.begin(), rleg_bones.end());
+  cone_bones.insert(cone_bones.end(), lleg_bones.begin(), lleg_bones.end());
+  cone_bones.push_back(spine);
+  cone_bones.push_back(rshoulder);
+  cone_bones.push_back(lshoulder);
+  cone_bones.push_back(lhip);
+  cone_bones.push_back(rhip);
+  cone_bones.push_back(head1);
+  cone_bones.push_back(head2);
+  cone_bones.push_back(head3);
 }
 
 void BoneTest() {
@@ -550,19 +658,27 @@ void BoneTest() {
 
 void InitCMR() {
   std::vector<glm::vec3> points;
-  points.push_back(glm::vec3(1.f, 2.f, 3.f));
+  points.push_back(glm::vec3(1.f, 8.f, 3.f));
   points.push_back(glm::vec3(2.f, 3.f, 4.f));
   points.push_back(glm::vec3(-1.f, -4.f, 1.f));
-  points.push_back(glm::vec3(0.f, 1.f, -1.f));
-  points.push_back(glm::vec3(-6.f, 8.f, 0.f));
-  points.push_back(glm::vec3(10.f, 0.f, 8.f));
-  points.push_back(glm::vec3(15.f, 15.f, 15.f));
+  points.push_back(glm::vec3(0.f, 5.f, -1.f));
+  points.push_back(glm::vec3(-4.f, 7.f, 0.f));
+  points.push_back(glm::vec3(-1.f, 1.f, 5.f));
+  points.push_back(glm::vec3(1.f, 4.f, 4.f));
   points.push_back(glm::vec3(0.0f, -10.f, 3.4f));
   points.push_back(glm::vec3(1.0f, 3.0f, -6.0f));
   points.push_back(glm::vec3(-1.0f, -2.0f, -10.f));
-  points.push_back(glm::vec3(-10.0f, -15.0f, -10.0f));
+  points.push_back(glm::vec3(-5.0f, -2.0f, 5.0f));
   points.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
   CMRchain = std::make_shared<core::CathmullRomChain>(points);
+
+  std::vector<glm::vec3> rleg_points;
+  rleg_points.push_back(glm::vec3(-1.f, -3.f, 1.f));
+  rleg_points.push_back(glm::vec3(-2.f, -4.f, 3.f));
+  rleg_points.push_back(glm::vec3(-0.5f, -2.f, 3.f));
+  rleg_points.push_back(glm::vec3(1.f, -3.f, 4.f));
+  rleg_points.push_back(glm::vec3(-1.f, -4.f, 2.f));
+  rleg_chain = std::make_shared<core::CathmullRomChain>(rleg_points);
 }
 int main(int argc, char** argv) {
   srand((unsigned int)time(NULL));
