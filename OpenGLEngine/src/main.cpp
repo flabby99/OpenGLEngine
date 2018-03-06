@@ -126,21 +126,28 @@ void ReloadShaders() {
 }
 
 std::shared_ptr<core::SceneInfo> peter;
+std::shared_ptr<scene::Object> sphere;
+std::shared_ptr<scene::Object> sphere_root;
 std::shared_ptr<scene::Object> cone;
-std::shared_ptr<scene::Object> cone_root;
 void LoadModels() {
   std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
  
+  sphere_root = std::make_shared<scene::Object>();
+  sphere_root->SetTranslation(glm::vec3(0.f, -1.0f, -18.f));
+  sphere_root->UpdateModelMatrix();
+  std::string sphere_filename = "unit_sphere.obj";
+  core::SceneInfo sphere_scene(sphere_filename, white);
+  sphere = sphere_scene.GetObject_(0);
+  sphere->SetColour(glm::vec3(1.0f, 0.f, 0.f));
+  sphere->SetParent(sphere_root);
+  sphere->SetScale(glm::vec3(0.2f));
 
-  cone_root = std::make_shared<scene::Object>();
-  cone_root->SetTranslation(glm::vec3(0.f, -1.0f, -18.f));
-  cone_root->UpdateModelMatrix();
-  std::string cone_filename = "unit_sphere.obj";
+  std::string cone_filename = "unit_cylinder.obj";
   core::SceneInfo cone_scene(cone_filename, white);
   cone = cone_scene.GetObject_(0);
-  cone->SetColour(glm::vec3(1.0f, 0.f, 0.f));
-  cone->SetParent(cone_root);
-  cone->SetScale(glm::vec3(0.2f));
+  cone->SetColour(glm::vec3(1.0, 1.0f, 0.0f));
+  cone->SetParent(sphere_root);
+
   std::string base_dir = "res/Models/Peter/";
   std::string peter_filename = "peter.obj";
   peter = std::make_shared<core::SceneInfo>(base_dir, peter_filename, white);
@@ -172,6 +179,7 @@ void UpdateScene() {
   static const DWORD start_time = timeGetTime();
   static DWORD last_time = 0;
   static float simulation_time = 0.f;
+  static float increment = 0.008f;
   static bool first1 = true;
   static bool first2 = true;
   DWORD curr_time = timeGetTime();
@@ -181,10 +189,17 @@ void UpdateScene() {
   {
     delta = 0;
     last_time = curr_time;
+    if (simulation_time - 1 > CMRchain->GetNumSplines()) {
+      increment = -0.008f;
+    }
+    if (simulation_time < 0) {
+      simulation_time = 0;
+      increment = 0.008f;
+    }
     target = CMRchain->GetPoint(simulation_time);
     IK::CCD_Solver ccd(1000, 0.01f, 0.001f);
     ccd.Solve(cone_chain, target);
-    simulation_time += 0.01f;
+    simulation_time += increment;
     glutPostRedisplay();
   }
 }
@@ -195,21 +210,28 @@ void RenderWithShader(render::Shader* shader) {
   shader->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
   shader->SetUniform4fv("proj", persp_proj);
-  //render::Renderer::Draw(*cone, shader, view);
-  for (unsigned int i = 0; i < peter->GetNumMeshes(); ++i) {
+  //render::Renderer::Draw(*sphere, shader, view);
+  /*for (unsigned int i = 0; i < peter->GetNumMeshes(); ++i) {
     render::Renderer::Draw(*peter->GetObject_(i), shader, view);
-  }
+  }*/
   for (auto& bone : cone_bones) {
     render::Renderer::Draw(*bone->GetBoneObject(), shader, view);
+    cone->SetTranslation(bone->GetBase());
+    glm::vec3 target_pointing = bone->GetEnd() - bone->GetBase();
+    glm::quat orientation = core::Maths::RotationBetweenVectors(glm::vec3(0.0f, 1.0f, 0.0f), target_pointing);
+    cone->SetRotation(glm::toMat4(orientation));
+    cone->SetScale(glm::vec3(1.0f, glm::distance(bone->GetEnd(), bone->GetBase()), 1.0f));
+    cone->UpdateModelMatrix();
+    render::Renderer::Draw(*cone, shader, view);
   }
-  cone->SetColour(glm::vec3(0.f, 1.f, 0.f));
-  cone->SetTranslation(glm::vec3(target));
-  cone->UpdateModelMatrix();
-  render::Renderer::Draw(*cone, shader, view);
-  cone->SetColour(glm::vec3(0.f, 0.f, 1.f));
-  cone->SetTranslation(glm::vec3(cone_chain->GetEndEffector()));
-  cone->UpdateModelMatrix();
-  render::Renderer::Draw(*cone, shader, view);
+  sphere->SetColour(glm::vec3(0.f, 1.f, 0.f));
+  sphere->SetTranslation(glm::vec3(target));
+  sphere->UpdateModelMatrix();
+  render::Renderer::Draw(*sphere, shader, view);
+  sphere->SetColour(glm::vec3(0.f, 0.f, 1.f));
+  sphere->SetTranslation(glm::vec3(cone_chain->GetEndEffector()));
+  sphere->UpdateModelMatrix();
+  render::Renderer::Draw(*sphere, shader, view);
 }
 
 void Render() {
@@ -408,7 +430,7 @@ void Keyboard(unsigned char key, int x, int y) {
   //Apply the changes
   if (changedmatrices) {
     model_transform = translationmatrices.UpdateModelMatrix();
-    target = glm::vec3(model_transform * glm::vec4(first_target, 1.0f));
+    //target = glm::vec3(model_transform * glm::vec4(first_target, 1.0f));
     glutPostRedisplay();
   }
 }
@@ -485,12 +507,12 @@ void InitBones() {
   target = glm::vec3(1.0f, 8.0f, 0.0f);
   std::vector<glm::vec3> cone_points;
   cone_points.push_back(glm::vec3(0.0f));
-  cone_points.push_back(glm::vec3(-1.0f, 4.0f, 1.0f));
-  cone_points.push_back(glm::vec3(0.0f, 9.0f, 0.0f));
+  cone_points.push_back(glm::vec3(0.0f, 4.0f, 0.0f));
+  cone_points.push_back(glm::vec3(0.0f, 7.0f, 0.0f));
   cone_points.push_back(glm::vec3(0.0f, 10.0f, 0.0f));
-  cone_points.push_back(glm::vec3(0.0f, 10.0f, -5.0f));
+  cone_points.push_back(glm::vec3(0.0f, 15.0f, 0.0f));
   cone_chain = std::make_shared<IK::BoneChain>();
-  cone_bones = cone_chain->MakeChain(cone_points, cone);
+  cone_bones = cone_chain->MakeChain(cone_points, sphere);
 }
 
 void BoneTest() {

@@ -13,6 +13,9 @@ namespace core
     ~CathmullRomChain();
     glm::vec3 GetPoint(const float& time);
     static glm::vec3 CatmullRomSpline(float time, glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3);
+    inline const unsigned int GetNumSplines() {
+      return num_splines_;
+    }
   private:
     std::vector<glm::vec3> points_;
     unsigned int num_splines_;

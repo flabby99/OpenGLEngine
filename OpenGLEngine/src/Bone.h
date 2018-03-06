@@ -57,6 +57,9 @@ namespace IK
     inline const glm::vec3 GetEnd() {
       return end_;
     }
+    inline const glm::quat GetOrientation() {
+      return orientation_;
+    }
     inline const std::shared_ptr<scene::Object> GetBoneObject() {
       return object_;
     }

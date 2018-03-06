@@ -36,7 +36,9 @@ namespace scene {
   }
   void Object::UpdateModelMatrix()
   {
-    model_matrix_ = glm::translate(rotation_ * glm::scale(glm::mat4(1.0f), scale_), translation_);
+    glm::mat4 translate = glm::translate(glm::mat4(1.0f), translation_);
+    glm::mat4 scale = glm::scale(glm::mat4(1.0f), scale_);
+    model_matrix_ = translate * rotation_ * scale;
   }
   void Object::RotateAboutPivotPoint(float angle, glm::vec3 axis)
   {

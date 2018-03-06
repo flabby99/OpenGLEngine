@@ -40,7 +40,6 @@ namespace IK
         glm::vec3 base_to_end = end_effector - bone_base;
 
         glm::quat desired_rot = core::Maths::RotationBetweenVectors(base_to_end, base_to_target);
-        glm::vec3 end_eff_vec = desired_rot * base_to_end;
         //Apply this rotation to the bone
         current_bone->UpdateOrientation(desired_rot);
         glm::vec3 end_eff = chain->GetEndEffector();
