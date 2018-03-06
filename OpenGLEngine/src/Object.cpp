@@ -1,6 +1,10 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include "Object.h"
 #include "ModelLoader.h"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/quaternion.hpp" 
+#include "glm/gtx/quaternion.hpp"
+#include "glm/gtx/euler_angles.hpp"
 
 namespace scene {
   Object::Object()
@@ -40,6 +44,14 @@ namespace scene {
     rotation = glm::rotate(rotation, angle, glm::vec3(0.0f, 0.0f, 1.0f));
     rotation = glm::translate(rotation, -origin_offset_);
     rotation_ *= rotation;
+    UpdateModelMatrix();
+  }
+  void Object::SetQuatRotate(const glm::quat& rotation)
+  {
+    glm::mat4 m_rotation = glm::translate(glm::mat4(1.0f), origin_offset_);
+    m_rotation = glm::toMat4(rotation);
+    m_rotation = glm::translate(m_rotation, -origin_offset_);
+    rotation_ = m_rotation;
     UpdateModelMatrix();
   }
   glm::mat4 Object::GetGlobalModelMatrix() const

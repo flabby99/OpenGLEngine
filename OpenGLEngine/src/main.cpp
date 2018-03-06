@@ -29,11 +29,6 @@
 #include <random>
 #include <time.h>
 
-
-#if 0
-//TODO store a white texture among all model loaders
-//Could even do this by pointing to a unique pointer
-
 Camera FPcamera(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 Camera TPcamera;
 
@@ -57,8 +52,10 @@ bool use_fp_camera = false;
 bool use_mip = true;
 bool do_rotate = false;
 
+glm::vec3 target = glm::vec3(0.0f);
+std::shared_ptr<IK::BoneChain> cone_chain;
 std::shared_ptr<scene::Object> sky_box;
-std::shared_ptr<scene::Object> plane_mesh;
+std::vector<std::shared_ptr<IK::Bone>> cone_bones;
 
 void InitSkyBox() {
     core::SceneInfo sceneinfo;
@@ -68,7 +65,6 @@ void InitSkyBox() {
         exit(-1);
     }
     sky_box = sceneinfo.GetObject_(0);
-    //TODO set the textures for the sky box
     const char* front = "res/Models/textures/Storforsen4/negz.jpg";
     const char* back = "res/Models/textures/Storforsen4/posz.jpg";
     const char* top = "res/Models/textures/Storforsen4/posy.jpg";
@@ -119,30 +115,22 @@ void ReloadShaders() {
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
 
-std::shared_ptr<scene::Texture> texture;
-std::shared_ptr<scene::Texture> no_mip_texture;
-
-void LoadTextures() {
-  texture = std::make_shared<scene::Texture>();
-  texture->SetSlot(GL_TEXTURE0);
-  texture->Load("res/Models/textures/checker.jpg");
-  no_mip_texture = std::make_shared<scene::Texture>();
-  no_mip_texture->SetSlot(GL_TEXTURE0);
-  no_mip_texture->LoadNoMip("res/Models/textures/checker.jpg");
-}
-
 std::shared_ptr<core::SceneInfo> peter;
-
+std::shared_ptr<scene::Object> cone;
+std::shared_ptr<scene::Object> cone_root;
 void LoadModels() {
   std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
-  core::SceneInfo sceneinfo("flat_plane.obj", white);
-  std::shared_ptr<scene::Object> root = std::make_shared<scene::Object>();
-  root->SetTranslation(glm::vec3(0.0f, -20.0f, -20.0f));
-  root->UpdateModelMatrix();
-  plane_mesh = sceneinfo.GetObject_(0);
-  plane_mesh->SetParent(root);
-  plane_mesh->SetDiffuseTexture(texture);
+ 
 
+  cone_root = std::make_shared<scene::Object>();
+  cone_root->SetTranslation(glm::vec3(0.f, -1.0f, -18.f));
+  cone_root->UpdateModelMatrix();
+  std::string cone_filename = "unit_sphere.obj";
+  core::SceneInfo cone_scene(cone_filename, white);
+  cone = cone_scene.GetObject_(0);
+  cone->SetColour(glm::vec3(1.0f, 0.f, 0.f));
+  cone->SetParent(cone_root);
+  cone->SetScale(glm::vec3(0.2f));
   std::string base_dir = "res/Models/Peter/";
   std::string peter_filename = "peter.obj";
   peter = std::make_shared<core::SceneInfo>(base_dir, peter_filename, white);
@@ -169,7 +157,6 @@ void DrawSkyBox() {
   glEnable(GL_CULL_FACE);
 }
 
-//REFERENCE The changing of filtering methods over time is based on https://github.com/openglredbook/examples/blob/master/src/06-mipfilters/06-mipfilters.cpp
 void UpdateScene() {
   // Wait until at least 16ms passed since start of last frame (Effectively caps framerate at ~60fps)
   static const DWORD start_time = timeGetTime();
@@ -179,61 +166,38 @@ void UpdateScene() {
   static bool first2 = true;
   DWORD curr_time = timeGetTime();
   DWORD delta = (curr_time - last_time);
-  DWORD t;
   const DWORD time_reset = 7680 * 4;
   if (delta > 16)
   {
     delta = 0;
     last_time = curr_time;
-    t = (curr_time - start_time) % time_reset;
-    if ((t < (time_reset / 4)) && first1)
-    {
-      first1 = false;
-      first2 = true;
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-      std::cout << "using texture filtering " << "Nearest both" << std::endl;
-    }
-    else if ((t < (time_reset / 2)) && t >= (time_reset / 4) && first2)
-    {
-      first1 = true;
-      first2 = false;
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-      std::cout << "using texture filtering " << "Linear tex, nearest mip" << std::endl;
-    }
-    else if ((t < (3 * time_reset / 4)) && t >= (time_reset / 2) && first1)
-    {
-      first1 = false;
-      first2 = true;
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-      std::cout << "using texture filtering " << "Nearest tex, linear mip" << std::endl;
-    }
-    else if (t >= (3 * time_reset / 4) && first2)
-    {
-      first1 = true;
-      first2 = false;
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      std::cout << "using texture filtering " << "Linear both" << std::endl;
-    }
+    IK::CCD_Solver ccd(1000, 0.01f, 0.001f);
+    ccd.Solve(cone_chain, target);
     glutPostRedisplay();
   }
 }
 
 void RenderWithShader(render::Shader* shader) {
   shader->Bind();
-  static float angle = -0.003f;
   glm::mat4 view = TPcamera.getMatrix();
   shader->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
   shader->SetUniform4fv("proj", persp_proj);
-  if (do_rotate) {
-    angle = fmod(angle + 0.003f, FULLROTATIONINRADIANS);
-    plane_mesh->SetRotation(glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f)));
-    plane_mesh->UpdateModelMatrix();  
-  }
-  render::Renderer::Draw(*plane_mesh, shader, view);
+  //render::Renderer::Draw(*cone, shader, view);
   for (unsigned int i = 0; i < peter->GetNumMeshes(); ++i) {
     render::Renderer::Draw(*peter->GetObject_(i), shader, view);
   }
+  for (auto& bone : cone_bones) {
+    render::Renderer::Draw(*bone->GetBoneObject(), shader, view);
+  }
+  cone->SetColour(glm::vec3(0.f, 1.f, 0.f));
+  cone->SetTranslation(glm::vec3(target));
+  cone->UpdateModelMatrix();
+  render::Renderer::Draw(*cone, shader, view);
+  cone->SetColour(glm::vec3(0.f, 0.f, 1.f));
+  cone->SetTranslation(glm::vec3(cone_chain->GetEndEffector()));
+  cone->UpdateModelMatrix();
+  render::Renderer::Draw(*cone, shader, view);
 }
 
 void Render() {
@@ -271,6 +235,7 @@ void Keyboard(unsigned char key, int x, int y) {
   static ModelMatrixTransformations translationmatrices;
   static GLfloat xtranslate = -0.3f;
   bool changedmatrices = false;
+  static glm::vec3 first_target = target;
   switch (key) {
 
   case 13: //Enter key
@@ -289,14 +254,6 @@ void Keyboard(unsigned char key, int x, int y) {
     break;
   
   case 9: //Tab key
-    break;
-
-  case 'o':
-    use_mip = !use_mip;
-    std::cout << "using mipmaps = " << use_mip << std::endl;
-    if (use_mip) plane_mesh->SetDiffuseTexture(texture);
-    else plane_mesh->SetDiffuseTexture(no_mip_texture);
-    glutPostRedisplay();
     break;
 
     //Reload vertex and fragment shaders during runtime
@@ -439,6 +396,7 @@ void Keyboard(unsigned char key, int x, int y) {
   //Apply the changes
   if (changedmatrices) {
     model_transform = translationmatrices.UpdateModelMatrix();
+    target = glm::vec3(model_transform * glm::vec4(first_target, 1.0f));
     glutPostRedisplay();
   }
 }
@@ -497,7 +455,6 @@ void Init() {
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
   InitSkyBox();
-  LoadTextures();
   LoadModels();
   CreateShaders();
 }
@@ -509,6 +466,51 @@ void CleanUp() {
   delete(silhoutte);
   delete(cube_map);
   delete(reflection);
+}
+
+void Bones() {
+  //TODO make a rectangle object and attach a copy of it to each bone in the chain
+  target = glm::vec3(1.0f, 8.0f, 0.0f);
+
+  //Create a bone chain and test it.
+  std::shared_ptr<IK::Bone> bone_base =
+    std::make_shared<IK::Bone>(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 0.0f, 0.0f));
+  std::shared_ptr<IK::Bone> bone_end =
+    std::make_shared<IK::Bone>(glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.0f, -1.0f, 0.0f));
+
+  bone_base->AddChild(bone_end);
+  std::shared_ptr<IK::BoneChain> chain =
+    std::make_shared<IK::BoneChain>(bone_base, bone_end);
+
+  IK::CCD_Solver ccd(1000, 0.01f, 0.001f);
+
+  ccd.Solve(chain, glm::vec3(2.1f, 0.0f, 0.f));
+
+  glm::vec3 ef = chain->GetEndEffector();
+  std::cout << ef.x << " " << ef.y << " " << ef.z << std::endl;
+
+  std::vector<glm::vec3> test_points;
+  test_points.push_back(glm::vec3(27, -7, 4));
+  test_points.push_back(glm::vec3(30, 10, 3));
+  test_points.push_back(glm::vec3(45, 2, 4));
+  test_points.push_back(glm::vec3(-10, 15, -30));
+  std::shared_ptr<IK::BoneChain> test_chain = std::make_shared<IK::BoneChain>();
+  std::vector<std::shared_ptr<IK::Bone>> test_bones;
+  test_bones = test_chain->MakeChain(test_points);
+  ccd.Solve(test_chain, glm::vec3(25, -18.2, -24));
+
+  ef = test_chain->GetEndEffector();
+  std::cout << ef.x << " " << ef.y << " " << ef.z << std::endl;
+
+  //TODO draw the bones
+  std::vector<glm::vec3> cone_points;
+  cone_points.push_back(glm::vec3(0.0f));
+  cone_points.push_back(glm::vec3(-1.0f, 4.0f, 1.0f));
+  cone_points.push_back(glm::vec3(0.0f, 9.0f, 0.0f));
+  cone_points.push_back(glm::vec3(0.0f, 10.0f, 0.0f));
+  cone_points.push_back(glm::vec3(0.0f, 10.0f, -5.0f));
+  cone_chain = std::make_shared<IK::BoneChain>();
+  cone_bones = cone_chain->MakeChain(cone_points, cone);
 }
 
 int main(int argc, char** argv) {
@@ -540,6 +542,7 @@ int main(int argc, char** argv) {
     fprintf(stderr, "Glm is not forced using radians\n");
   #endif
 
+
   glutDisplayFunc(Render);
   glutIdleFunc(UpdateScene);
   glutKeyboardFunc(Keyboard);
@@ -547,49 +550,10 @@ int main(int argc, char** argv) {
   glutMotionFunc(MouseMovement);
   glutPassiveMotionFunc(PassiveMouseMovement);
   Init();
+  //TODO remove
+  Bones();
   glutMainLoop();
   CleanUp();
-  return 0;
-}
-#endif
-
-int main(int argc, char** argv) {
-  //TODO could make a bone chain by giving a list of connection points!
-
-  //Create a bone chain and test it.
-  std::shared_ptr<IK::Bone> bone_base =
-    std::make_shared<IK::Bone>(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 0.0f, 0.0f));
-  std::shared_ptr<IK::Bone> bone_end =
-    std::make_shared<IK::Bone>(glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.0f, -1.0f, 0.0f));
-
-  bone_base->AddChild(bone_end);
-  std::shared_ptr<IK::BoneChain> chain =
-    std::make_shared<IK::BoneChain>(bone_base, bone_end);
-
-  IK::CCD_Solver ccd(1000, 0.01f, 0.001f);
-
-  ccd.Solve(chain, glm::vec3(2.1f, 0.0f, 0.f));
-
-  glm::vec3 ef = chain->GetEndEffector();
-  std::cout << ef.x << " " << ef.y << " " << ef.z << std::endl;
-
-  std::cin.ignore();
-
-  std::vector<glm::vec3> test_points;
-  test_points.push_back(glm::vec3(27, -7, 4));
-  test_points.push_back(glm::vec3(30, 10, 3));
-  test_points.push_back(glm::vec3(45, 2, 4));
-  test_points.push_back(glm::vec3(-10, 15, -30));
-  std::shared_ptr<IK::BoneChain> test_chain = std::make_shared<IK::BoneChain>();
-  std::vector<std::shared_ptr<IK::Bone>> test_bones;
-  test_bones = test_chain->MakeChain(test_points);
-  ccd.Solve(test_chain, glm::vec3(25, -18.2, -24));
-
-  ef = test_chain->GetEndEffector();
-  std::cout << ef.x << " " << ef.y << " " << ef.z << std::endl;
-
-  std::cin.ignore();
-
   return 0;
 }
 

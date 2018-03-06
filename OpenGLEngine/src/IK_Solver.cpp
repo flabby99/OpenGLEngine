@@ -55,6 +55,7 @@ namespace IK
         break;
       }
     }
+    chain->UpdateChainObjects();
     if (iterations == this->max_iterations_) {
       std::cout << " Ran out of iterations, breaking ccd" << std::endl;
     }

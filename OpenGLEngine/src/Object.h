@@ -37,6 +37,7 @@ namespace scene {
     //Rotates the model about its pivot point using an angle and an axis
     void AddMaterialData(const core::MaterialData& material_data);
     void RotateAboutPivotPoint(float angle, glm::vec3 axis);
+    void SetQuatRotate(const glm::quat& rotation);
     inline void SetNumIndices(const unsigned int& value) { num_indices_ = value; }
     inline void SetParent(const std::shared_ptr<Object>& parent) { parent_ = parent; }
     inline void SetRotation(const glm::mat4& rotation) { rotation_ = rotation; }
@@ -59,6 +60,7 @@ namespace scene {
     inline std::shared_ptr<Texture> GetDiffuseTexture() const { return texture_diffuse_; }
     inline std::shared_ptr<Texture> GetBumpTexture() const { return texture_bump_; }
     inline std::shared_ptr<Texture> GetNormalTexture() const { return texture_normal_; }
+    inline glm::vec3 GetScale() const { return scale_; }
     //Returns the model matrix relative to the object heirarchy - recursive
     glm::mat4 GetGlobalModelMatrix() const;
   };

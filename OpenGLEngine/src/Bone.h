@@ -31,10 +31,6 @@ namespace IK
     glm::quat orientation_ = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     AngleLimits angle_limits_;
     std::shared_ptr<Bone> parent_ = nullptr;
-
-    //TODO set this up so that objects have parents
-    //When done update objects rotations!
-    //Make sure to set object origins to the bone starts
     std::shared_ptr<scene::Object> object_ = nullptr;
     std::list<std::weak_ptr<Bone>> children_;
     void UpdateChildren(glm::vec3 origin, glm::quat orientation);
@@ -61,11 +57,18 @@ namespace IK
     inline const glm::vec3 GetEnd() {
       return end_;
     }
+    inline const std::shared_ptr<scene::Object> GetBoneObject() {
+      return object_;
+    }
     //Set the origin of rotation to be the bones base
     //Then rotate the end, and update every child bone, rotating around the origin
 
     void UpdateOrientation(glm::quat rotation);
     const glm::quat GetGlobalOrientation();
+    void SetObject(const std::shared_ptr<scene::Object>& object);
+
+    //Recursively update your objects and children's objects
+    void UpdateObject();
   };
 
   //Stores the head and tail of a DLL of bones
@@ -83,10 +86,15 @@ namespace IK
     inline const glm::vec3 GetEndEffector() {
       return end_bone_->end_;
     }
+    
+    inline void UpdateChainObjects() {
+      base_bone_->UpdateObject();
+    }
     //Move up one bone in the chain
     //If the current_bone is off the chain, start from the bottom of the chain again
     //If the next bone is off the chain, then nullptr is set to the current bone and returned
     const std::shared_ptr<Bone> MoveUpOneBone();
     std::vector<std::shared_ptr<Bone>> MakeChain(std::vector<glm::vec3> points);
+    std::vector<std::shared_ptr<Bone>> MakeChain(std::vector<glm::vec3> points, std::shared_ptr<scene::Object> object);
   };
 } //namespace IK

@@ -4,7 +4,6 @@
 #if 0
 //This can be used to load tangents ourself instead of using assimp
 
-//TODO look at this
 //this works for a triangle, but we are not using the face information here - need to take it into account
 //We could do this for each face
 //alternatively perhaps we could leave it as is, but average over the tangents and bitangents for each vertex

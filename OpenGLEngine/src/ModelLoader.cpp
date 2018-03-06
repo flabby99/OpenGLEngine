@@ -127,7 +127,7 @@ namespace core {
       if (Material->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
         bool skip = false;
         std::string full_path = Path.data;
-        if(Path.data[1] != ':') full_path += base_dir_;
+        if(Path.data[1] != ':') full_path = base_dir_ + Path.data;
         //If the texture is not loaded, then load it
         for (auto& texture_ptr : loaded_textures) {
           if (strcmp(texture_ptr->GetFileName(), full_path.c_str()) == 0) {
