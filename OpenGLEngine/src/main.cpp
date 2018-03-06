@@ -561,7 +561,7 @@ void InitBones() {
   std::shared_ptr<IK::Bone> head1;
   std::shared_ptr<IK::Bone> head2;
   std::shared_ptr<IK::Bone> head3;
-  spine = SetupBone(glm::vec3(0.f, 5.f, 0.f), glm::vec3(0.f, -1.f, 0.f));
+  spine = SetupBone(glm::vec3(0.f, -1.f, 0.f), glm::vec3(0.f, 5.f, 0.f));
   rshoulder = SetupBone(glm::vec3(0.f, 5.f, 0.f), glm::vec3(-2.0f, 5.f, 0.f));
   lshoulder = SetupBone(glm::vec3(0.f, 5.f, 0.f), glm::vec3(2.0f, 5.f, 0.f));
   rhip = SetupBone(glm::vec3(0.f, -1.f, 0.f), glm::vec3(-1.0f, -1.f, 0.f));
@@ -569,6 +569,11 @@ void InitBones() {
   head1 = SetupBone(glm::vec3(0.f, 5.f, 0.f), glm::vec3(-1.5f, 7.f, 0.f));
   head2 = SetupBone(glm::vec3(1.5f, 7.f, 0.f), glm::vec3(0.f, 5.f, 0.f));
   head3 = SetupBone(glm::vec3(-1.5f, 7.f, 0.f), glm::vec3(1.5f, 7.f, 0.f));
+  spine->AddChild(lshoulder);
+  spine->AddChild(rshoulder);
+  spine->AddChild(head1);
+  head1->AddChild(head3);
+  head3->AddChild(head2);
 
   rarm_target = glm::vec3(1.0f, 8.0f, 0.0f);
 
@@ -579,6 +584,7 @@ void InitBones() {
   cone_points.push_back(glm::vec3(-4.2f, 5.f, 2.1f));
   right_arm = std::make_shared<IK::BoneChain>();
   cone_bones = right_arm->MakeChain(cone_points, sphere);
+  rshoulder->AddChild(cone_bones[0]);
 
   larm_target = glm::vec3(3.0f, 2.0f, 1.0f);
 
@@ -590,6 +596,8 @@ void InitBones() {
   larm_points.push_back(glm::vec3(4.2f, 5.f, 2.1f));
   left_arm = std::make_shared<IK::BoneChain>();
   larm_bones = left_arm->MakeChain(larm_points, sphere);
+  left_arm->SetBaseBone(spine);
+  lshoulder->AddChild(larm_bones[0]);
 
   std::vector<glm::vec3> rleg_points;
   std::vector<std::shared_ptr<IK::Bone>> rleg_bones;

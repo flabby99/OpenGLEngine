@@ -93,6 +93,9 @@ namespace IK
     inline void UpdateChainObjects() {
       base_bone_->UpdateObject();
     }
+    inline void SetBaseBone(const std::shared_ptr<Bone>& bone) {
+      base_bone_ = bone;
+    }
     //Move up one bone in the chain
     //If the current_bone is off the chain, start from the bottom of the chain again
     //If the next bone is off the chain, then nullptr is set to the current bone and returned
