@@ -188,7 +188,7 @@ void UpdateScene() {
   static DWORD last_time = 0;
   static float simulation_time = 0.f;
   static float rleg_time = 0.f;
-  static float rleg_increment = 0.008f;
+  static float rleg_increment = 0.02f;
   static float increment = 0.008f;
   static bool first1 = true;
   static bool first2 = true;
@@ -211,11 +211,11 @@ void UpdateScene() {
     ccd.Solve(right_arm, rarm_target);
 
     if (rleg_time - 1 > rleg_chain->GetNumSplines()) {
-      rleg_increment = -0.008f;
+      rleg_increment = -0.02f;
     }
     if (rleg_time < 0) {
       rleg_time = 0;
-      rleg_increment = 0.008f;
+      rleg_increment = 0.02f;
     }
     rleg_target = rleg_chain->GetPoint(rleg_time);
     rleg_time += rleg_increment;
@@ -674,10 +674,12 @@ void InitCMR() {
 
   std::vector<glm::vec3> rleg_points;
   rleg_points.push_back(glm::vec3(-1.f, -3.f, 1.f));
-  rleg_points.push_back(glm::vec3(-2.f, -4.f, 3.f));
-  rleg_points.push_back(glm::vec3(-0.5f, -2.f, 3.f));
-  rleg_points.push_back(glm::vec3(1.f, -3.f, 4.f));
-  rleg_points.push_back(glm::vec3(-1.f, -4.f, 2.f));
+  rleg_points.push_back(glm::vec3(-2.f, -2.f, 3.f));
+  rleg_points.push_back(glm::vec3(-2.f, -4.f, 1.f));
+  //rleg_points.push_back(glm::vec3(-1.5f, -5.f, -0.f));
+  rleg_points.push_back(glm::vec3(-1.5f, -3.f, -3.f));
+  rleg_points.push_back(glm::vec3(-1.f, -3.f, -4.f));
+  rleg_points.push_back(glm::vec3(-1.f, -6.f, -5.f));
   rleg_chain = std::make_shared<core::CathmullRomChain>(rleg_points);
 }
 int main(int argc, char** argv) {
