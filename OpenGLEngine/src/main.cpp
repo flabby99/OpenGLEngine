@@ -19,6 +19,8 @@
 #include "ParticleSpawner.h"
 #include "Bone.h"
 #include "IK_Solver.h"
+#include "Maths.h"
+#include "CathmullRomChain.h"
 
 #include <memory>
 #include <iostream>
@@ -28,6 +30,13 @@
 #include <string.h>
 #include <random>
 #include <time.h>
+
+const glm::mat4 core::CathmullRomChain::CatmullRomCoeffs = glm::mat4(
+  0, 2, 0, 0,
+  -1, 0, 1, 0,
+  2, -5, 4, -1,
+  -1, 3, -3, 1
+);
 
 Camera FPcamera(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 Camera TPcamera;
@@ -52,6 +61,7 @@ bool use_fp_camera = false;
 bool use_mip = true;
 bool do_rotate = false;
 
+std::shared_ptr<core::CathmullRomChain> CMRchain;
 glm::vec3 target = glm::vec3(0.0f);
 std::shared_ptr<IK::BoneChain> cone_chain;
 std::shared_ptr<scene::Object> sky_box;
@@ -160,8 +170,8 @@ void DrawSkyBox() {
 void UpdateScene() {
   // Wait until at least 16ms passed since start of last frame (Effectively caps framerate at ~60fps)
   static const DWORD start_time = timeGetTime();
-  static DWORD  last_time = 0;
-  static int simulation_time = 0;
+  static DWORD last_time = 0;
+  static float simulation_time = 0.f;
   static bool first1 = true;
   static bool first2 = true;
   DWORD curr_time = timeGetTime();
@@ -171,8 +181,10 @@ void UpdateScene() {
   {
     delta = 0;
     last_time = curr_time;
+    target = CMRchain->GetPoint(simulation_time);
     IK::CCD_Solver ccd(1000, 0.01f, 0.001f);
     ccd.Solve(cone_chain, target);
+    simulation_time += 0.01f;
     glutPostRedisplay();
   }
 }
@@ -468,10 +480,20 @@ void CleanUp() {
   delete(reflection);
 }
 
-void Bones() {
-  //TODO make a rectangle object and attach a copy of it to each bone in the chain
-  target = glm::vec3(1.0f, 8.0f, 0.0f);
 
+void InitBones() {
+  target = glm::vec3(1.0f, 8.0f, 0.0f);
+  std::vector<glm::vec3> cone_points;
+  cone_points.push_back(glm::vec3(0.0f));
+  cone_points.push_back(glm::vec3(-1.0f, 4.0f, 1.0f));
+  cone_points.push_back(glm::vec3(0.0f, 9.0f, 0.0f));
+  cone_points.push_back(glm::vec3(0.0f, 10.0f, 0.0f));
+  cone_points.push_back(glm::vec3(0.0f, 10.0f, -5.0f));
+  cone_chain = std::make_shared<IK::BoneChain>();
+  cone_bones = cone_chain->MakeChain(cone_points, cone);
+}
+
+void BoneTest() {
   //Create a bone chain and test it.
   std::shared_ptr<IK::Bone> bone_base =
     std::make_shared<IK::Bone>(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -501,18 +523,25 @@ void Bones() {
 
   ef = test_chain->GetEndEffector();
   std::cout << ef.x << " " << ef.y << " " << ef.z << std::endl;
-
-  //TODO draw the bones
-  std::vector<glm::vec3> cone_points;
-  cone_points.push_back(glm::vec3(0.0f));
-  cone_points.push_back(glm::vec3(-1.0f, 4.0f, 1.0f));
-  cone_points.push_back(glm::vec3(0.0f, 9.0f, 0.0f));
-  cone_points.push_back(glm::vec3(0.0f, 10.0f, 0.0f));
-  cone_points.push_back(glm::vec3(0.0f, 10.0f, -5.0f));
-  cone_chain = std::make_shared<IK::BoneChain>();
-  cone_bones = cone_chain->MakeChain(cone_points, cone);
 }
 
+
+void InitCMR() {
+  std::vector<glm::vec3> points;
+  points.push_back(glm::vec3(1.f, 2.f, 3.f));
+  points.push_back(glm::vec3(2.f, 3.f, 4.f));
+  points.push_back(glm::vec3(-1.f, -4.f, 1.f));
+  points.push_back(glm::vec3(0.f, 1.f, -1.f));
+  points.push_back(glm::vec3(-6.f, 8.f, 0.f));
+  points.push_back(glm::vec3(10.f, 0.f, 8.f));
+  points.push_back(glm::vec3(15.f, 15.f, 15.f));
+  points.push_back(glm::vec3(0.0f, -10.f, 3.4f));
+  points.push_back(glm::vec3(1.0f, 3.0f, -6.0f));
+  points.push_back(glm::vec3(-1.0f, -2.0f, -10.f));
+  points.push_back(glm::vec3(-10.0f, -15.0f, -10.0f));
+  points.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+  CMRchain = std::make_shared<core::CathmullRomChain>(points);
+}
 int main(int argc, char** argv) {
   srand((unsigned int)time(NULL));
   glutInit(&argc, argv);
@@ -541,8 +570,6 @@ int main(int argc, char** argv) {
   #else
     fprintf(stderr, "Glm is not forced using radians\n");
   #endif
-
-
   glutDisplayFunc(Render);
   glutIdleFunc(UpdateScene);
   glutKeyboardFunc(Keyboard);
@@ -550,8 +577,8 @@ int main(int argc, char** argv) {
   glutMotionFunc(MouseMovement);
   glutPassiveMotionFunc(PassiveMouseMovement);
   Init();
-  //TODO remove
-  Bones();
+  InitBones();
+  InitCMR();
   glutMainLoop();
   CleanUp();
   return 0;

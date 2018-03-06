@@ -25,3 +25,4 @@ I will attempt to update the code base to follow https://google.github.io/styleg
 * Automatic mipmap generation - [OpenGL wiki](https://www.khronos.org/opengl/wiki/Common_Mistakes#Automatic_mipmap_generation)
 * Stbi image loader for textures - [Github stb](https://github.com/nothings/stb)
 * Quaternion rotation calculations - [OpenGL tutorial](https://github.com/opengl-tutorials/ogl/blob/master/common/quaternion_utils.cpp)
+* Cathmull-Rom Splines - [Microsoft MVP](https://www.mvps.org/directx/articles/catmull/)

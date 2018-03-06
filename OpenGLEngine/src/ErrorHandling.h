@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include "glm\glm.hpp"
+#include <iostream>
 //Used for error handling in GL
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) error_handling::GLErrors::GLClearErrors();\
@@ -12,5 +14,11 @@ namespace error_handling {
     public:
         static void GLClearErrors();
         static bool GLLogCall(const char* function, const char* file, int line);
+    };
+    class Log {
+    public:
+      inline static void LogToCout(glm::vec3 value) {
+        std::cout << "Vector is: " << value.x << " " << value.y << " " << value.z << std::endl;
+      }
     };
 } //namespace error_handling

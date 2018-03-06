@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\CathmullRomChain.h" />
     <ClInclude Include="src\Bone.h" />
     <ClInclude Include="src\IK_Solver.h" />
     <ClInclude Include="src\Camera.h" />
@@ -41,6 +42,7 @@
     <ClInclude Include="src\VertexBufferLayout.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CathmullRomChain.cpp" />
     <ClCompile Include="src\Bone.cpp" />
     <ClCompile Include="src\IK_Solver.cpp" />
     <ClCompile Include="src\Deprecated.cpp" />

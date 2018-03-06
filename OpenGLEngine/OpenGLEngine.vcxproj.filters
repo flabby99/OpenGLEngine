@@ -81,6 +81,9 @@
     <ClInclude Include="src\Maths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\CathmullRomChain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -138,6 +141,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Maths.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CathmullRomChain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

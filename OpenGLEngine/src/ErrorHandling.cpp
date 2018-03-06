@@ -1,6 +1,5 @@
 #include "ErrorHandling.h"
 #include "glew/glew.h"
-#include <iostream>
 
 namespace error_handling {
     void GLErrors::GLClearErrors()

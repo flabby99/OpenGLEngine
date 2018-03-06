@@ -47,7 +47,5 @@ namespace core
       rotationAxis.y * invs,
       rotationAxis.z * invs
     );
-
-
   }
 } //namespace core
