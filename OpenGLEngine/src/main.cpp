@@ -54,16 +54,9 @@ bool use_quaternions = true;
 //Could use this for the camera position
 std::shared_ptr<core::CathmullRomChain> CMRchain;
 std::shared_ptr<scene::Object> sky_box;
+std::shared_ptr<scene::Object> box_root;
 
-//Need to draw the sky box in the right place TODO
-void InitSkyBox() {
-    core::SceneInfo sceneinfo;
-    char* filename = "res/Models/cube.obj";
-    if (!sceneinfo.LoadModelFromFile(filename)) {
-        fprintf(stderr, "ERROR: Could not load %s", filename);
-        exit(-1);
-    }
-    sky_box = sceneinfo.GetObject_(0);
+void InitSkyBox(std::shared_ptr<scene::Object> box) {
     const char* front = "res/Models/textures/Storforsen4/negz.jpg";
     const char* back = "res/Models/textures/Storforsen4/posz.jpg";
     const char* top = "res/Models/textures/Storforsen4/posy.jpg";
@@ -72,7 +65,8 @@ void InitSkyBox() {
     const char* right = "res/Models/textures/Storforsen4/posx.jpg";
     std::shared_ptr<scene::Texture> texture = std::make_shared<scene::Texture>();
     texture->CreateCubeMap(front, back, top, bottom, left, right);
-    sky_box->SetDiffuseTexture(texture);
+    //TODO check if diffuse texture will work
+    box->SetDiffuseTexture(texture);
 }
 
 enum class eRenderType {
@@ -82,7 +76,7 @@ enum class eRenderType {
   RT_reflection
 };
 
-eRenderType render_type = eRenderType::RT_cel;
+eRenderType render_type = eRenderType::RT_blinn;
 
 render::CommonShader* blinn_phong;
 render::CommonShader* silhoutte;
@@ -128,6 +122,10 @@ void LoadModels() {
   sphere->SetColour(glm::vec3(1.0f, 0.f, 0.f));
   sphere->SetParent(sphere_root);
   sphere->SetScale(glm::vec3(0.2f));
+
+  std::string filename = "cube.obj";
+  core::SceneInfo box_scene(filename, white);
+  sky_box = box_scene.GetObject_(0);
 }
 
 void DrawSkyBox() {
@@ -137,7 +135,7 @@ void DrawSkyBox() {
   glm::mat4 view;
   view = TPcamera.getMatrix();
   cube_map->SetUniform4fv("view", view);
-  glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
+  glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
   cube_map->SetUniform4fv("proj", persp_proj);
   render::Renderer::Draw(*sky_box);
   glDepthMask(GL_TRUE);
@@ -164,6 +162,8 @@ void RenderWithShader(render::Shader* shader) {
   shader->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
   shader->SetUniform4fv("proj", persp_proj);
+  render::Renderer::Draw(*sphere, shader, view);
+  //render::Renderer::Draw(*sky_box, shader, view);
 }
 
 void Render() {
@@ -400,8 +400,8 @@ void Init() {
   glDepthFunc(GL_LESS);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
-  InitSkyBox();
   LoadModels();
+  InitSkyBox(sky_box);
   CreateShaders();
 }
 
