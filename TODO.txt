@@ -1,0 +1,2 @@
+I will need to set up something in my renderer for rendering to a specific target.
+I will have to investigate the setup for shaders to use this other rendering targets.
