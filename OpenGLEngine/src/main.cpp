@@ -15,10 +15,6 @@
 #include "Shader.h"
 #include "Renderer.h"
 #include "Object.h"
-#include "Particle.h"
-#include "ParticleSpawner.h"
-#include "Bone.h"
-#include "IK_Solver.h"
 #include "Maths.h"
 #include "CathmullRomChain.h"
 
@@ -38,7 +34,6 @@ const glm::mat4 core::CathmullRomChain::CatmullRomCoeffs = glm::mat4(
   -1, 3, -3, 1
 );
 
-Camera FPcamera(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 Camera TPcamera;
 
 int window_height = 0;
@@ -54,27 +49,13 @@ std::vector<core::SceneInfo> Scene;
 //Modified in the mouse function
 bool left_mouse_down;
 bool middle_mouse_down;
-bool use_quaternions = false;
+bool use_quaternions = true;
 
-//NOTE it might be more effective to refactor this to Enum and allow many camera types
-bool use_fp_camera = false;
-bool use_mip = true;
-bool do_rotate = false;
-
+//Could use this for the camera position
 std::shared_ptr<core::CathmullRomChain> CMRchain;
-std::shared_ptr<core::CathmullRomChain> rleg_chain;
-std::shared_ptr<core::CathmullRomChain> lleg_chain;
-glm::vec3 rarm_target = glm::vec3(0.0f);
-glm::vec3 larm_target = glm::vec3(0.0f);
-glm::vec3 rleg_target = glm::vec3(0.0f);
-glm::vec3 lleg_target = glm::vec3(0.0f);
-std::shared_ptr<IK::BoneChain> right_arm;
-std::shared_ptr<IK::BoneChain> left_arm;
-std::shared_ptr<IK::BoneChain> right_leg;
-std::shared_ptr<IK::BoneChain> left_leg;
 std::shared_ptr<scene::Object> sky_box;
-std::vector<std::shared_ptr<IK::Bone>> cone_bones;
 
+//Need to draw the sky box in the right place TODO
 void InitSkyBox() {
     core::SceneInfo sceneinfo;
     char* filename = "res/Models/cube.obj";
@@ -133,10 +114,8 @@ void ReloadShaders() {
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
 
-std::shared_ptr<core::SceneInfo> peter;
 std::shared_ptr<scene::Object> sphere;
 std::shared_ptr<scene::Object> sphere_root;
-std::shared_ptr<scene::Object> cone;
 void LoadModels() {
   std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
  
@@ -149,16 +128,6 @@ void LoadModels() {
   sphere->SetColour(glm::vec3(1.0f, 0.f, 0.f));
   sphere->SetParent(sphere_root);
   sphere->SetScale(glm::vec3(0.2f));
-
-  std::string cone_filename = "unit_cylinder.obj";
-  core::SceneInfo cone_scene(cone_filename, white);
-  cone = cone_scene.GetObject_(0);
-  cone->SetColour(glm::vec3(1.0, 1.0f, 0.0f));
-  cone->SetParent(sphere_root);
-
-  std::string base_dir = "res/Models/Peter/";
-  std::string peter_filename = "peter.obj";
-  peter = std::make_shared<core::SceneInfo>(base_dir, peter_filename, white);
 }
 
 void DrawSkyBox() {
@@ -166,14 +135,7 @@ void DrawSkyBox() {
   glDisable(GL_CULL_FACE);
   cube_map->Bind();
   glm::mat4 view;
-  if (use_fp_camera) {
-    FPcamera.updatePosition(glm::vec3(model_transform * glm::vec4(-0.007894f, 2.238691f, 2.166406f, 1.0f)));
-    FPcamera.updateDirection(glm::vec3(model_transform * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f)));
-    view = FPcamera.getRotation();
-  }
-  else {
-    view = TPcamera.getMatrix();
-  }
+  view = TPcamera.getMatrix();
   cube_map->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
   cube_map->SetUniform4fv("proj", persp_proj);
@@ -186,43 +148,12 @@ void UpdateScene() {
   // Wait until at least 16ms passed since start of last frame (Effectively caps framerate at ~60fps)
   static const DWORD start_time = timeGetTime();
   static DWORD last_time = 0;
-  static float simulation_time = 0.f;
-  static float rleg_time = 0.f;
-  static float rleg_increment = 0.02f;
-  static float increment = 0.008f;
-  static bool first1 = true;
-  static bool first2 = true;
   DWORD curr_time = timeGetTime();
   DWORD delta = (curr_time - last_time);
-  const DWORD time_reset = 7680 * 4;
   if (delta > 16)
   {
     delta = 0;
     last_time = curr_time;
-    if (simulation_time - 1 > CMRchain->GetNumSplines()) {
-      increment = -0.008f;
-    }
-    if (simulation_time < 0) {
-      simulation_time = 0;
-      increment = 0.008f;
-    }
-    rarm_target = CMRchain->GetPoint(simulation_time);
-    IK::CCD_Solver ccd(1000, 0.01f, 0.001f);
-    ccd.Solve(right_arm, rarm_target);
-
-    if (rleg_time - 1 > rleg_chain->GetNumSplines()) {
-      rleg_increment = -0.02f;
-    }
-    if (rleg_time < 0) {
-      rleg_time = 0;
-      rleg_increment = 0.02f;
-    }
-    rleg_target = rleg_chain->GetPoint(rleg_time);
-    rleg_time += rleg_increment;
-    ccd.Solve(right_leg, rleg_target);
-    ccd.Solve(left_arm, larm_target);
-    ccd.Solve(left_leg, lleg_target);
-    simulation_time += increment;
     glutPostRedisplay();
   }
 }
@@ -233,53 +164,11 @@ void RenderWithShader(render::Shader* shader) {
   shader->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
   shader->SetUniform4fv("proj", persp_proj);
-  //render::Renderer::Draw(*sphere, shader, view);
-  /*for (unsigned int i = 0; i < peter->GetNumMeshes(); ++i) {
-    render::Renderer::Draw(*peter->GetObject_(i), shader, view);
-  }*/
-  for (auto& bone : cone_bones) {
-    render::Renderer::Draw(*bone->GetBoneObject(), shader, view);
-    cone->SetTranslation(bone->GetBase());
-    glm::vec3 target_pointing = bone->GetEnd() - bone->GetBase();
-    glm::quat orientation = core::Maths::RotationBetweenVectors(glm::vec3(0.0f, 1.0f, 0.0f), target_pointing);
-    cone->SetRotation(glm::toMat4(orientation));
-    cone->SetScale(glm::vec3(1.0f, glm::distance(bone->GetEnd(), bone->GetBase()), 1.0f));
-    cone->UpdateModelMatrix();
-    render::Renderer::Draw(*cone, shader, view);
-  }
-  sphere->SetColour(glm::vec3(0.f, 1.f, 0.f));
-  sphere->SetTranslation(glm::vec3(rarm_target));
-  sphere->UpdateModelMatrix();
-  render::Renderer::Draw(*sphere, shader, view);
-  sphere->SetTranslation(glm::vec3(larm_target));
-  sphere->UpdateModelMatrix();
-  render::Renderer::Draw(*sphere, shader, view);
-  sphere->SetTranslation(glm::vec3(lleg_target));
-  sphere->UpdateModelMatrix();
-  render::Renderer::Draw(*sphere, shader, view);
-  sphere->SetTranslation(glm::vec3(rleg_target));
-  sphere->UpdateModelMatrix();
-  render::Renderer::Draw(*sphere, shader, view);
-
-
-  sphere->SetColour(glm::vec3(0.f, 0.f, 1.f));
-  sphere->SetTranslation(glm::vec3(right_arm->GetEndEffector()));
-  sphere->UpdateModelMatrix();
-  render::Renderer::Draw(*sphere, shader, view);
-  sphere->SetTranslation(glm::vec3(left_arm->GetEndEffector()));
-  sphere->UpdateModelMatrix();
-  render::Renderer::Draw(*sphere, shader, view);
-  sphere->SetTranslation(glm::vec3(left_leg->GetEndEffector()));
-  sphere->UpdateModelMatrix();
-  render::Renderer::Draw(*sphere, shader, view);
-  sphere->SetTranslation(glm::vec3(right_leg->GetEndEffector()));
-  sphere->UpdateModelMatrix();
-  render::Renderer::Draw(*sphere, shader, view);
 }
 
 void Render() {
   render::Renderer::Clear();
-  //DrawSkyBox();
+  DrawSkyBox();
   switch (render_type) {
     case eRenderType::RT_blinn :
       RenderWithShader(blinn_phong);
@@ -312,13 +201,9 @@ void Keyboard(unsigned char key, int x, int y) {
   static ModelMatrixTransformations translationmatrices;
   static GLfloat xtranslate = -0.3f;
   bool changedmatrices = false;
-  static glm::vec3 first_target = larm_target;
   switch (key) {
 
   case 13: //Enter key
-    //use_fp_camera = !use_fp_camera;
-    //if(use_fp_camera) FPcamera.mouseUpdate(glm::vec2(mouse_x, mouse_y));
-    //else FPcamera.first_click = false;
     break;
 
   case 27: //ESC key
@@ -326,8 +211,6 @@ void Keyboard(unsigned char key, int x, int y) {
     break;
 
   case 32: //Space key
-    use_quaternions = !use_quaternions;
-    changedmatrices = true;
     break;
   
   case 9: //Tab key
@@ -337,10 +220,6 @@ void Keyboard(unsigned char key, int x, int y) {
   case 'P':
     ReloadShaders();
     std::cout << "Reloaded shaders" << std::endl;
-    break;
-
-  case 'h':
-    do_rotate = !do_rotate;
     break;
 
     //Rotations
@@ -473,53 +352,43 @@ void Keyboard(unsigned char key, int x, int y) {
   //Apply the changes
   if (changedmatrices) {
     model_transform = translationmatrices.UpdateModelMatrix();
-    larm_target = glm::vec3(model_transform * glm::vec4(first_target, 1.0f));
     glutPostRedisplay();
   }
 }
 
 void Mouse(int button, int state, int x, int y) {
-  if (!use_fp_camera) {
-    if (button == GLUT_LEFT && state == GLUT_DOWN)
-    {
-      left_mouse_down = true;
-      TPcamera.mouseUpdate(glm::vec2(x, y));
-    }
-    if (button == GLUT_LEFT && state == GLUT_UP)
-    {
-      left_mouse_down = false;
-      TPcamera.first_click = false;
-    }
-    if (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN)
-    {
-      middle_mouse_down = true;
-      TPcamera.mouseMove(glm::vec2(x, y));
-    }
-    if (button == GLUT_MIDDLE_BUTTON && state == GLUT_UP)
-    {
-      middle_mouse_down = false;
-      TPcamera.first_click = false;
-    }
+  if (button == GLUT_LEFT && state == GLUT_DOWN)
+  {
+    left_mouse_down = true;
+    TPcamera.mouseUpdate(glm::vec2(x, y));
+  }
+  if (button == GLUT_LEFT && state == GLUT_UP)
+  {
+    left_mouse_down = false;
+    TPcamera.first_click = false;
+  }
+  if (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN)
+  {
+    middle_mouse_down = true;
+    TPcamera.mouseMove(glm::vec2(x, y));
+  }
+  if (button == GLUT_MIDDLE_BUTTON && state == GLUT_UP)
+  {
+    middle_mouse_down = false;
+    TPcamera.first_click = false;
   }
 }
 
 void MouseMovement(int x, int y) {
-  if (!use_fp_camera) {
-    if (left_mouse_down) {
-      TPcamera.mouseUpdate(glm::vec2(x, y));
-    }
-    if (middle_mouse_down) {
-      TPcamera.mouseMove(glm::vec2(x, y));
-    }
+  if (left_mouse_down) {
+    TPcamera.mouseUpdate(glm::vec2(x, y));
+  }
+  if (middle_mouse_down) {
+    TPcamera.mouseMove(glm::vec2(x, y));
   }
 }
 
 void PassiveMouseMovement(int x, int y) {
-  if (use_fp_camera) {
-    //NOTE - A potential solution could be to make FPcamera and TP camera children of camera class
-    //And the update function is different in FPcamera
-    //FPcamera.mouseUpdate(glm::vec2(x, y));
-  }
   mouse_x = x;
   mouse_y = y;
 }
@@ -545,151 +414,6 @@ void CleanUp() {
   delete(reflection);
 }
 
-std::shared_ptr<IK::Bone> SetupBone(const glm::vec3 start, const glm::vec3 end) {
-  std::shared_ptr<IK::Bone> bone;
-  bone = std::make_shared<IK::Bone>(start, end);
-  bone->SetObject(std::make_shared<scene::Object>(*sphere));
-  return bone;
-}
-
-void InitBones() {
-  std::shared_ptr<IK::Bone> spine;
-  std::shared_ptr<IK::Bone> rshoulder;
-  std::shared_ptr<IK::Bone> lshoulder;
-  std::shared_ptr<IK::Bone> rhip;
-  std::shared_ptr<IK::Bone> lhip;
-  std::shared_ptr<IK::Bone> head1;
-  std::shared_ptr<IK::Bone> head2;
-  std::shared_ptr<IK::Bone> head3;
-  spine = SetupBone(glm::vec3(0.f, -1.f, 0.f), glm::vec3(0.f, 5.f, 0.f));
-  rshoulder = SetupBone(glm::vec3(0.f, 5.f, 0.f), glm::vec3(-2.0f, 5.f, 0.f));
-  lshoulder = SetupBone(glm::vec3(0.f, 5.f, 0.f), glm::vec3(2.0f, 5.f, 0.f));
-  rhip = SetupBone(glm::vec3(0.f, -1.f, 0.f), glm::vec3(-1.0f, -1.f, 0.f));
-  lhip = SetupBone(glm::vec3(0.f, -1.f, 0.f), glm::vec3(1.0f, -1.f, 0.f));
-  head1 = SetupBone(glm::vec3(0.f, 5.f, 0.f), glm::vec3(-1.5f, 7.f, 0.f));
-  head2 = SetupBone(glm::vec3(1.5f, 7.f, 0.f), glm::vec3(0.f, 5.f, 0.f));
-  head3 = SetupBone(glm::vec3(-1.5f, 7.f, 0.f), glm::vec3(1.5f, 7.f, 0.f));
-  spine->AddChild(lshoulder);
-  spine->AddChild(rshoulder);
-  spine->AddChild(head1);
-  head1->AddChild(head3);
-  head3->AddChild(head2);
-
-  rarm_target = glm::vec3(1.0f, 8.0f, 0.0f);
-
-  std::vector<glm::vec3> cone_points;
-  cone_points.push_back(glm::vec3(-2.f, 5.f, 0.f));
-  cone_points.push_back(glm::vec3(-4.0f, 3.0f, -1.0f));
-  cone_points.push_back(glm::vec3(-4.0f, 5.0f, 2.0f));
-  cone_points.push_back(glm::vec3(-4.2f, 5.f, 2.1f));
-  right_arm = std::make_shared<IK::BoneChain>();
-  cone_bones = right_arm->MakeChain(cone_points, sphere);
-  rshoulder->AddChild(cone_bones[0]);
-
-  larm_target = glm::vec3(3.0f, 2.0f, 1.0f);
-
-  std::vector<glm::vec3> larm_points;
-  std::vector<std::shared_ptr<IK::Bone>> larm_bones;
-  larm_points.push_back(glm::vec3(2.f, 5.f, 0.f));
-  larm_points.push_back(glm::vec3(4.0f, 3.0f, -1.0f));
-  larm_points.push_back(glm::vec3(4.0f, 5.0f, 2.0f));
-  larm_points.push_back(glm::vec3(4.2f, 5.f, 2.1f));
-  left_arm = std::make_shared<IK::BoneChain>();
-  larm_bones = left_arm->MakeChain(larm_points, sphere);
-  left_arm->SetBaseBone(spine);
-  lshoulder->AddChild(larm_bones[0]);
-
-  std::vector<glm::vec3> rleg_points;
-  std::vector<std::shared_ptr<IK::Bone>> rleg_bones;
-  rleg_points.push_back(glm::vec3(-1.0f, -1.f, 0.f));
-  rleg_points.push_back(glm::vec3(-2.0f, -2.0f, -1.0f));
-  rleg_points.push_back(glm::vec3(-3.0f, -5.0f, -1.0f));
-  //rleg_points.push_back(glm::vec3(-3.f, -5.4f, -1.f));
-  right_leg = std::make_shared<IK::BoneChain>();
-  rleg_bones = right_leg->MakeChain(rleg_points, sphere);
-
-  lleg_target = glm::vec3(1.5f, -5.3f, 0.f);
-  std::vector<glm::vec3> lleg_points;
-  std::vector<std::shared_ptr<IK::Bone>> lleg_bones;
-  lleg_points.push_back(glm::vec3(1.0f, -1.f, 0.f));
-  lleg_points.push_back(glm::vec3(2.0f, -2.0f, -1.0f));
-  lleg_points.push_back(glm::vec3(3.0f, -5.0f, -1.0f));
-  //lleg_points.push_back(glm::vec3(3.f, -5.4f, -1.f));
-  left_leg = std::make_shared<IK::BoneChain>();
-  lleg_bones = left_leg->MakeChain(lleg_points, sphere);
-
-  cone_bones.insert(cone_bones.end(), larm_bones.begin(), larm_bones.end());
-  cone_bones.insert(cone_bones.end(), rleg_bones.begin(), rleg_bones.end());
-  cone_bones.insert(cone_bones.end(), lleg_bones.begin(), lleg_bones.end());
-  cone_bones.push_back(spine);
-  cone_bones.push_back(rshoulder);
-  cone_bones.push_back(lshoulder);
-  cone_bones.push_back(lhip);
-  cone_bones.push_back(rhip);
-  cone_bones.push_back(head1);
-  cone_bones.push_back(head2);
-  cone_bones.push_back(head3);
-}
-
-void BoneTest() {
-  //Create a bone chain and test it.
-  std::shared_ptr<IK::Bone> bone_base =
-    std::make_shared<IK::Bone>(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 0.0f, 0.0f));
-  std::shared_ptr<IK::Bone> bone_end =
-    std::make_shared<IK::Bone>(glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.0f, -1.0f, 0.0f));
-
-  bone_base->AddChild(bone_end);
-  std::shared_ptr<IK::BoneChain> chain =
-    std::make_shared<IK::BoneChain>(bone_base, bone_end);
-
-  IK::CCD_Solver ccd(1000, 0.01f, 0.001f);
-
-  ccd.Solve(chain, glm::vec3(2.1f, 0.0f, 0.f));
-
-  glm::vec3 ef = chain->GetEndEffector();
-  std::cout << ef.x << " " << ef.y << " " << ef.z << std::endl;
-
-  std::vector<glm::vec3> test_points;
-  test_points.push_back(glm::vec3(27, -7, 4));
-  test_points.push_back(glm::vec3(30, 10, 3));
-  test_points.push_back(glm::vec3(45, 2, 4));
-  test_points.push_back(glm::vec3(-10, 15, -30));
-  std::shared_ptr<IK::BoneChain> test_chain = std::make_shared<IK::BoneChain>();
-  std::vector<std::shared_ptr<IK::Bone>> test_bones;
-  test_bones = test_chain->MakeChain(test_points);
-  ccd.Solve(test_chain, glm::vec3(25, -18.2, -24));
-
-  ef = test_chain->GetEndEffector();
-  std::cout << ef.x << " " << ef.y << " " << ef.z << std::endl;
-}
-
-
-void InitCMR() {
-  std::vector<glm::vec3> points;
-  points.push_back(glm::vec3(1.f, 8.f, 3.f));
-  points.push_back(glm::vec3(2.f, 3.f, 4.f));
-  points.push_back(glm::vec3(-1.f, -4.f, 1.f));
-  points.push_back(glm::vec3(0.f, 5.f, -1.f));
-  points.push_back(glm::vec3(-4.f, 7.f, 0.f));
-  points.push_back(glm::vec3(-1.f, 1.f, 5.f));
-  points.push_back(glm::vec3(1.f, 4.f, 4.f));
-  points.push_back(glm::vec3(0.0f, -10.f, 3.4f));
-  points.push_back(glm::vec3(1.0f, 3.0f, -6.0f));
-  points.push_back(glm::vec3(-1.0f, -2.0f, -10.f));
-  points.push_back(glm::vec3(-5.0f, -2.0f, 5.0f));
-  points.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
-  CMRchain = std::make_shared<core::CathmullRomChain>(points);
-
-  std::vector<glm::vec3> rleg_points;
-  rleg_points.push_back(glm::vec3(-1.f, -3.f, 1.f));
-  rleg_points.push_back(glm::vec3(-2.f, -2.f, 3.f));
-  rleg_points.push_back(glm::vec3(-2.f, -4.f, 1.f));
-  //rleg_points.push_back(glm::vec3(-1.5f, -5.f, -0.f));
-  rleg_points.push_back(glm::vec3(-1.5f, -3.f, -3.f));
-  rleg_points.push_back(glm::vec3(-1.f, -3.f, -4.f));
-  rleg_points.push_back(glm::vec3(-1.f, -6.f, -5.f));
-  rleg_chain = std::make_shared<core::CathmullRomChain>(rleg_points);
-}
 int main(int argc, char** argv) {
   srand((unsigned int)time(NULL));
   glutInit(&argc, argv);
@@ -725,8 +449,6 @@ int main(int argc, char** argv) {
   glutMotionFunc(MouseMovement);
   glutPassiveMotionFunc(PassiveMouseMovement);
   Init();
-  InitBones();
-  InitCMR();
   glutMainLoop();
   CleanUp();
   return 0;
