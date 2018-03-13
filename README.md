@@ -26,6 +26,9 @@ I will attempt to update the code base to follow https://google.github.io/styleg
 * Stbi image loader for textures - [Github stb](https://github.com/nothings/stb)
 * Quaternion rotation calculations - [OpenGL tutorial](https://github.com/opengl-tutorials/ogl/blob/master/common/quaternion_utils.cpp)
 * Cathmull-Rom Splines - [Microsoft MVP](https://www.mvps.org/directx/articles/catmull/)
+* Frame buffers - [OpenGL tutorial](http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/)
+* Rendering to textures - [ThinMatrix youtube](https://www.youtube.com/user/ThinMatrix/)
+* Frame buffers - [Open.GL](https://open.gl/framebuffers)
 
 
 # Rendering to non-default framebuffer locations

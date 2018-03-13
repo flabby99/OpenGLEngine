@@ -146,8 +146,28 @@ namespace scene {
     Load(filename);
   }
 
+  Texture::Texture(const GLuint& size_x, const GLuint& size_y, const GLenum& type) {
+    GLCall(glGenTextures(1, &texture_id_));
+    GLCall(glBindTexture(GL_TEXTURE_2D, texture_id_));
+    type_ = type;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size_x, size_y, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    //Poor filtering is used here
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  }
+
   Texture::~Texture()
   {
     GLCall(glDeleteTextures(1, &texture_id_));
+  }
+  DepthTexture::DepthTexture(const GLuint & size_x, const GLuint & size_y, const GLenum & type)
+  {
+    GLCall(glGenTextures(1, &GetChangeableID()));
+    GLCall(glBindTexture(GL_TEXTURE_2D, GetID()));
+    SetType(type);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, size_x, size_y, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+    //Poor filtering is used here
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   }
 } //namespace scene

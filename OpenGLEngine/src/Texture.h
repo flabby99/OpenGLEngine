@@ -27,7 +27,17 @@ namespace scene {
     Texture();
     Texture(const char* filename);
     ~Texture();
+    //Loads an empty texture of a certain size and of a certain type
+    Texture(const GLuint& size_x, const GLuint& size_y, const GLenum& type);
     inline const char* GetFileName() const { return filename_.get(); }
-    inline void SetSlot(GLenum slot) { slot_ = slot; }
+    inline void SetSlot(const GLenum& slot) { slot_ = slot; }
+    inline void SetType(const GLenum& type) { type_ = type; }
+    inline GLuint& GetChangeableID() { return texture_id_; }
+    inline const GLuint& GetID() const { return texture_id_; }
+  };
+
+  class DepthTexture : public Texture {
+    inline DepthTexture() {}
+    DepthTexture(const GLuint& size_x, const GLuint& size_y, const GLenum& type);
   };
 } //namespace scene
