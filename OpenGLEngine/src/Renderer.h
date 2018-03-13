@@ -5,6 +5,7 @@
 
 //REFERENCE inspired by https://www.youtube.com/watch?v=jjaTTRFXRAk
 //The Cherno Project
+//TODO add support for drawing using framebuffers, see OpenGL tutorial 15
 namespace render {
   class Renderer {
     Shader* shader_;
