@@ -97,9 +97,9 @@ namespace core {
       vertices[i].tangent_z_ = tangent->z;
     }
 
-    render::VertexBuffer vb(vertices.get(), sizeof(VertexData) * aiMesh->mNumVertices);
-    render::VertexArray va;
-    va.Addbuffer(vb, vertex_buffer_layout_);
+    auto vb = std::make_shared<render::VertexBuffer>(vertices.get(), (unsigned int)sizeof(VertexData) * aiMesh->mNumVertices);
+    auto va = std::make_shared<render::VertexArray>();
+    va->Addbuffer(vb, vertex_buffer_layout_);
 
     std::unique_ptr<unsigned int[]> indices = std::make_unique<unsigned int[]>(3 * aiMesh->mNumFaces);
     for (unsigned int i = 0; i < aiMesh->mNumFaces; ++i) {
@@ -112,7 +112,7 @@ namespace core {
       indices[3 * i + 2] = face.mIndices[2];
     }
 
-    render::IndexBuffer ib(indices.get(), 3 * aiMesh->mNumFaces);
+    auto ib = std::make_shared<render::IndexBuffer>(indices.get(), 3 * aiMesh->mNumFaces);
 
     std::shared_ptr<scene::Object> object = std::make_shared<scene::Object>(va, ib);
     return object;

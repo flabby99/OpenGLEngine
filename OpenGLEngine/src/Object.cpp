@@ -18,10 +18,9 @@ namespace scene {
     parent_ = NULL;
   }
 
-  Object::Object(const render::VertexArray& va, const render::IndexBuffer& ib)
+  Object::Object(const std::shared_ptr<render::VertexArray>& va, const std::shared_ptr<render::IndexBuffer>& ib)
   {
-    mesh_.va = va;
-    mesh_.ib = ib;
+    SetMesh(va, ib);
     rotation_ = glm::mat4(1.0f);
     scale_ = glm::vec3(1.0f);
     translation_ = glm::vec3(0.0f);
