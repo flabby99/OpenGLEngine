@@ -10,7 +10,8 @@ namespace render {
 
     VertexArray::~VertexArray()
     {
-        //GLCall(glDeleteVertexArrays(1, &renderer_id_));
+        GLCall(glDeleteVertexArrays(1, &renderer_id_));
+        attached_vbs.clear();
     }
 
     void VertexArray::Bind() const {
@@ -25,10 +26,10 @@ namespace render {
     ** Permits adding a vertex buffer with each vertice stored continuously with the information
     ** identified by layout - eg. vertice consists of float, float, float, unsigned int, unsigned int.
     */
-    void VertexArray::Addbuffer(const VertexBuffer& vb, const VertexBufferLayout& layout)
+    void VertexArray::Addbuffer(const std::shared_ptr<VertexBuffer>& vb, const VertexBufferLayout& layout)
     {
         Bind();
-        vb.Bind();
+        vb->Bind();
         const auto& elements = layout.GetElements();
         //TODO unsure of the use of offset
         unsigned int offset = 0;
@@ -39,22 +40,25 @@ namespace render {
                 layout.GetStride(), (const GLvoid*)offset));
             offset += element.count * VertexBufferElement::GetSizeOfType(element.type);
         }
+        attached_vbs.push_back(vb);
     }
 
     //Add a vertex buffer with 3 floats for each vertice at an array index 
-    void VertexArray::Addbuffer_3f(const VertexBuffer& vb, const GLuint index) {
+    void VertexArray::Addbuffer_3f(const std::shared_ptr<VertexBuffer>& vb, const GLuint index) {
         Bind();
-        vb.Bind();
+        vb->Bind();
         GLCall(glEnableVertexAttribArray(index));
         GLCall(glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, NULL));
+        attached_vbs.push_back(vb);
     }
 
     //Add a vertex buffer with 2 floats for each vertice at an array index 
-    void VertexArray::Addbuffer_2f(const VertexBuffer & vb, const GLuint index)
+    void VertexArray::Addbuffer_2f(const std::shared_ptr<VertexBuffer>& vb, const GLuint index)
     {
       Bind();
-      vb.Bind();
+      vb->Bind();
       GLCall(glEnableVertexAttribArray(index));
       GLCall(glVertexAttribPointer(index, 2, GL_FLOAT, GL_FALSE, 0, NULL));
+      attached_vbs.push_back(vb);
     }
 } //namespace render

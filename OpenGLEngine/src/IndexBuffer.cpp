@@ -13,7 +13,7 @@ namespace render {
 
     IndexBuffer::~IndexBuffer()
     {
-        //GLCall(glDeleteBuffers(1, &renderer_id_));
+        GLCall(glDeleteBuffers(1, &renderer_id_));
     }
 
     void IndexBuffer::Bind() const

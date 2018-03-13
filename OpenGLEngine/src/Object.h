@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "glm/glm.hpp"
 #include "Texture.h"
+#include <memory>
 
 namespace core {
   struct MaterialData;
@@ -12,8 +13,8 @@ namespace core {
 
 namespace scene {
   struct Mesh {
-    render::VertexArray va;
-    render::IndexBuffer ib;
+    std::shared_ptr<render::VertexArray> va;
+    std::shared_ptr<render::IndexBuffer> ib;
   };
   class Object {
   private:
@@ -31,7 +32,7 @@ namespace scene {
     std::shared_ptr<Texture> texture_normal_ = nullptr;
   public:
     Object();
-    Object(const render::VertexArray& va, const render::IndexBuffer& ib);
+    Object(const std::shared_ptr<render::VertexArray>& va, const std::shared_ptr<render::IndexBuffer>& ib);
     ~Object();
     void UpdateModelMatrix();
     //Rotates the model about its pivot point using an angle and an axis
@@ -49,7 +50,7 @@ namespace scene {
     inline void SetDiffuseTexture(const std::shared_ptr<Texture>& texture) { texture_diffuse_ = texture; }
     inline void SetBumpTexture(const std::shared_ptr<Texture>& texture) { texture_bump_ = texture; }
     inline void SetNormalTexture(const std::shared_ptr<Texture>& texture) { texture_normal_ = texture; }
-    inline void SetMesh(const render::VertexArray& va, const render::IndexBuffer& ib) {
+    inline void SetMesh(const std::shared_ptr<render::VertexArray>& va, const std::shared_ptr<render::IndexBuffer>& ib) {
       mesh_.va = va; mesh_.ib = ib;
     }
     inline glm::mat4 GetLocalModelMatrix() const { return model_matrix_; }
