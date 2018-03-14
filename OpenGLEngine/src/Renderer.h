@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "glm\glm.hpp"
 #include "shader.h"
+#include "FrameBuffer.h"
 
 //REFERENCE inspired by https://www.youtube.com/watch?v=jjaTTRFXRAk
 //The Cherno Project

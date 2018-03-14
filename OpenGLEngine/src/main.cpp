@@ -69,6 +69,44 @@ void InitSkyBox(std::shared_ptr<scene::Object> box) {
     box->SetDiffuseTexture(texture);
 }
 
+std::shared_ptr<scene::Object> ss_quad;
+//Sets up a quad, which covers the screen exactly in clip co-ordinates
+//This can be used to see your textures on the screen
+void CreateScreenQuad() {
+  //TODO change this so that it has an index buffer
+  //Positions of two triangle that cover the screen
+  float ss_quad_pos[] = {
+    -1.f, -1.f,
+    1.f, -1.f,
+    1.f, 1.f,
+    -1.f, 1.f,
+  };
+  //Texture co ordinates of these two triangles
+  float ss_quad_st[] = {
+    0.f, 0.f,
+    1.f, 0.f,
+    1.f, 1.f,
+    0.f, 1.f,
+  };
+  GLuint ss_quad_indices[] = {
+    0, 1, 2, 2, 3, 0
+  };
+  
+  auto points_vb = std::make_shared<render::VertexBuffer>(
+    &ss_quad_pos[0],
+    (unsigned int)sizeof(float) * 8
+    );
+  auto tex_co_ords_vb = std::make_shared<render::VertexBuffer>(
+    &ss_quad_st[0],
+    (unsigned int)sizeof(float) * 8
+    );
+  auto ib = std::make_shared<render::IndexBuffer>(&ss_quad_indices[0], 6);
+  auto va = std::make_shared<render::VertexArray>();
+  va->Addbuffer_2f(points_vb, 0);
+  va->Addbuffer_2f(tex_co_ords_vb, 0);
+  ss_quad = std::make_shared<scene::Object>(va, ib);
+}
+
 enum class eRenderType {
   RT_blinn,
   RT_cel,
@@ -84,6 +122,7 @@ render::CommonShader* cel;
 render::CommonShader* minnaert;
 render::Shader* cube_map;
 render::CommonShader* reflection;
+render::Shader* post_process;
 
 void CreateShaders() {
     const std::string shaderfile = "config/shadernames.txt";
@@ -93,6 +132,7 @@ void CreateShaders() {
     minnaert = new render::CommonShader("minnaert", shaderfile);
     reflection = new render::CommonShader("reflection", shaderfile);
     cube_map = new render::Shader("cube_map", shaderfile);
+    post_process = new render::Shader("post_process", shaderfile);
     cube_map->Bind();
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
@@ -163,9 +203,13 @@ void RenderWithShader(render::Shader* shader) {
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
   shader->SetUniform4fv("proj", persp_proj);
   render::Renderer::Draw(*sphere, shader, view);
-  //render::Renderer::Draw(*sky_box, shader, view);
 }
 
+//TODO edit the render loop so that I draw to a texture first 
+//Then I post process this and draw using the screen quad
+//TODO set up a shader for this
+//TODO set up some code so that I can test the texture by rendering it to the screen if I want to 
+//For testing purposes.
 void Render() {
   render::Renderer::Clear();
   DrawSkyBox();
@@ -194,6 +238,8 @@ void Render() {
     default:
       break;
   }
+  post_process->Bind();
+  render::Renderer::Draw(*ss_quad);
   glutSwapBuffers();
 }
 
@@ -412,6 +458,7 @@ void CleanUp() {
   delete(silhoutte);
   delete(cube_map);
   delete(reflection);
+  delete(post_process);
 }
 
 int main(int argc, char** argv) {

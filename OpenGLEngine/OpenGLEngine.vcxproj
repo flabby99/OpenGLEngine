@@ -67,6 +67,8 @@
     <None Include="res\Shaders\MinnaertShader.frag" />
     <None Include="res\Shaders\NormalMapShader.frag" />
     <None Include="res\Shaders\NormalMapShader.vert" />
+    <None Include="res\Shaders\PostProcess.frag" />
+    <None Include="res\Shaders\PostProcess.vert" />
     <None Include="res\Shaders\ReflectionShader.frag" />
     <None Include="res\Shaders\ReflectionShader.vert" />
     <None Include="res\Shaders\SilhoutteShader.frag" />

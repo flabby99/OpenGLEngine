@@ -1,23 +1,27 @@
 blinn_phong
-res/Shaders/VertexShader.vert
-res/Shaders/FragmentShaderBlinnPhong.frag
+shaders/VertexShader.vert
+shaders/FragmentShaderBlinnPhong.frag
 
 silhouette
-res/Shaders/SilhoutteShader.vert
-res/Shaders/SilhoutteShader.frag
+shaders/SilhoutteShader.vert
+shaders/SilhoutteShader.frag
 
 cel
-res/Shaders/CelShader.vert
-res/Shaders/CelShader.frag
+shaders/CelShader.vert
+shaders/CelShader.frag
 
 minnaert
-res/Shaders/VertexShader.vert
-res/Shaders/MinnaertShader.frag
+shaders/VertexShader.vert
+shaders/MinnaertShader.frag
 
 cube_map
-res/Shaders/cube_map.vert
-res/Shaders/cube_map.frag
+shaders/cube_map.vert
+shaders/cube_map.frag
 
 reflection
-res/Shaders/ReflectionShader.vert
-res/Shaders/ReflectionShader.frag
+shaders/ReflectionShader.vert
+shaders/ReflectionShader.frag
+
+post_process
+shaders/PostProcess.vert
+shaders/PostProcess.frag

@@ -25,8 +25,8 @@ namespace render
     //@param attachment - the place to attacch
     //@param texture - the texture to attach
     void AttachTexture(std::shared_ptr<scene::Texture> texture, GLenum attachment);
-
-    //NOTE could also add support for renderbuffers
+    void SetBufferForDraw();
+    bool BufferStatusCheck();
 
   private:
     GLuint renderer_id_;

@@ -170,6 +170,8 @@
     <None Include="res\Shaders\NormalMapShader.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="res\Shaders\PostProcess.vert" />
+    <None Include="res\Shaders\PostProcess.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="config\modelnames.txt">
