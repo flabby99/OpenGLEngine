@@ -65,7 +65,6 @@ void InitSkyBox(std::shared_ptr<scene::Object> box) {
     const char* right = "res/Models/textures/Storforsen4/posx.jpg";
     std::shared_ptr<scene::Texture> texture = std::make_shared<scene::Texture>();
     texture->CreateCubeMap(front, back, top, bottom, left, right);
-    //TODO check if diffuse texture will work
     box->SetDiffuseTexture(texture);
 }
 
@@ -103,7 +102,7 @@ void CreateScreenQuad() {
   auto ib = std::make_shared<render::IndexBuffer>(&ss_quad_indices[0], 6);
   auto va = std::make_shared<render::VertexArray>();
   va->Addbuffer_2f(points_vb, 0);
-  va->Addbuffer_2f(tex_co_ords_vb, 0);
+  va->Addbuffer_2f(tex_co_ords_vb, 1);
   ss_quad = std::make_shared<scene::Object>(va, ib);
 }
 
@@ -448,6 +447,7 @@ void Init() {
   glCullFace(GL_BACK);
   LoadModels();
   InitSkyBox(sky_box);
+  CreateScreenQuad();
   CreateShaders();
 }
 
