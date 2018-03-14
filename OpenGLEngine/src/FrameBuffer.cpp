@@ -20,6 +20,7 @@ namespace render
     Bind();
     GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->GetID(), 0));
     draw_targets_.push_back(attachment);
+    textures_.push_back(texture);
   }
   void FrameBuffer::SetBufferForDraw()
   {

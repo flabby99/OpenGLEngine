@@ -68,12 +68,19 @@ void InitSkyBox(std::shared_ptr<scene::Object> box) {
     box->SetDiffuseTexture(texture);
 }
 
+std::shared_ptr<render::FrameBuffer> colour_buffer;
+void InitFrameBuffers() {
+  colour_buffer = std::make_shared<render::FrameBuffer>();
+  auto final_texture = std::make_shared<scene::Texture>(window_width, window_height, GL_TEXTURE_2D);
+  colour_buffer->AttachTexture(final_texture, GL_COLOR_ATTACHMENT0);
+  colour_buffer->BufferStatusCheck();
+}
+
 std::shared_ptr<scene::Object> ss_quad;
 //Sets up a quad, which covers the screen exactly in clip co-ordinates
 //This can be used to see your textures on the screen
 void CreateScreenQuad() {
-  //TODO change this so that it has an index buffer
-  //Positions of two triangle that cover the screen
+  //Positions of two triangles that cover the screen
   float ss_quad_pos[] = {
     -1.f, -1.f,
     1.f, -1.f,
@@ -136,6 +143,7 @@ void CreateShaders() {
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
 
+//TODO maybe I could make a map of shaders if I am going to have a lot
 void ReloadShaders() {
     blinn_phong->Reload();
     silhoutte->Reload();
@@ -143,6 +151,7 @@ void ReloadShaders() {
     minnaert->Reload();
     reflection->Reload();
     cube_map->Reload();
+    post_process->Reload();
     cube_map->Bind();
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
@@ -204,13 +213,9 @@ void RenderWithShader(render::Shader* shader) {
   render::Renderer::Draw(*sphere, shader, view);
 }
 
-//TODO edit the render loop so that I draw to a texture first 
-//Then I post process this and draw using the screen quad
-//TODO set up a shader for this
-//TODO set up some code so that I can test the texture by rendering it to the screen if I want to 
-//For testing purposes.
 void Render() {
   render::Renderer::Clear();
+  colour_buffer->SetBufferForDraw();
   DrawSkyBox();
   switch (render_type) {
     case eRenderType::RT_blinn :
@@ -237,6 +242,8 @@ void Render() {
     default:
       break;
   }
+  colour_buffer->Unbind();
+  colour_buffer->GetTexture(0)->Bind();
   post_process->Bind();
   render::Renderer::Draw(*ss_quad);
   glutSwapBuffers();
@@ -449,6 +456,7 @@ void Init() {
   InitSkyBox(sky_box);
   CreateScreenQuad();
   CreateShaders();
+  InitFrameBuffers();
 }
 
 void CleanUp() {

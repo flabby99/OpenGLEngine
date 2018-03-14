@@ -27,11 +27,14 @@ namespace render
     void AttachTexture(std::shared_ptr<scene::Texture> texture, GLenum attachment);
     void SetBufferForDraw();
     bool BufferStatusCheck();
-
+    inline std::shared_ptr<scene::Texture> GetTexture(const unsigned int& index) {
+      return textures_[index];
+    }
   private:
     GLuint renderer_id_;
     //A vector of GLenums which are the places to render to
     std::vector<GLenum> draw_targets_;
+    std::vector<std::shared_ptr<scene::Texture>> textures_;
   };
 }
 
