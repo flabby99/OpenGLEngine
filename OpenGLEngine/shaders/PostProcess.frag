@@ -7,6 +7,12 @@ layout(binding = 0) uniform sampler2D tex;
 out vec4 frag_colour;
 
 void main() {
-  //Red colour for now
-  frag_colour = vec4(1.0, 0.0, 0.0, 1.0);
+  //Invert the colour of the right hand side
+  vec3 colour;
+  if(st.s >= 0.5) {
+    colour = 1.0 - texture(tex, st).rgb;
+  } else {
+    colour = texture(tex, st).rgb;
+  }
+  frag_colour = vec4(colour, 1.0);
 }
