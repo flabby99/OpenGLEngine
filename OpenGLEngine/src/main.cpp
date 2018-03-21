@@ -17,6 +17,7 @@
 #include "Object.h"
 #include "Maths.h"
 #include "CathmullRomChain.h"
+#include "CausticMapping.h"
 
 #include <memory>
 #include <iostream>
@@ -113,6 +114,12 @@ void CreateScreenQuad() {
   ss_quad = std::make_shared<scene::Object>(va, ib);
 }
 
+std::unique_ptr<render::CausticMapping> caustic_mapping;
+
+void CreateCausticMapper() {
+  caustic_mapping = std::make_unique<render::CausticMapping>(&window_width, &window_height, false);
+}
+
 enum class eRenderType {
   RT_blinn,
   RT_cel,
@@ -157,19 +164,28 @@ void ReloadShaders() {
 }
 
 std::shared_ptr<scene::Object> sphere;
-std::shared_ptr<scene::Object> sphere_root;
+std::shared_ptr<scene::Object> scene_root;
+std::shared_ptr<scene::Object> plane;
 void LoadModels() {
   std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
  
-  sphere_root = std::make_shared<scene::Object>();
-  sphere_root->SetTranslation(glm::vec3(0.f, -1.0f, -18.f));
-  sphere_root->UpdateModelMatrix();
+  scene_root = std::make_shared<scene::Object>();
+  scene_root->SetTranslation(glm::vec3(0.f, -1.0f, -18.f));
+  scene_root->UpdateModelMatrix();
   std::string sphere_filename = "unit_sphere.obj";
   core::SceneInfo sphere_scene(sphere_filename, white);
   sphere = sphere_scene.GetObject_(0);
   sphere->SetColour(glm::vec3(1.0f, 0.f, 0.f));
-  sphere->SetParent(sphere_root);
+  sphere->SetParent(scene_root);
   sphere->SetScale(glm::vec3(0.2f));
+
+  std::string plane_filename = "flat_plane.obj";
+  core::SceneInfo plane_scene(plane_filename, white);
+  plane = plane_scene.GetObject_(0);
+  plane->SetColour(glm::vec3(0.1f, 0.1f, 0.1f));
+  plane->SetParent(scene_root);
+  plane->SetTranslation(glm::vec3(0.0f, -5.0f, 0.0f));
+  plane->UpdateModelMatrix();
 
   std::string filename = "cube.obj";
   core::SceneInfo box_scene(filename, white);
@@ -215,9 +231,9 @@ void RenderWithShader(render::Shader* shader) {
 
 void Render() {
   render::Renderer::Clear();
-  colour_buffer->SetBufferForDraw();
-  DrawSkyBox();
-  switch (render_type) {
+  //colour_buffer->SetBufferForDraw();
+  //DrawSkyBox();
+ /* switch (render_type) {
     case eRenderType::RT_blinn :
       RenderWithShader(blinn_phong);
       break;
@@ -241,11 +257,17 @@ void Render() {
       break;
     default:
       break;
-  }
-  colour_buffer->Unbind();
+  }*/
+ /* colour_buffer->Unbind();
   colour_buffer->GetTexture(0)->Bind();
   post_process->Bind();
-  render::Renderer::Draw(*ss_quad);
+  render::Renderer::Draw(*ss_quad);*/
+
+  //TODO remove making the vectors here
+  std::vector <std::shared_ptr<scene::Object>> receivers;
+  receivers.push_back(plane);
+  std::vector<std::shared_ptr<scene::Object>> producers;
+  caustic_mapping->CalculateCaustics(receivers, producers, post_process, ss_quad.get());
   glutSwapBuffers();
 }
 
@@ -456,6 +478,7 @@ void Init() {
   InitSkyBox(sky_box);
   CreateScreenQuad();
   CreateShaders();
+  CreateCausticMapper();
   InitFrameBuffers();
 }
 

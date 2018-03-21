@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="src\CathmullRomChain.h" />
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\CausticMapping.h" />
     <ClInclude Include="src\ErrorHandling.h" />
     <ClInclude Include="src\FrameBuffer.h" />
     <ClInclude Include="src\IndexBuffer.h" />
@@ -40,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CathmullRomChain.cpp" />
+    <ClCompile Include="src\CausticMapping.cpp" />
     <ClCompile Include="src\Deprecated.cpp" />
     <ClCompile Include="src\ErrorHandling.cpp" />
     <ClCompile Include="src\FrameBuffer.cpp" />
@@ -74,6 +76,8 @@
     <None Include="res\Shaders\SilhoutteShader.frag" />
     <None Include="res\Shaders\SilhoutteShader.vert" />
     <None Include="res\Shaders\VertexShader.vert" />
+    <None Include="shaders\caustics\receiver_shader.frag" />
+    <None Include="shaders\caustics\receiver_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="config\modelnames.txt" />

@@ -75,6 +75,9 @@
     <ClInclude Include="src\FrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\CausticMapping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -128,6 +131,9 @@
     <ClCompile Include="src\FrameBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\CausticMapping.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Shaders\CelShader.frag">
@@ -172,6 +178,8 @@
     </None>
     <None Include="res\Shaders\PostProcess.vert" />
     <None Include="res\Shaders\PostProcess.frag" />
+    <None Include="shaders\caustics\receiver_shader.vert" />
+    <None Include="shaders\caustics\receiver_shader.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="config\modelnames.txt">
