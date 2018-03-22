@@ -47,6 +47,7 @@ void main() {
   //fColour = vec4(colour, 1.0);
   fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0) * texture (diffuse_texture, texture_coords);
   //Debugs
+  //fColour = vec4(eye_position, 1.0);
   //fColour = vec4(eye_normal, 1.0);
   //fColour = vec4(texture_coords.x, texture_coords.y, 0, 1);
 }

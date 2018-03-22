@@ -42,6 +42,7 @@ namespace render
     void CalculateCaustics(std::vector<std::shared_ptr<scene::Object>> receivers,
       std::vector<std::shared_ptr<scene::Object>> producers,
       render::Shader* post_process, scene::Object* ss_quad);
+    void LoadShaders();
   };
 }
 
