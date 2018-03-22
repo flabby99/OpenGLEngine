@@ -1,3 +1,6 @@
 receiver
 shaders/caustics/receiver_shader.vert
 shaders/caustics/receiver_shader.frag
+producer
+shaders/caustics/producer_shader.vert
+shaders/caustics/producer_shader.frag

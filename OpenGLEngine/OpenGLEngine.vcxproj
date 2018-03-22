@@ -76,6 +76,8 @@
     <None Include="res\Shaders\SilhoutteShader.frag" />
     <None Include="res\Shaders\SilhoutteShader.vert" />
     <None Include="res\Shaders\VertexShader.vert" />
+    <None Include="shaders\caustics\producer_shader.frag" />
+    <None Include="shaders\caustics\producer_shader.vert" />
     <None Include="shaders\caustics\receiver_shader.frag" />
     <None Include="shaders\caustics\receiver_shader.vert" />
   </ItemGroup>
