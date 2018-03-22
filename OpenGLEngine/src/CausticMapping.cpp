@@ -46,14 +46,7 @@ namespace render
       shadow_map_->BufferStatusCheck();
     }
     //Create the shaders
-    {
-      const std::string caustic_shaders = "config/causticshaders.txt";
-      receiver_shader_ = std::make_shared<Shader>("receiver", caustic_shaders);
-      //TODO put back in
-    /*  producer_shader_ = std::make_shared<Shader>("producer", caustic_shaders);
-      caustic_shader_ = std::make_shared<Shader>("caustic", caustic_shaders);
-      shadow_shader_ = std::make_shared<Shader>("shadow", caustic_shaders);*/
-    }
+    LoadShaders();
   }
 
   void CausticMapping::Visualise( std::shared_ptr<FrameBuffer> fb, unsigned int texture_index,
@@ -84,8 +77,10 @@ namespace render
       //Use this shader
       for (auto object : receivers) {
         glm::mat4 model_matrix = object->GetGlobalModelMatrix();
-        glm::mat4 light_mv = light_view_matrix * model_matrix;
-        receiver_shader_->SetUniform4fv("model_view_matrix", light_mv);
+        glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 300.0f);
+        receiver_shader_->SetUniform4fv("model", object->GetGlobalModelMatrix());
+        receiver_shader_->SetUniform4fv("view", light_view_matrix);
+        receiver_shader_->SetUniform4fv("proj", persp_proj);
         render::Renderer::Draw(*object);
       }
 
@@ -106,5 +101,10 @@ namespace render
     {
       shadow_map_->SetBufferForDraw();
     }
+  }
+  void CausticMapping::LoadShaders()
+  {
+    const std::string caustic_shaders = "config/causticshaders.txt";
+    receiver_shader_ = std::make_shared<Shader>("receiver", caustic_shaders);
   }
 }

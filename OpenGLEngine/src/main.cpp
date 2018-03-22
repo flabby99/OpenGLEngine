@@ -170,7 +170,7 @@ void LoadModels() {
   std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
  
   scene_root = std::make_shared<scene::Object>();
-  scene_root->SetTranslation(glm::vec3(0.f, -1.0f, -18.f));
+  scene_root->SetTranslation(glm::vec3(0.f, 0.0f, 0.f));
   scene_root->UpdateModelMatrix();
   std::string sphere_filename = "unit_sphere.obj";
   core::SceneInfo sphere_scene(sphere_filename, white);
@@ -226,48 +226,70 @@ void RenderWithShader(render::Shader* shader) {
   shader->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
   shader->SetUniform4fv("proj", persp_proj);
+  shader->SetUniform4fv("model_view_matrix", persp_proj * view * sphere->GetGlobalModelMatrix());
   render::Renderer::Draw(*sphere, shader, view);
+}
+
+std::shared_ptr<render::Shader> receiver_shader;
+
+void LoadReceiver() {
+  const std::string caustic_shaders = "config/causticshaders.txt";
+  receiver_shader = std::make_shared<render::Shader>("receiver", caustic_shaders);
 }
 
 void Render() {
   render::Renderer::Clear();
-  //colour_buffer->SetBufferForDraw();
-  //DrawSkyBox();
- /* switch (render_type) {
-    case eRenderType::RT_blinn :
-      RenderWithShader(blinn_phong);
-      break;
-    case eRenderType::RT_cel :
-      glCullFace(GL_FRONT);
-      silhoutte->Bind();
-      silhoutte->SetUniform3f("const_colour", glm::vec3(0.0f));
-      silhoutte->SetUniform1f("offset", 0.15f);
-      RenderWithShader(silhoutte);
-      cel->Bind();
-      cel->SetUniform1f("num_shades", 8);
-      cel->SetUniform3f("base_colour", glm::vec3(1.0f));
-      glCullFace(GL_BACK);
-      RenderWithShader(cel);
-      break;
-    case eRenderType::RT_minnaert :
-      RenderWithShader(minnaert);
-      break;
-    case eRenderType::RT_reflection :
-      RenderWithShader(reflection);
-      break;
-    default:
-      break;
-  }*/
- /* colour_buffer->Unbind();
+  //colour_buffer->Bind();
+  //render::Renderer::SetScreenAsRenderTarget();
+  
+  glm::vec3 light_position = glm::vec3(0.0f, 0.0f, 20.0f);
+  glm::vec3 origin = glm::vec3(0.0f, 1.0f, -8.0f);
+  glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+  glm::mat4 light_view_matrix = glm::lookAt(light_position, origin, up);
+  //TODO - do I need the projection?
+  //glm::mat4 light_projection_matrix = 
+  //glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 300.0f);
+  //Obtain 3D positions of the receiver geometry
+
+  DrawSkyBox();
+  //RenderWithShader(receiver_shader.get());
+  //RenderWithShader(blinn_phong);
+  //switch (render_type) {
+  //  case eRenderType::RT_blinn :
+  //    RenderWithShader(blinn_phong);
+  //    break;
+  //  case eRenderType::RT_cel :
+  //    glCullFace(GL_FRONT);
+  //    silhoutte->Bind();
+  //    silhoutte->SetUniform3f("const_colour", glm::vec3(0.0f));
+  //    silhoutte->SetUniform1f("offset", 0.15f);
+  //    RenderWithShader(silhoutte);
+  //    cel->Bind();
+  //    cel->SetUniform1f("num_shades", 8);
+  //    cel->SetUniform3f("base_colour", glm::vec3(1.0f));
+  //    glCullFace(GL_BACK);
+  //    RenderWithShader(cel);
+  //    break;
+  //  case eRenderType::RT_minnaert :
+  //    RenderWithShader(minnaert);
+  //    break;
+  //  case eRenderType::RT_reflection :
+  //    RenderWithShader(reflection);
+  //    break;
+  //  default:
+  //    break;
+  //}
+  /*colour_buffer->Unbind();
   colour_buffer->GetTexture(0)->Bind();
   post_process->Bind();
   render::Renderer::Draw(*ss_quad);*/
 
   //TODO remove making the vectors here
   std::vector <std::shared_ptr<scene::Object>> receivers;
-  receivers.push_back(plane);
+  receivers.push_back(sphere);
   std::vector<std::shared_ptr<scene::Object>> producers;
   caustic_mapping->CalculateCaustics(receivers, producers, post_process, ss_quad.get());
+  render::Renderer::SetScreenAsRenderTarget();
   glutSwapBuffers();
 }
 
@@ -293,6 +315,8 @@ void Keyboard(unsigned char key, int x, int y) {
     //Reload vertex and fragment shaders during runtime
   case 'P':
     ReloadShaders();
+    caustic_mapping->LoadShaders();
+    LoadReceiver();
     std::cout << "Reloaded shaders" << std::endl;
     break;
 
@@ -480,6 +504,7 @@ void Init() {
   CreateShaders();
   CreateCausticMapper();
   InitFrameBuffers();
+  LoadReceiver();
 }
 
 void CleanUp() {

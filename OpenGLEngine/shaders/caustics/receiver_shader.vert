@@ -1,13 +1,15 @@
 #version 430
+layout (location = 0) in vec3 vPosition;
 
-uniform mat4 model_view_matrix;
+//Todo remove
+layout(location = 0) uniform mat4 view;
+layout(location = 1) uniform mat4 proj;
+layout(location = 2) uniform mat4 model;
 
-layout (location = 0) in vec3 position;
-
-out vec3 light_world_pos;
+out vec4 world_pos;
 
 void main()
 {
-  light_world_pos = vec3(model_view_matrix * vec4(position, 1.0));
-  gl_Position = vec4(light_world_pos, 1.0);
+  world_pos = (model * vec4(vPosition, 1.0));
+  gl_Position = proj * view * world_pos;
 }

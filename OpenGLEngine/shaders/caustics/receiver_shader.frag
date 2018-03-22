@@ -1,8 +1,8 @@
 #version 430
-in vec3 light_world_pos;
+in vec4 world_pos;
 
-out vec4 colour;
+out vec4 fColour;
 
 void main() {
-  colour = vec4(light_world_pos, 1.0);
+  fColour = world_pos;
 }
