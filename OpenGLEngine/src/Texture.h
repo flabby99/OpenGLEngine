@@ -34,6 +34,7 @@ namespace scene {
     inline void SetType(const GLenum& type) { type_ = type; }
     inline GLuint& GetChangeableID() { return texture_id_; }
     inline const GLuint& GetID() const { return texture_id_; }
+    inline const GLenum& GetSlot() const { return slot_; }
   };
 
   class DepthTexture : public Texture {

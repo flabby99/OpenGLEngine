@@ -78,6 +78,9 @@
     <ClInclude Include="src\CausticMapping.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\VertexGrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -134,6 +137,9 @@
     <ClCompile Include="src\CausticMapping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\VertexGrid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Shaders\CelShader.frag">
@@ -182,6 +188,8 @@
     <None Include="shaders\caustics\receiver_shader.frag" />
     <None Include="shaders\caustics\producer_shader.frag" />
     <None Include="shaders\caustics\producer_shader.vert" />
+    <None Include="shaders\caustics\caustic_shader.frag" />
+    <None Include="shaders\caustics\caustic_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="config\modelnames.txt">

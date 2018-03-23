@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include "VertexGrid.h"
 
 namespace scene {
   class Object;
@@ -10,6 +11,7 @@ namespace render
 {
   class FrameBuffer;
   class Shader;
+  //class VertexGrid;
   class CausticMapping
   {
   private:
@@ -24,6 +26,7 @@ namespace render
     std::shared_ptr<Shader> producer_shader_;
     std::shared_ptr<Shader> caustic_shader_;
     std::shared_ptr<Shader> shadow_shader_;
+    std::unique_ptr<VertexGrid> vertex_grid_;
 
     void Init(bool should_shadow_map);
   public:

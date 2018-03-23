@@ -240,9 +240,9 @@ void LoadReceiver() {
 void Render() {
   render::Renderer::Clear();
   std::vector <std::shared_ptr<scene::Object>> receivers;
-  receivers.push_back(sphere);
+  receivers.push_back(plane);
   std::vector<std::shared_ptr<scene::Object>> producers;
-  producers.push_back(plane);
+  producers.push_back(sphere);
  /* 
   DrawSkyBox();*/
   caustic_mapping->CalculateCaustics(receivers, producers, post_process, ss_quad.get());
