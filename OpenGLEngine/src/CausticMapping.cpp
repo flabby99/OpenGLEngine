@@ -8,6 +8,7 @@
 #include "glm\glm.hpp"
 #include "glm/gtx/transform.hpp"
 
+
 namespace render
 {
   void CausticMapping::Init(bool should_shadow_map)
@@ -26,7 +27,7 @@ namespace render
       auto positions_texture = std::make_shared<scene::Texture>(*window_width_, *window_height_, GL_TEXTURE_2D);
       caustic_pos_norms_->AttachTexture(positions_texture, GL_COLOR_ATTACHMENT0);
       auto normals_texture = std::make_shared<scene::Texture>(*window_width_, *window_height_, GL_TEXTURE_2D);
-      //normals_texture->SetSlot(GL_TEXTURE1);
+      normals_texture->SetSlot(GL_TEXTURE1);
       caustic_pos_norms_->AttachTexture(normals_texture, GL_COLOR_ATTACHMENT1);
       caustic_pos_norms_->BufferStatusCheck();
     }
@@ -47,15 +48,23 @@ namespace render
     }
     //Create the shaders
     LoadShaders();
+    //Create the vertex grid with resolution equal to size of the window
+    vertex_grid_ = std::make_unique<VertexGrid>(*window_width_, *window_height_);
   }
 
   void CausticMapping::Visualise( std::shared_ptr<FrameBuffer> fb, unsigned int texture_index,
                                   render::Shader* post_process, scene::Object* ss_quad) 
   {
+    std::shared_ptr<scene::Texture> current_texture;
+
     fb->Unbind();
-    fb->GetTexture(texture_index)->Bind();
+    current_texture = fb->GetTexture(texture_index);
+    GLenum temp_slot = current_texture->GetSlot();
+    current_texture->SetSlot(GL_TEXTURE0);
+    current_texture->Bind();
     post_process->Bind();
     render::Renderer::Draw(*ss_quad);
+    current_texture->SetSlot(temp_slot);
   }
 
   void CausticMapping::CalculateCaustics(std::vector<std::shared_ptr<scene::Object>> receivers,
@@ -85,9 +94,9 @@ namespace render
       }
 
       //Visualise to see what I'm getting
-      Visualise(receiver_positions_, 0, post_process, ss_quad);
+      //Visualise(receiver_positions_, 0, post_process, ss_quad);
     }
-
+    
     //Obtain 3D positions and surface normals of the producers
     {
       caustic_pos_norms_->SetBufferForDraw();
@@ -102,11 +111,16 @@ namespace render
         producer_shader_->SetUniform4fv("proj", persp_proj);
         render::Renderer::Draw(*object);
       }
+      //Set temp slot to the current slot, set current slot to zero and then set back the slot after visualising
       //Visualise(caustic_pos_norms_, 1, post_process, ss_quad);
     }
     //Create a caustic map texture
     {
       caustic_map_->SetBufferForDraw();
+      render::Renderer::Clear();
+      caustic_shader_->Bind();
+      render::Renderer::DrawPoints(vertex_grid_.get());
+      Visualise(caustic_map_, 0, post_process, ss_quad);
     }
     //Optionally Construct a shadow map
     if (should_shadow_map_) 
@@ -119,5 +133,6 @@ namespace render
     const std::string caustic_shaders = "config/causticshaders.txt";
     receiver_shader_ = std::make_shared<Shader>("receiver", caustic_shaders);
     producer_shader_ = std::make_shared<Shader>("producer", caustic_shaders);
+    caustic_shader_ = std::make_shared<Shader>("caustic", caustic_shaders);
   }
 }

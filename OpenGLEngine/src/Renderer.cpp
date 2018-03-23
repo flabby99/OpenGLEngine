@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "ErrorHandling.h"
+#include "VertexGrid.h"
 
 namespace render {
   void Renderer::Draw(scene::Object object, Shader* shader, glm::mat4 view)
@@ -47,6 +48,12 @@ namespace render {
     shader_->SetUniform4fv("mv_it", glm::transpose(glm::inverse(view_ * model_matrix)));
     GLCall(glDrawElements(GL_TRIANGLES, object.GetMesh().ib->GetCount(), GL_UNSIGNED_INT, (void*)0));
   }
+
+  void Renderer::DrawPoints(VertexGrid* vertex_grid) {
+    GLCall(vertex_grid->GetVAO()->Bind());
+    GLCall(glDrawArrays(GL_POINTS, 0, vertex_grid->GetNumVertices()));
+  }
+
   void Renderer::Clear()
   {
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
