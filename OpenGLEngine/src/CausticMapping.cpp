@@ -17,6 +17,7 @@ namespace render
     {
       receiver_positions_ = std::make_shared<render::FrameBuffer>();
       auto positions_texture = std::make_shared<scene::Texture>(*window_width_, *window_height_, GL_TEXTURE_2D);
+      positions_texture->SetSlot(GL_TEXTURE2);
       receiver_positions_->AttachTexture(positions_texture, GL_COLOR_ATTACHMENT0);
       receiver_positions_->BufferStatusCheck();
     }
@@ -48,7 +49,7 @@ namespace render
     }
     //Create the shaders
     LoadShaders();
-    //Create the vertex grid with resolution equal to size of the window
+    //Create a vertex grid of predifined size
     vertex_grid_ = std::make_unique<VertexGrid>(*window_width_, *window_height_);
   }
 
@@ -76,6 +77,7 @@ namespace render
     glm::vec3 origin = glm::vec3(0.0f);
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::mat4 light_view_matrix = glm::lookAt(light_position, origin, up);
+    glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 300.0f);
 
     //Obtain 3D world positions of the receiver geometry
     {
@@ -85,8 +87,6 @@ namespace render
       receiver_shader_->Bind();
       for (auto object : receivers) {
         glm::mat4 model_matrix = object->GetGlobalModelMatrix();
-        //TODO decide on the projection
-        glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 300.0f);
         receiver_shader_->SetUniform4fv("model", object->GetGlobalModelMatrix());
         receiver_shader_->SetUniform4fv("view", light_view_matrix);
         receiver_shader_->SetUniform4fv("proj", persp_proj);
@@ -104,8 +104,6 @@ namespace render
       producer_shader_->Bind();
       for (auto object : producers) {
         glm::mat4 model_matrix = object->GetGlobalModelMatrix();
-        //TODO decide on the projection
-        glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 300.0f);
         producer_shader_->SetUniform4fv("model", object->GetGlobalModelMatrix());
         producer_shader_->SetUniform4fv("view", light_view_matrix);
         producer_shader_->SetUniform4fv("proj", persp_proj);
@@ -119,6 +117,12 @@ namespace render
       caustic_map_->SetBufferForDraw();
       render::Renderer::Clear();
       caustic_shader_->Bind();
+      caustic_pos_norms_->GetTexture(0)->Bind();
+      caustic_pos_norms_->GetTexture(1)->Bind();
+      receiver_positions_->GetTexture(0)->Bind();
+      glm::vec3 light_direction = -glm::normalize(light_position);
+      caustic_shader_->SetUniform3f("light_direction", light_direction);
+      caustic_shader_->SetUniform4fv("view_proj", persp_proj * light_view_matrix);
       render::Renderer::DrawPoints(vertex_grid_.get());
       Visualise(caustic_map_, 0, post_process, ss_quad);
     }
