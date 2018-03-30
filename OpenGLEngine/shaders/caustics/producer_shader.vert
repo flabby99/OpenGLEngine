@@ -14,6 +14,5 @@ void main()
 {
   world_pos = model * vec4(vPosition, 1.0);
   world_normal = vec3(model * vec4(vNormal, 0.0));
-  //world_normal = vNormal;
   gl_Position = proj * view * world_pos;
 }

@@ -170,7 +170,7 @@ void LoadModels() {
   std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
  
   scene_root = std::make_shared<scene::Object>();
-  scene_root->SetTranslation(glm::vec3(0.f, 0.0f, 0.f));
+  scene_root->SetTranslation(glm::vec3(0.f, 0.0f, 5.f));
   scene_root->UpdateModelMatrix();
   std::string sphere_filename = "unit_sphere.obj";
   core::SceneInfo sphere_scene(sphere_filename, white);
@@ -184,7 +184,8 @@ void LoadModels() {
   plane = plane_scene.GetObject_(0);
   plane->SetColour(glm::vec3(0.1f, 0.1f, 0.1f));
   plane->SetParent(scene_root);
-  plane->SetTranslation(glm::vec3(0.0f, -0.0f, 0.0f));
+  plane->SetRotation(glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+  plane->SetTranslation(glm::vec3(0.0f, 0.0f, -2.0f));
   plane->UpdateModelMatrix();
 
   std::string filename = "cube.obj";

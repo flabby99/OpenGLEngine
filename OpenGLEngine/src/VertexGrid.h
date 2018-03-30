@@ -10,7 +10,7 @@ namespace render {
     std::unique_ptr<VertexArray> vao_;
   public:
     inline VertexGrid() {}
-    VertexGrid(const int const width, const int const height);
+    VertexGrid(const int width, const int height);
     inline const int GetNumVertices() {
       return width_ * height_;
     }

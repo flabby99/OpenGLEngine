@@ -83,6 +83,7 @@ namespace render
     {
       //render the scene from the light's point of view and render co ords to texture
       receiver_positions_->SetBufferForDraw();
+      glViewport(0, 0, *window_width_, *window_height_);
       render::Renderer::Clear();
       receiver_shader_->Bind();
       for (auto object : receivers) {
@@ -94,12 +95,16 @@ namespace render
       }
 
       //Visualise to see what I'm getting
-      //Visualise(receiver_positions_, 0, post_process, ss_quad);
+      receiver_positions_->Unbind();
+      render::Renderer::SetScreenAsRenderTarget();
+      glViewport(*window_width_ / 2, *window_height_ / 2, *window_width_  / 2, *window_height_ / 2);
+      Visualise(receiver_positions_, 0, post_process, ss_quad);
     }
     
     //Obtain 3D positions and surface normals of the producers
     {
       caustic_pos_norms_->SetBufferForDraw();
+      glViewport(0, 0, *window_width_, *window_height_);
       render::Renderer::Clear();
       producer_shader_->Bind();
       for (auto object : producers) {
@@ -110,11 +115,15 @@ namespace render
         render::Renderer::Draw(*object);
       }
       //Set temp slot to the current slot, set current slot to zero and then set back the slot after visualising
-      //Visualise(caustic_pos_norms_, 1, post_process, ss_quad);
+      caustic_pos_norms_->Unbind();
+      render::Renderer::SetScreenAsRenderTarget();
+      glViewport(0, 0, *window_width_ / 2, *window_height_ / 2);
+      Visualise(caustic_pos_norms_, 0, post_process, ss_quad);
     }
     //Create a caustic map texture
     {
       caustic_map_->SetBufferForDraw();
+      glViewport(0, 0, *window_width_, *window_height_);
       render::Renderer::Clear();
       caustic_shader_->Bind();
       caustic_pos_norms_->GetTexture(0)->Bind();
@@ -123,7 +132,13 @@ namespace render
       glm::vec3 light_direction = -glm::normalize(light_position);
       caustic_shader_->SetUniform3f("light_direction", light_direction);
       caustic_shader_->SetUniform4fv("view_proj", persp_proj * light_view_matrix);
+      caustic_shader_->SetUniform4fv("view", light_view_matrix);
+      caustic_shader_->SetUniform4fv("proj", persp_proj);
       render::Renderer::DrawPoints(vertex_grid_.get());
+
+      render::Renderer::SetScreenAsRenderTarget();
+      caustic_map_->Unbind();
+      glViewport(0, *window_height_ / 2, *window_width_ / 2, *window_height_ / 2);
       Visualise(caustic_map_, 0, post_process, ss_quad);
     }
     //Optionally Construct a shadow map
@@ -131,6 +146,7 @@ namespace render
     {
       shadow_map_->SetBufferForDraw();
     }
+    glViewport(0, 0, *window_width_, *window_height_);
   }
   void CausticMapping::LoadShaders()
   {
