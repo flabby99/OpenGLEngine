@@ -78,6 +78,12 @@ namespace render
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::mat4 light_view_matrix = glm::lookAt(light_position, origin, up);
     glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 300.0f);
+    //const glm::mat4 scale_bias_matrix = glm::mat4(
+    //  glm::vec4(26.0f, 0.0f, 0.0f, 0.0f),
+    //  glm::vec4(0.0f, 20.0f, 0.0f, 0.0f),
+    //  glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+    //  glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f));
+    const glm::mat4 scale_bias_matrix = glm::mat4(1.0f);
 
     //Obtain 3D world positions of the receiver geometry
     {
@@ -132,8 +138,7 @@ namespace render
       glm::vec3 light_direction = -glm::normalize(light_position);
       caustic_shader_->SetUniform3f("light_direction", light_direction);
       caustic_shader_->SetUniform4fv("view_proj", persp_proj * light_view_matrix);
-      caustic_shader_->SetUniform4fv("view", light_view_matrix);
-      caustic_shader_->SetUniform4fv("proj", persp_proj);
+      caustic_shader_->SetUniform4fv("bias", scale_bias_matrix);
       render::Renderer::DrawPoints(vertex_grid_.get());
 
       render::Renderer::SetScreenAsRenderTarget();
@@ -146,7 +151,11 @@ namespace render
     {
       shadow_map_->SetBufferForDraw();
     }
-    glViewport(0, 0, *window_width_, *window_height_);
+    
+    render::Renderer::SetScreenAsRenderTarget();
+    shadow_map_->Unbind();
+    glViewport(*window_width_ / 2, 0, *window_width_, *window_height_);
+
   }
   void CausticMapping::LoadShaders()
   {
@@ -154,5 +163,6 @@ namespace render
     receiver_shader_ = std::make_shared<Shader>("receiver", caustic_shaders);
     producer_shader_ = std::make_shared<Shader>("producer", caustic_shaders);
     caustic_shader_ = std::make_shared<Shader>("caustic", caustic_shaders);
+    //scene_shader_ = std::make_shared<Shader>("scene", caustic_shaders);
   }
 }

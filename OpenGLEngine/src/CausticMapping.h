@@ -26,6 +26,7 @@ namespace render
     std::shared_ptr<Shader> producer_shader_;
     std::shared_ptr<Shader> caustic_shader_;
     std::shared_ptr<Shader> shadow_shader_;
+    std::shared_ptr<Shader> scene_shader_;
     std::unique_ptr<VertexGrid> vertex_grid_;
 
     void Init(bool should_shadow_map);

@@ -17,6 +17,8 @@ namespace render {
         vertices[2 * (i * height + j) + 1] = (float)(start_height + height_increment * j);
       }
     }
+    //vertices[0] = 0.5f;
+    //vertices[1] = 0.5f;
     auto points_vb = std::make_shared<VertexBuffer>(
       vertices,
       (unsigned int)sizeof(float) * 2 * width * height
