@@ -28,7 +28,6 @@ vec3 P2 = v + distance(v, recPos.xyz) * r;
 texPt = view_proj * vec4(P2, 1.0);
 tc = 0.5 * texPt.xy /texPt.w + vec2(0.5);
 return texture(posTexture, tc).rgb;
-//return vec3(view * vec4(v, 0.0));
 }
 void main()
 {
@@ -39,8 +38,7 @@ void main()
   vec3 producer_pos = texture(producer_pos_tex, vPosition * 0.5 + vec2(0.5)).rgb;
   receiver_pos = EstimateIntersection (producer_pos, refracted, receiver_pos_tex);
   //receiver_pos = -refracted;
-  receiver_pos = texture(receiver_pos_tex, vPosition * 0.5 + vec2(0.5)).rgb;
-  //receiver_pos = texture(receiver_pos_tex, vPosition).rgb;
+  //receiver_pos = texture(receiver_pos_tex, vPosition * 0.5 + vec2(0.5)).rgb;
   vec4 temp = bias * view_proj * vec4(receiver_pos, 1.0); 
   gl_Position = temp;
   //gl_Position = vec4(vPosition, 0.0, 1.0);
