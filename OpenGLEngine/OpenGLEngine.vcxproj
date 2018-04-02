@@ -29,6 +29,7 @@
     <ClInclude Include="src\ModelLoader.h" />
     <ClInclude Include="src\ModelMatrixTransformations.h" />
     <ClInclude Include="src\Object.h" />
+    <ClInclude Include="src\Query.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\ShaderLoader.h" />

@@ -24,6 +24,9 @@ namespace render {
     void Render(scene::Object object);
     //Clears the depth and colour buffers
     static void Clear(); 
+    inline static void ClearColourOnly() {
+      GLCall(glClear(GL_COLOR_BUFFER_BIT));
+    }
     inline static void SetScreenAsRenderTarget() {
       GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
     }

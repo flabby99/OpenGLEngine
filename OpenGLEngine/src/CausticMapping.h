@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include "VertexGrid.h"
+#include "Query.h"
 
 namespace scene {
   class Object;
@@ -28,6 +29,7 @@ namespace render
     std::shared_ptr<Shader> shadow_shader_;
     std::shared_ptr<Shader> scene_shader_;
     std::unique_ptr<VertexGrid> vertex_grid_;
+    std::unique_ptr<Query> query_;
 
     void Init(bool should_shadow_map);
   public:

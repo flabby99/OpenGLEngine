@@ -1,12 +1,13 @@
 #define GLM_ENABLE_EXPERIMENTAL
+#include <string>
 #include "CausticMapping.h"
 #include "Texture.h"
 #include "FrameBuffer.h"
 #include "Renderer.h"
-#include <string>
 #include "Shader.h"
 #include "glm\glm.hpp"
 #include "glm/gtx/transform.hpp"
+#include <iostream>
 
 
 namespace render
@@ -51,6 +52,7 @@ namespace render
     LoadShaders();
     //Create a vertex grid of predifined size
     vertex_grid_ = std::make_unique<VertexGrid>(*window_width_, *window_height_);
+    query_ = std::make_unique<Query>(GL_SAMPLES_PASSED);
   }
 
   void CausticMapping::Visualise( std::shared_ptr<FrameBuffer> fb, unsigned int texture_index,
@@ -71,6 +73,7 @@ namespace render
   void CausticMapping::CalculateCaustics(std::vector<std::shared_ptr<scene::Object>> receivers,
     std::vector<std::shared_ptr<scene::Object>> producers,
     render::Shader* post_process, scene::Object* ss_quad) {
+    static bool past_first_frame = false;
     glClearColor(0.f, 0.f, 0.0f, 0.0f);
     //TODO make this a changeable
     glm::vec3 light_position = glm::vec3(0.0f, 4.0f, 20.0f);
@@ -78,7 +81,11 @@ namespace render
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::mat4 light_view_matrix = glm::lookAt(light_position, origin, up);
     glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 300.0f);
-
+    GLuint pixels_renderered_last_frame = *window_height_ * *window_width_;
+    if (past_first_frame) {
+      query_->ResultNoWait(&pixels_renderered_last_frame);
+    }
+    past_first_frame = true;
     //Obtain 3D world positions of the receiver geometry
     {
       //render the scene from the light's point of view and render co ords to texture
@@ -103,9 +110,10 @@ namespace render
     
     //Obtain 3D positions and surface normals of the producers
     {
+      query_->Begin();
       caustic_pos_norms_->SetBufferForDraw();
       glViewport(0, 0, *window_width_, *window_height_);
-      render::Renderer::Clear();
+      render::Renderer::ClearColourOnly();
       producer_shader_->Bind();
       for (auto object : producers) {
         glm::mat4 model_matrix = object->GetGlobalModelMatrix();
@@ -114,6 +122,7 @@ namespace render
         producer_shader_->SetUniform4fv("proj", persp_proj);
         render::Renderer::Draw(*object);
       }
+      query_->End();
       //Set temp slot to the current slot, set current slot to zero and then set back the slot after visualising
       caustic_pos_norms_->Unbind();
       render::Renderer::SetScreenAsRenderTarget();
@@ -127,12 +136,21 @@ namespace render
       render::Renderer::Clear();
       caustic_shader_->Bind();
       //Combine the flux intensity
+    /*  if (pixels_renderered_last_frame == 0) {
+        fprintf(stderr, "WARNING: no producer pixels rendered\n");
+        std::cout << "Number of pixels rendered last frame" << pixels_renderered_last_frame << std::endl;
+        pixels_renderered_last_frame = *window_height_ * *window_width_;
+      }*/
+      //This works but turns into a synchronous operation
+     /* query_->Result(&pixels_renderered_last_frame);*/
+      std::cout << "Number of pixels rendered last frame" << pixels_renderered_last_frame << std::endl;
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE);
       caustic_pos_norms_->GetTexture(0)->Bind();
       caustic_pos_norms_->GetTexture(1)->Bind();
       receiver_positions_->GetTexture(0)->Bind();
       glm::vec3 light_direction = -glm::normalize(light_position);
+      caustic_shader_->SetUniform1i("surface_area", pixels_renderered_last_frame);
       caustic_shader_->SetUniform3f("light_direction", light_direction);
       caustic_shader_->SetUniform4fv("view_proj", persp_proj * light_view_matrix);
       render::Renderer::DrawPoints(vertex_grid_.get());

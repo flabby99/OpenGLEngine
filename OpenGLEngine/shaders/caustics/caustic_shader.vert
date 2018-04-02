@@ -9,6 +9,7 @@ layout (binding = 2) uniform sampler2D receiver_pos_tex;
 //The process is similar to ray tracing
 layout (location = 0) uniform vec3 light_direction;
 layout (location = 1) uniform mat4 view_proj;
+layout (location = 2) uniform int surface_area;
 
 out vec4 intensity;
 
