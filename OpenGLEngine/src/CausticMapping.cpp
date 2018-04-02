@@ -37,6 +37,7 @@ namespace render
     {
       caustic_map_ = std::make_shared<render::FrameBuffer>();
       auto map_texture = std::make_shared<scene::Texture>(*window_width_, *window_height_, GL_TEXTURE_2D);
+      map_texture->SetSlot(GL_TEXTURE3);
       caustic_map_->AttachTexture(map_texture, GL_COLOR_ATTACHMENT0);
       caustic_map_->BufferStatusCheck();
     }
@@ -53,7 +54,6 @@ namespace render
     //Create a vertex grid of predifined size
     vertex_grid_ = std::make_unique<VertexGrid>(*window_width_, *window_height_);
     query_ = std::make_unique<Query>(GL_SAMPLES_PASSED);
-    light_view_matrix_ = glm::lookAt(light_position_, origin_, up_);
     persp_proj_ = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 300.0f);
     pixels_renderered_last_frame_ = *window_height_ * *window_width_;
   }
@@ -77,6 +77,7 @@ namespace render
     std::vector<std::shared_ptr<scene::Object>> producers,
     render::Shader* post_process, scene::Object* ss_quad) {
     glClearColor(0.f, 0.f, 0.0f, 0.0f);
+    light_view_matrix_ = glm::lookAt(light_position_, origin_, up_);
     if (past_first_frame) {
       query_->ResultNoWait(&pixels_renderered_last_frame_);
     }
@@ -161,14 +162,6 @@ namespace render
     {
       shadow_map_->SetBufferForDraw();
     }
-    
-    //Render the final scene
-    {
-      render::Renderer::SetScreenAsRenderTarget();
-      shadow_map_->Unbind();
-      glViewport(*window_width_ / 2, 0, *window_width_, *window_height_);
-    }
-
   }
   void CausticMapping::LoadShaders()
   {
@@ -180,4 +173,8 @@ namespace render
   void CausticMapping::BindCausticTexture() {
     caustic_map_->GetTexture(0)->Bind();
   }
+  void CausticMapping::BindReceiverTexture() {
+    receiver_positions_->GetTexture(0)->Bind();
+  }
+
 }

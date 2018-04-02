@@ -57,7 +57,11 @@ namespace render
       std::vector<std::shared_ptr<scene::Object>> producers,
       render::Shader* post_process, scene::Object* ss_quad);
     void BindCausticTexture();
+    void BindReceiverTexture();
     void LoadShaders();
+    inline glm::mat4 getLightViewProj() {
+      return persp_proj_ * light_view_matrix_;
+    }
   };
 }
 

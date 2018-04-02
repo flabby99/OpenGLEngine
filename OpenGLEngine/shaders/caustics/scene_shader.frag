@@ -3,12 +3,13 @@
 in vec3 eye_position;
 in vec3 eye_normal;
 in vec2 texture_coords;
+in vec4 caustic_colour;
 
 //To bring world light position to the eye space
 uniform mat4 view;
 
-layout(location = 4) uniform vec3 colour;
-layout(binding = 0) uniform sampler2D diffuse_texture;
+layout(location = 5) uniform vec3 colour;
+layout(binding = 1) uniform sampler2D diffuse_texture;
 
 //fixed point light properties - could make them uniform if want to change them
 layout(location = 6) uniform vec3 world_light_position;
@@ -43,11 +44,6 @@ void main() {
   float dot_prod_specular = clamp(dot(half_way, eye_normal), 0.0, 1.0);
   float specular_factor = pow(dot_prod_specular, specular_exp);
   vec3 Ispecular = Lspecular * Kspecular * specular_factor;
-  //fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0);
-  //fColour = vec4(colour, 1.0);
-  fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0) * texture (diffuse_texture, texture_coords);
-  //Debugs
-  //fColour = vec4(eye_position, 1.0);
-  //fColour = vec4(eye_normal, 1.0);
-  //fColour = vec4(texture_coords.x, texture_coords.y, 0, 1);
+  //fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0) * texture (diffuse_texture, texture_coords);
+  fColour = caustic_colour;
 }

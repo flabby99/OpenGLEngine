@@ -35,7 +35,7 @@ const glm::mat4 core::CathmullRomChain::CatmullRomCoeffs = glm::mat4(
   -1, 3, -3, 1
 );
 
-Camera TPcamera;
+std::unique_ptr<Camera> TPcamera;
 
 int window_height = 0;
 int window_width = 0;
@@ -115,9 +115,12 @@ void CreateScreenQuad() {
 }
 
 std::unique_ptr<render::CausticMapping> caustic_mapping;
-
+glm::vec3 light_position;
 void CreateCausticMapper() {
-  caustic_mapping = std::make_unique<render::CausticMapping>(&window_width, &window_height, false, glm::vec3(0.0f, 4.0f, 20.0f));
+  light_position = glm::vec3(0.0f, 4.0f, 20.0f);
+  caustic_mapping = std::make_unique<render::CausticMapping>(&window_width, &window_height, false, light_position);
+  glm::vec3 up(0.0f, 1.0f, 0.0f);
+  TPcamera = std::make_unique<Camera>(light_position, -light_position, up);
 }
 
 enum class eRenderType {
@@ -136,6 +139,7 @@ render::CommonShader* minnaert;
 render::Shader* cube_map;
 render::CommonShader* reflection;
 render::Shader* post_process;
+std::unique_ptr<render::Shader> caustic_scene_shader;
 
 void CreateShaders() {
     const std::string shaderfile = "config/shadernames.txt";
@@ -148,6 +152,8 @@ void CreateShaders() {
     post_process = new render::Shader("post_process", shaderfile);
     cube_map->Bind();
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
+    const std::string caustic_file = "config/causticshaders.txt";
+    caustic_scene_shader = std::make_unique<render::Shader>("scene", caustic_file);
 }
 
 //TODO maybe I could make a map of shaders if I am going to have a lot
@@ -159,6 +165,7 @@ void ReloadShaders() {
     reflection->Reload();
     cube_map->Reload();
     post_process->Reload();
+    caustic_scene_shader->Reload();
     cube_map->Bind();
     cube_map->SetUniform4fv("scale", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
 }
@@ -166,6 +173,8 @@ void ReloadShaders() {
 std::shared_ptr<scene::Object> sphere;
 std::shared_ptr<scene::Object> scene_root;
 std::shared_ptr<scene::Object> plane;
+std::vector <std::shared_ptr<scene::Object>> receivers;
+std::vector<std::shared_ptr<scene::Object>> producers;
 void LoadModels() {
   std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
  
@@ -177,7 +186,7 @@ void LoadModels() {
   sphere = sphere_scene.GetObject_(0);
   sphere->SetColour(glm::vec3(1.0f, 0.f, 0.f));
   sphere->SetParent(scene_root);
-  sphere->SetScale(glm::vec3(0.2f));
+  sphere->SetScale(glm::vec3(0.3f));
 
   std::string plane_filename = "flat_plane.obj";
   core::SceneInfo plane_scene(plane_filename, white);
@@ -186,11 +195,14 @@ void LoadModels() {
   plane->SetParent(scene_root);
   plane->SetRotation(glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
   plane->SetTranslation(glm::vec3(0.0f, 0.0f, -2.0f));
+  plane->SetScale(glm::vec3(0.2f));
   plane->UpdateModelMatrix();
 
   std::string filename = "cube.obj";
   core::SceneInfo box_scene(filename, white);
   sky_box = box_scene.GetObject_(0);
+  receivers.push_back(plane);
+  producers.push_back(sphere);
 }
 
 void DrawSkyBox() {
@@ -198,7 +210,7 @@ void DrawSkyBox() {
   glDisable(GL_CULL_FACE);
   cube_map->Bind();
   glm::mat4 view;
-  view = TPcamera.getMatrix();
+  view = TPcamera->getMatrix();
   cube_map->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
   cube_map->SetUniform4fv("proj", persp_proj);
@@ -223,7 +235,7 @@ void UpdateScene() {
 
 void RenderWithShader(render::Shader* shader) {
   shader->Bind();
-  glm::mat4 view = TPcamera.getMatrix();
+  glm::mat4 view = TPcamera->getMatrix();
   shader->SetUniform4fv("view", view);
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
   shader->SetUniform4fv("proj", persp_proj);
@@ -231,24 +243,40 @@ void RenderWithShader(render::Shader* shader) {
   render::Renderer::Draw(*sphere, shader, view);
 }
 
-std::shared_ptr<render::Shader> receiver_shader;
+void RenderCaustics() {
+  //Render the final scene
+  glm::mat4 view = TPcamera->getMatrix();
+  glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
+  render::Renderer::SetScreenAsRenderTarget();
+  glViewport(window_width / 2, 0, window_width, window_height);
+  //DrawSkyBox();
 
-void LoadReceiver() {
-  const std::string caustic_shaders = "config/causticshaders.txt";
-  receiver_shader = std::make_shared<render::Shader>("receiver", caustic_shaders);
+  //Draw receivers
+  caustic_scene_shader->Bind();
+  caustic_mapping->BindCausticTexture();
+  //caustic_mapping->BindReceiverTexture();
+  caustic_scene_shader->SetUniform3f("world_light_position", light_position);
+  caustic_scene_shader->SetUniform4fv("light_view_proj", caustic_mapping->getLightViewProj());
+  caustic_scene_shader->SetUniform4fv("view", view);
+  caustic_scene_shader->SetUniform4fv("proj", persp_proj);
+  for (auto object : receivers) {
+    render::Renderer::Draw(*object, caustic_scene_shader.get(), view);
+  }
+  //Draw rest of scene
+  blinn_phong->Bind();
+  blinn_phong->SetUniform3f("world_light_position", light_position);
+  blinn_phong->SetUniform4fv("light_view_proj", caustic_mapping->getLightViewProj());
+  blinn_phong->SetUniform4fv("view", view);
+  blinn_phong->SetUniform4fv("proj", persp_proj);
+  for (auto object : producers) {
+    render::Renderer::Draw(*object, blinn_phong, view);
+  }
 }
 
 void Render() {
   render::Renderer::Clear();
-  std::vector <std::shared_ptr<scene::Object>> receivers;
-  receivers.push_back(plane);
-  std::vector<std::shared_ptr<scene::Object>> producers;
-  producers.push_back(sphere);
- /* 
-  DrawSkyBox();*/
   caustic_mapping->CalculateCaustics(receivers, producers, post_process, ss_quad.get());
-  //NB need this
-  render::Renderer::SetScreenAsRenderTarget();
+  RenderCaustics();
   glutSwapBuffers();
 }
 
@@ -275,7 +303,6 @@ void Keyboard(unsigned char key, int x, int y) {
   case 'P':
     ReloadShaders();
     caustic_mapping->LoadShaders();
-    LoadReceiver();
     std::cout << "Reloaded shaders" << std::endl;
     break;
 
@@ -341,27 +368,27 @@ void Keyboard(unsigned char key, int x, int y) {
 
   //Camera Translations
   case 'd':
-    TPcamera.Move(glm::vec3(1.0f, 0.0f, 0.0f));
+    TPcamera->Move(glm::vec3(1.0f, 0.0f, 0.0f));
     changedmatrices = true;
     break;
   case 'a':
-    TPcamera.Move(glm::vec3(-1.0f, 0.0f, 0.0f));
+    TPcamera->Move(glm::vec3(-1.0f, 0.0f, 0.0f));
     changedmatrices = true;
     break;
   case 'w':
-    TPcamera.Move(glm::vec3(0.0f, 1.0f, 0.0f));
+    TPcamera->Move(glm::vec3(0.0f, 1.0f, 0.0f));
     changedmatrices = true;
     break;
   case 's':
-    TPcamera.Move(glm::vec3(0.0f, -1.0f, 0.0f));
+    TPcamera->Move(glm::vec3(0.0f, -1.0f, 0.0f));
     changedmatrices = true;
     break;
   case 'q':
-    TPcamera.Move(glm::vec3(0.0f, 0.0f, -1.0f));
+    TPcamera->Move(glm::vec3(0.0f, 0.0f, -1.0f));
     changedmatrices = true;
     break;
   case 'e':
-    TPcamera.Move(glm::vec3(0.0f, 0.0f, 1.0f));
+    TPcamera->Move(glm::vec3(0.0f, 0.0f, 1.0f));
     changedmatrices = true;
     break;
 
@@ -418,31 +445,31 @@ void Mouse(int button, int state, int x, int y) {
   if (button == GLUT_LEFT && state == GLUT_DOWN)
   {
     left_mouse_down = true;
-    TPcamera.mouseUpdate(glm::vec2(x, y));
+    TPcamera->mouseUpdate(glm::vec2(x, y));
   }
   if (button == GLUT_LEFT && state == GLUT_UP)
   {
     left_mouse_down = false;
-    TPcamera.first_click = false;
+    TPcamera->first_click = false;
   }
   if (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN)
   {
     middle_mouse_down = true;
-    TPcamera.mouseMove(glm::vec2(x, y));
+    TPcamera->mouseMove(glm::vec2(x, y));
   }
   if (button == GLUT_MIDDLE_BUTTON && state == GLUT_UP)
   {
     middle_mouse_down = false;
-    TPcamera.first_click = false;
+    TPcamera->first_click = false;
   }
 }
 
 void MouseMovement(int x, int y) {
   if (left_mouse_down) {
-    TPcamera.mouseUpdate(glm::vec2(x, y));
+    TPcamera->mouseUpdate(glm::vec2(x, y));
   }
   if (middle_mouse_down) {
-    TPcamera.mouseMove(glm::vec2(x, y));
+    TPcamera->mouseMove(glm::vec2(x, y));
   }
 }
 
@@ -464,7 +491,6 @@ void Init() {
   CreateShaders();
   CreateCausticMapper();
   InitFrameBuffers();
-  LoadReceiver();
 }
 
 void CleanUp() {

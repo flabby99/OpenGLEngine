@@ -7,3 +7,6 @@ shaders/caustics/producer_shader.frag
 caustic
 shaders/caustics/caustic_shader.vert
 shaders/caustics/caustic_shader.frag
+scene
+shaders/caustics/scene_shader.vert
+shaders/caustics/scene_shader.frag
