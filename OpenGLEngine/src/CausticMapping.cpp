@@ -135,22 +135,19 @@ namespace render
       glViewport(0, 0, *window_width_, *window_height_);
       render::Renderer::Clear();
       caustic_shader_->Bind();
+      glPointSize(1);
       //Combine the flux intensity
-    /*  if (pixels_renderered_last_frame == 0) {
-        fprintf(stderr, "WARNING: no producer pixels rendered\n");
-        std::cout << "Number of pixels rendered last frame" << pixels_renderered_last_frame << std::endl;
-        pixels_renderered_last_frame = *window_height_ * *window_width_;
-      }*/
-      //This works but turns into a synchronous operation
+      //This works but it is a synchronus operation
      /* query_->Result(&pixels_renderered_last_frame);*/
-      std::cout << "Number of pixels rendered last frame" << pixels_renderered_last_frame << std::endl;
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE);
       caustic_pos_norms_->GetTexture(0)->Bind();
       caustic_pos_norms_->GetTexture(1)->Bind();
       receiver_positions_->GetTexture(0)->Bind();
       glm::vec3 light_direction = -glm::normalize(light_position);
-      caustic_shader_->SetUniform1i("surface_area", pixels_renderered_last_frame);
+      float visible = 1.f - (float)(pixels_renderered_last_frame) / (float)(*window_width_ * *window_height_);
+      if (visible < 0.01f) visible = 0.01f;
+      caustic_shader_->SetUniform1f("surface_area", visible);
       caustic_shader_->SetUniform3f("light_direction", light_direction);
       caustic_shader_->SetUniform4fv("view_proj", persp_proj * light_view_matrix);
       render::Renderer::DrawPoints(vertex_grid_.get());

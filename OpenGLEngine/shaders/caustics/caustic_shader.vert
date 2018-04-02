@@ -9,7 +9,7 @@ layout (binding = 2) uniform sampler2D receiver_pos_tex;
 //The process is similar to ray tracing
 layout (location = 0) uniform vec3 light_direction;
 layout (location = 1) uniform mat4 view_proj;
-layout (location = 2) uniform int surface_area;
+layout (location = 2) uniform float surface_area;
 
 out vec4 intensity;
 
@@ -39,10 +39,14 @@ void main()
     intensity = vec4(0.0);
   }
   else {
-    vec3 refracted = normalize(refract(light_direction, texture(producer_norm_tex, vPosition * 0.5 + vec2(0.5)).rgb, ratio));
+    vec3 receiver_normal = texture(producer_norm_tex, vPosition * 0.5 + vec2(0.5)).rgb;
+    vec3 refracted = normalize(refract(light_direction, receiver_normal, ratio));
     vec3 receiver_pos = EstimateIntersection (producer_pos.rgb, refracted, receiver_pos_tex);
     vec4 temp = view_proj * vec4(receiver_pos, 1.0); 
     gl_Position = temp;
-    intensity = vec4(1.0);
+    float light_normal_dot = clamp(dot(receiver_normal, -light_direction), 0.0, 1.0);
+    float intensity_scale = light_normal_dot * surface_area;
+    //intensity_scale = light_normal_dot;
+    intensity = vec4(vec3(intensity_scale), 1.0);
   }
 }
