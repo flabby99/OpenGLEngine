@@ -145,6 +145,7 @@ namespace render
       glm::vec3 light_direction = -glm::normalize(light_position_);
       float visible = 1.f - (float)(pixels_renderered_last_frame_) / (float)(*window_width_ * *window_height_);
       if (visible < 0.01f) visible = 0.01f;
+      visible *= 0.1;
       caustic_shader_->SetUniform1f("surface_area", visible);
       caustic_shader_->SetUniform3f("light_direction", light_direction);
       caustic_shader_->SetUniform4fv("view_proj", persp_proj_ * light_view_matrix_);

@@ -195,7 +195,7 @@ void LoadModels() {
   plane->SetParent(scene_root);
   plane->SetRotation(glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
   plane->SetTranslation(glm::vec3(0.0f, 0.0f, -2.0f));
-  plane->SetScale(glm::vec3(0.2f));
+  plane->SetScale(glm::vec3(0.3f));
   plane->UpdateModelMatrix();
 
   std::string filename = "cube.obj";
