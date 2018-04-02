@@ -71,19 +71,13 @@ namespace render
   void CausticMapping::CalculateCaustics(std::vector<std::shared_ptr<scene::Object>> receivers,
     std::vector<std::shared_ptr<scene::Object>> producers,
     render::Shader* post_process, scene::Object* ss_quad) {
-    glClearColor(0.f, 0.f, 0.f, 1.0f);
+    glClearColor(0.f, 0.f, 0.0f, 0.0f);
     //TODO make this a changeable
     glm::vec3 light_position = glm::vec3(0.0f, 4.0f, 20.0f);
     glm::vec3 origin = glm::vec3(0.0f);
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::mat4 light_view_matrix = glm::lookAt(light_position, origin, up);
     glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 300.0f);
-    //const glm::mat4 scale_bias_matrix = glm::mat4(
-    //  glm::vec4(26.0f, 0.0f, 0.0f, 0.0f),
-    //  glm::vec4(0.0f, 20.0f, 0.0f, 0.0f),
-    //  glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
-    //  glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f));
-    const glm::mat4 scale_bias_matrix = glm::mat4(1.0f);
 
     //Obtain 3D world positions of the receiver geometry
     {
@@ -132,14 +126,17 @@ namespace render
       glViewport(0, 0, *window_width_, *window_height_);
       render::Renderer::Clear();
       caustic_shader_->Bind();
+      //Combine the flux intensity
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
       caustic_pos_norms_->GetTexture(0)->Bind();
       caustic_pos_norms_->GetTexture(1)->Bind();
       receiver_positions_->GetTexture(0)->Bind();
       glm::vec3 light_direction = -glm::normalize(light_position);
       caustic_shader_->SetUniform3f("light_direction", light_direction);
       caustic_shader_->SetUniform4fv("view_proj", persp_proj * light_view_matrix);
-      caustic_shader_->SetUniform4fv("bias", scale_bias_matrix);
       render::Renderer::DrawPoints(vertex_grid_.get());
+      glDisable(GL_BLEND);
 
       render::Renderer::SetScreenAsRenderTarget();
       caustic_map_->Unbind();

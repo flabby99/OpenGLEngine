@@ -9,14 +9,14 @@ layout (binding = 2) uniform sampler2D receiver_pos_tex;
 //The process is similar to ray tracing
 layout (location = 0) uniform vec3 light_direction;
 layout (location = 1) uniform mat4 view_proj;
-layout (location = 2) uniform mat4 bias;
 
-out vec2 uv;
-out vec3 receiver_pos;
+out vec4 intensity;
 
 //Constants for refraction
 float air_refractive_index = 1;
 float glass_refractive_index = 1.517;
+//Let us just work with air and glass at the moment
+float ratio = air_refractive_index / glass_refractive_index;
 
 //This is from the paper "Caustics Mapping - An Image space technique for Real time Caustics"
 vec3 EstimateIntersection (vec3 v, vec3 r, sampler2D posTexture) {
@@ -31,15 +31,17 @@ return texture(posTexture, tc).rgb;
 }
 void main()
 {
-  //Let us just work with air and glass at the moment
-  float ratio = air_refractive_index / glass_refractive_index;
-
-  vec3 refracted = normalize(refract(light_direction, texture(producer_norm_tex, vPosition * 0.5 + vec2(0.5)).rgb, ratio));
-  vec3 producer_pos = texture(producer_pos_tex, vPosition * 0.5 + vec2(0.5)).rgb;
-  receiver_pos = EstimateIntersection (producer_pos, refracted, receiver_pos_tex);
-  //receiver_pos = -refracted;
-  //receiver_pos = texture(receiver_pos_tex, vPosition * 0.5 + vec2(0.5)).rgb;
-  vec4 temp = bias * view_proj * vec4(receiver_pos, 1.0); 
-  gl_Position = temp;
-  //gl_Position = vec4(vPosition, 0.0, 1.0);
+  vec4 producer_pos = texture(producer_pos_tex, vPosition * 0.5 + vec2(0.5));
+  //Ignore blank positions
+  if(producer_pos.a < 0.00001) {
+    gl_Position = vec4(0.0);
+    intensity = vec4(0.0);
+  }
+  else {
+    vec3 refracted = normalize(refract(light_direction, texture(producer_norm_tex, vPosition * 0.5 + vec2(0.5)).rgb, ratio));
+    vec3 receiver_pos = EstimateIntersection (producer_pos.rgb, refracted, receiver_pos_tex);
+    vec4 temp = view_proj * vec4(receiver_pos, 1.0); 
+    gl_Position = temp;
+    intensity = vec4(1.0);
+  }
 }
