@@ -53,6 +53,9 @@ namespace render
     //Create a vertex grid of predifined size
     vertex_grid_ = std::make_unique<VertexGrid>(*window_width_, *window_height_);
     query_ = std::make_unique<Query>(GL_SAMPLES_PASSED);
+    light_view_matrix_ = glm::lookAt(light_position_, origin_, up_);
+    persp_proj_ = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 300.0f);
+    pixels_renderered_last_frame_ = *window_height_ * *window_width_;
   }
 
   void CausticMapping::Visualise( std::shared_ptr<FrameBuffer> fb, unsigned int texture_index,
@@ -73,19 +76,12 @@ namespace render
   void CausticMapping::CalculateCaustics(std::vector<std::shared_ptr<scene::Object>> receivers,
     std::vector<std::shared_ptr<scene::Object>> producers,
     render::Shader* post_process, scene::Object* ss_quad) {
-    static bool past_first_frame = false;
     glClearColor(0.f, 0.f, 0.0f, 0.0f);
-    //TODO make this a changeable
-    glm::vec3 light_position = glm::vec3(0.0f, 4.0f, 20.0f);
-    glm::vec3 origin = glm::vec3(0.0f);
-    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::mat4 light_view_matrix = glm::lookAt(light_position, origin, up);
-    glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 300.0f);
-    GLuint pixels_renderered_last_frame = *window_height_ * *window_width_;
     if (past_first_frame) {
-      query_->ResultNoWait(&pixels_renderered_last_frame);
+      query_->ResultNoWait(&pixels_renderered_last_frame_);
     }
     past_first_frame = true;
+
     //Obtain 3D world positions of the receiver geometry
     {
       //render the scene from the light's point of view and render co ords to texture
@@ -96,8 +92,8 @@ namespace render
       for (auto object : receivers) {
         glm::mat4 model_matrix = object->GetGlobalModelMatrix();
         receiver_shader_->SetUniform4fv("model", object->GetGlobalModelMatrix());
-        receiver_shader_->SetUniform4fv("view", light_view_matrix);
-        receiver_shader_->SetUniform4fv("proj", persp_proj);
+        receiver_shader_->SetUniform4fv("view", light_view_matrix_);
+        receiver_shader_->SetUniform4fv("proj", persp_proj_);
         render::Renderer::Draw(*object);
       }
 
@@ -118,8 +114,8 @@ namespace render
       for (auto object : producers) {
         glm::mat4 model_matrix = object->GetGlobalModelMatrix();
         producer_shader_->SetUniform4fv("model", object->GetGlobalModelMatrix());
-        producer_shader_->SetUniform4fv("view", light_view_matrix);
-        producer_shader_->SetUniform4fv("proj", persp_proj);
+        producer_shader_->SetUniform4fv("view", light_view_matrix_);
+        producer_shader_->SetUniform4fv("proj", persp_proj_);
         render::Renderer::Draw(*object);
       }
       query_->End();
@@ -129,6 +125,7 @@ namespace render
       glViewport(0, 0, *window_width_ / 2, *window_height_ / 2);
       Visualise(caustic_pos_norms_, 0, post_process, ss_quad);
     }
+
     //Create a caustic map texture
     {
       caustic_map_->SetBufferForDraw();
@@ -144,12 +141,12 @@ namespace render
       caustic_pos_norms_->GetTexture(0)->Bind();
       caustic_pos_norms_->GetTexture(1)->Bind();
       receiver_positions_->GetTexture(0)->Bind();
-      glm::vec3 light_direction = -glm::normalize(light_position);
-      float visible = 1.f - (float)(pixels_renderered_last_frame) / (float)(*window_width_ * *window_height_);
+      glm::vec3 light_direction = -glm::normalize(light_position_);
+      float visible = 1.f - (float)(pixels_renderered_last_frame_) / (float)(*window_width_ * *window_height_);
       if (visible < 0.01f) visible = 0.01f;
       caustic_shader_->SetUniform1f("surface_area", visible);
       caustic_shader_->SetUniform3f("light_direction", light_direction);
-      caustic_shader_->SetUniform4fv("view_proj", persp_proj * light_view_matrix);
+      caustic_shader_->SetUniform4fv("view_proj", persp_proj_ * light_view_matrix_);
       render::Renderer::DrawPoints(vertex_grid_.get());
       glDisable(GL_BLEND);
 
@@ -158,15 +155,19 @@ namespace render
       glViewport(0, *window_height_ / 2, *window_width_ / 2, *window_height_ / 2);
       Visualise(caustic_map_, 0, post_process, ss_quad);
     }
+
     //Optionally Construct a shadow map
     if (should_shadow_map_) 
     {
       shadow_map_->SetBufferForDraw();
     }
     
-    render::Renderer::SetScreenAsRenderTarget();
-    shadow_map_->Unbind();
-    glViewport(*window_width_ / 2, 0, *window_width_, *window_height_);
+    //Render the final scene
+    {
+      render::Renderer::SetScreenAsRenderTarget();
+      shadow_map_->Unbind();
+      glViewport(*window_width_ / 2, 0, *window_width_, *window_height_);
+    }
 
   }
   void CausticMapping::LoadShaders()
@@ -175,6 +176,8 @@ namespace render
     receiver_shader_ = std::make_shared<Shader>("receiver", caustic_shaders);
     producer_shader_ = std::make_shared<Shader>("producer", caustic_shaders);
     caustic_shader_ = std::make_shared<Shader>("caustic", caustic_shaders);
-    //scene_shader_ = std::make_shared<Shader>("scene", caustic_shaders);
+  }
+  void CausticMapping::BindCausticTexture() {
+    caustic_map_->GetTexture(0)->Bind();
   }
 }

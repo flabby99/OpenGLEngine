@@ -27,17 +27,25 @@ namespace render
     std::shared_ptr<Shader> producer_shader_;
     std::shared_ptr<Shader> caustic_shader_;
     std::shared_ptr<Shader> shadow_shader_;
-    std::shared_ptr<Shader> scene_shader_;
     std::unique_ptr<VertexGrid> vertex_grid_;
     std::unique_ptr<Query> query_;
+
+    bool past_first_frame = false;
+    glm::vec3 light_position_;
+    glm::vec3 origin_ = glm::vec3(0.0f);
+    glm::vec3 up_ = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::mat4 light_view_matrix_;
+    glm::mat4 persp_proj_;
+    GLuint pixels_renderered_last_frame_;
 
     void Init(bool should_shadow_map);
   public:
     //Blank constructor
     inline CausticMapping() {}
     //Creates the necessary framebuffers and textures
-    inline CausticMapping(const int* window_width, const int* window_height, bool should_shadow_map)
-      : window_width_(window_width), window_height_(window_height), should_shadow_map_(should_shadow_map)
+    inline CausticMapping(const int* window_width, const int* window_height, bool should_shadow_map, glm::vec3 light_position )
+      : window_width_(window_width), window_height_(window_height), should_shadow_map_(should_shadow_map),
+        light_position_(light_position)
     {
       Init(should_shadow_map_);
     }
@@ -48,6 +56,7 @@ namespace render
     void CalculateCaustics(std::vector<std::shared_ptr<scene::Object>> receivers,
       std::vector<std::shared_ptr<scene::Object>> producers,
       render::Shader* post_process, scene::Object* ss_quad);
+    void BindCausticTexture();
     void LoadShaders();
   };
 }

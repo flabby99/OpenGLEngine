@@ -117,7 +117,7 @@ void CreateScreenQuad() {
 std::unique_ptr<render::CausticMapping> caustic_mapping;
 
 void CreateCausticMapper() {
-  caustic_mapping = std::make_unique<render::CausticMapping>(&window_width, &window_height, false);
+  caustic_mapping = std::make_unique<render::CausticMapping>(&window_width, &window_height, false, glm::vec3(0.0f, 4.0f, 20.0f));
 }
 
 enum class eRenderType {
