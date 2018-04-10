@@ -59,6 +59,9 @@ namespace render
     void BindCausticTexture();
     void BindReceiverTexture();
     void LoadShaders();
+    void SetLightPosition(const glm::vec3& light_position) {
+      light_position_ = light_position;
+    }
     inline glm::mat4 getLightViewProj() {
       return persp_proj_ * light_view_matrix_;
     }

@@ -117,7 +117,7 @@ void CreateScreenQuad() {
 std::unique_ptr<render::CausticMapping> caustic_mapping;
 glm::vec3 light_position;
 void CreateCausticMapper() {
-  light_position = glm::vec3(0.0f, 4.0f, 20.0f);
+  light_position = glm::vec3(5.0f, 4.0f, 20.0f);
   caustic_mapping = std::make_unique<render::CausticMapping>(&window_width, &window_height, false, light_position);
   glm::vec3 up(0.0f, 1.0f, 0.0f);
   TPcamera = std::make_unique<Camera>(light_position, -light_position, up);
@@ -176,7 +176,7 @@ std::shared_ptr<scene::Object> plane;
 std::vector <std::shared_ptr<scene::Object>> receivers;
 std::vector<std::shared_ptr<scene::Object>> producers;
 void LoadModels() {
-  std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
+  std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/piper_diffuse.jpg");
  
   scene_root = std::make_shared<scene::Object>();
   scene_root->SetTranslation(glm::vec3(0.f, 0.0f, 5.f));
@@ -247,8 +247,12 @@ void RenderCaustics() {
   //Render the final scene
   glm::mat4 view = TPcamera->getMatrix();
   glm::mat4 persp_proj = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 300.0f);
+  //float aspect = (float)window_height / (float)window_width;
+  //persp_proj = glm::frustum(-1.0f, 1.0f, -aspect, aspect, 1.0f, -1.0f);
   render::Renderer::SetScreenAsRenderTarget();
-  glViewport(window_width / 2, 0, window_width, window_height);
+  //glViewport(window_width / 2, 0, window_width, window_height / 2);
+  glViewport(0, 0, window_width, window_height);
+  render::Renderer::Clear();
   //DrawSkyBox();
 
   //Draw receivers
@@ -436,7 +440,10 @@ void Keyboard(unsigned char key, int x, int y) {
   //Apply the changes
   if (changedmatrices) {
     model_transform = translationmatrices.UpdateModelMatrix();
-    sphere->SetModelMatrix(model_transform);
+    light_position = glm::vec3(5.0f, 4.0f, 20.0f);
+    light_position = model_transform * glm::vec4(light_position, 1.0);
+    caustic_mapping->SetLightPosition(light_position);
+    //sphere->SetModelMatrix(model_transform);
     glutPostRedisplay();
   }
 }

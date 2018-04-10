@@ -20,7 +20,7 @@ float glass_refractive_index = 1.517;
 float ratio = air_refractive_index / glass_refractive_index;
 
 //This is from the paper "Caustics Mapping - An Image space technique for Real time Caustics"
-vec3 EstimateIntersection (vec3 v, vec3 r, sampler2D posTexture) {
+vec3 EstimateIntersection (in vec3 v, in vec3 r, in sampler2D posTexture) {
 vec3 P1 = v + r;
 vec4 texPt = view_proj * vec4(P1, 1.0);
 vec2 tc = 0.5 * texPt.xy /texPt.w + vec2(0.5);

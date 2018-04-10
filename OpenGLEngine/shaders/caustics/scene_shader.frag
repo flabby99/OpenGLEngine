@@ -9,7 +9,7 @@ in vec2 tex_lookup;
 uniform mat4 view;
 
 layout(location = 5) uniform vec3 colour;
-layout(binding = 1) uniform sampler2D diffuse_texture;
+layout(binding = 0) uniform sampler2D diffuse_texture;
 layout(binding = 3) uniform sampler2D caustic_intensity;
 
 //fixed point light properties - could make them uniform if want to change them
@@ -46,7 +46,7 @@ void main() {
   float specular_factor = pow(dot_prod_specular, specular_exp);
   vec3 Ispecular = Lspecular * Kspecular * specular_factor;
   //fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0) * texture (diffuse_texture, texture_coords);
-  vec4 caustic_colour = texture(caustic_intensity, tex_lookup);
-  //caustic_colour = vec4(tex_lookup, 0.0, 1.0);
-  fColour = caustic_colour;
+  vec4 temp = texture(caustic_intensity, tex_lookup);
+  //temp = vec4(tex_lookup, 0, 1);
+  fColour = temp;
 }

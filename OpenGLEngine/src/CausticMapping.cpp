@@ -54,7 +54,9 @@ namespace render
     //Create a vertex grid of predifined size
     vertex_grid_ = std::make_unique<VertexGrid>(*window_width_, *window_height_);
     query_ = std::make_unique<Query>(GL_SAMPLES_PASSED);
-    persp_proj_ = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 300.0f);
+    //persp_proj_ = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 80.0f);
+    persp_proj_ = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 20.0f, -70.0f);
+    //persp_proj_ = glm::frustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
     pixels_renderered_last_frame_ = *window_height_ * *window_width_;
   }
 
@@ -145,7 +147,7 @@ namespace render
       glm::vec3 light_direction = -glm::normalize(light_position_);
       float visible = 1.f - (float)(pixels_renderered_last_frame_) / (float)(*window_width_ * *window_height_);
       if (visible < 0.01f) visible = 0.01f;
-      visible *= 0.1;
+      /*visible *= 0.1f;*/
       caustic_shader_->SetUniform1f("surface_area", visible);
       caustic_shader_->SetUniform3f("light_direction", light_direction);
       caustic_shader_->SetUniform4fv("view_proj", persp_proj_ * light_view_matrix_);
