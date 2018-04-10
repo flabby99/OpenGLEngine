@@ -114,13 +114,13 @@ void CreateScreenQuad() {
   ss_quad = std::make_shared<scene::Object>(va, ib);
 }
 
-int caustic_size = 64;
+int caustic_size = 1024;
 std::unique_ptr<render::CausticMapping> caustic_mapping;
 glm::vec3 light_position;
 void CreateCausticMapper() {
   light_position = glm::vec3(5.0f, 4.0f, 20.0f);
   //NOTE the textures can be any size, advantage of window size is that number of renderered pixels match
-  //caustic_mapping = std::make_unique<render::CausticMapping>(&caustic_size, &caustic_size, false, light_position);
+  //caustic_mapping = std::make_unique<render::CausticMapping>(&caustic_size, &caustic_size, true, light_position);
   caustic_mapping = std::make_unique<render::CausticMapping>(&window_width, &window_height, true, light_position);
   glm::vec3 up(0.0f, 1.0f, 0.0f);
   TPcamera = std::make_unique<Camera>(light_position, -light_position, up);
@@ -198,8 +198,9 @@ void LoadModels() {
   plane->SetParent(scene_root);
   plane->SetRotation(glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
   plane->SetTranslation(glm::vec3(0.0f, 0.0f, -2.0f));
-  plane->SetScale(glm::vec3(0.3f));
+  plane->SetScale(glm::vec3(0.15f));
   plane->UpdateModelMatrix();
+  plane->SetColour(glm::vec3(0.0f, 0.5f, 0.5f));
 
   std::string filename = "cube.obj";
   core::SceneInfo box_scene(filename, white);
@@ -261,18 +262,25 @@ void RenderCaustics() {
   //Draw receivers
   caustic_scene_shader->Bind();
   caustic_mapping->BindCausticTexture();
+  caustic_mapping->BindShadowTexture();
   //caustic_mapping->BindReceiverTexture();
+  glm::mat4 bias(
+    0.5, 0.0, 0.0, 0.0,
+    0.0, 0.5, 0.0, 0.0,
+    0.0, 0.0, 0.5, 0.0,
+    0.5, 0.5, 0.5, 1.0
+  );
   caustic_scene_shader->SetUniform3f("world_light_position", light_position);
-  caustic_scene_shader->SetUniform4fv("light_view_proj", caustic_mapping->getLightViewProj());
+  caustic_scene_shader->SetUniform4fv("light_view_proj", bias * caustic_mapping->getLightViewProj());
   caustic_scene_shader->SetUniform4fv("view", view);
   caustic_scene_shader->SetUniform4fv("proj", persp_proj);
   for (auto object : receivers) {
+    caustic_scene_shader->SetUniform3f("colour", object->GetColour());
     render::Renderer::Draw(*object, caustic_scene_shader.get(), view);
   }
   //Draw rest of scene
   blinn_phong->Bind();
   blinn_phong->SetUniform3f("world_light_position", light_position);
-  blinn_phong->SetUniform4fv("light_view_proj", caustic_mapping->getLightViewProj());
   blinn_phong->SetUniform4fv("view", view);
   blinn_phong->SetUniform4fv("proj", persp_proj);
   for (auto object : producers) {

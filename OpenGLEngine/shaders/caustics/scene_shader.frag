@@ -3,7 +3,7 @@
 in vec3 eye_position;
 in vec3 eye_normal;
 in vec2 texture_coords;
-in vec2 tex_lookup;
+in vec4 TexPt;
 
 //To bring world light position to the eye space
 uniform mat4 view;
@@ -11,6 +11,8 @@ uniform mat4 view;
 layout(location = 5) uniform vec3 colour;
 layout(binding = 0) uniform sampler2D diffuse_texture;
 layout(binding = 3) uniform sampler2D caustic_intensity;
+layout(binding = 4) uniform sampler2DShadow depth_texture;
+//layout(binding = 4) uniform sampler2D depth_texture;
 
 //fixed point light properties - could make them uniform if want to change them
 layout(location = 6) uniform vec3 world_light_position;
@@ -45,8 +47,18 @@ void main() {
   float dot_prod_specular = clamp(dot(half_way, eye_normal), 0.0, 1.0);
   float specular_factor = pow(dot_prod_specular, specular_exp);
   vec3 Ispecular = Lspecular * Kspecular * specular_factor;
+
+  //Shadowing
+  //float bias = 0.005*tan(acos(dot_prod));
+  //bias = clamp(bias, 0.0, 0.01);
+  //float visibility = 1.0;
+  //if (texture(depth_texture, TexPt.xy).z < TexPt.z - bias) {
+	//visibility = 0.5;
+  //}
+  float visibility = texture(depth_texture, TexPt.xyz);
   //fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0) * texture (diffuse_texture, texture_coords);
-  vec4 temp = texture(caustic_intensity, tex_lookup);
-  //temp = vec4(tex_lookup, 0, 1);
-  fColour = temp;
+  vec4 temp = texture(caustic_intensity, TexPt.xy);
+  fColour = vec4(Iambient + temp.rgb + visibility * (Idiffuse + Ispecular), 1.0);
+  //fColour = vec4(texture(depth_texture, TexPt.xy).z, 0, 0, 1);
+  //fColour = vec4(visibility, 0, 0, 1);
 }

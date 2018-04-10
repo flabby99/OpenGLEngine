@@ -34,3 +34,6 @@ I will attempt to update the code base to follow https://google.github.io/styleg
 # Rendering to non-default framebuffer locations
 The framebuffer OpenGL object is used as a container, and textures and renderbuffers can be attached to framebuffers. 
 Renderbuffers are used over texture buffers when the intention is to render, and not to use the texture again for any further lookups.
+
+# Caustics
+Currently we are only dealing with directional lights, and as such, an ortographic projection can be used for the light.

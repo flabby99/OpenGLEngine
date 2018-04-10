@@ -45,8 +45,9 @@ namespace render
     if (should_shadow_map_)
     {
       shadow_map_ = std::make_shared<render::FrameBuffer>();
-      auto map_texture = std::make_shared<scene::DepthTexture>(*window_width_, *window_height_, GL_TEXTURE_2D);
-      shadow_map_->AttachTexture(map_texture, GL_DEPTH_ATTACHMENT);
+      auto shadow_texture = std::make_shared<scene::DepthTexture>(*window_width_, *window_height_, GL_TEXTURE_2D);
+      shadow_texture->SetSlot(GL_TEXTURE4);
+      shadow_map_->AttachTexture(shadow_texture, GL_DEPTH_ATTACHMENT);
       shadow_map_->BufferStatusCheck();
     }
     //Create the shaders
@@ -168,6 +169,10 @@ namespace render
       render::Renderer::Clear();
       shadow_shader_->Bind();
       shadow_shader_->SetUniform4fv("view_proj", persp_proj_ * light_view_matrix_);
+      glEnable(GL_POLYGON_OFFSET_FILL);
+      glPolygonOffset(2.0f, 4.0f);
+      // Draw from the light's point of view
+
       for (auto object : producers) {
         glm::mat4 model_matrix = object->GetGlobalModelMatrix();
         shadow_shader_->SetUniform4fv("model", object->GetGlobalModelMatrix());
@@ -178,6 +183,7 @@ namespace render
         shadow_shader_->SetUniform4fv("model", object->GetGlobalModelMatrix());
         render::Renderer::Draw(*object);
       }
+      glDisable(GL_POLYGON_OFFSET_FILL);
       render::Renderer::SetScreenAsRenderTarget();
       shadow_map_->Unbind();
       glViewport(*window_width_ / 2, *window_height_ / 2, *window_width_ / 2, *window_height_ / 2);
@@ -199,6 +205,9 @@ namespace render
   }
   void CausticMapping::BindReceiverTexture() {
     receiver_positions_->GetTexture(0)->Bind();
+  }
+  void CausticMapping::BindShadowTexture() {
+    shadow_map_->GetTexture(0)->Bind();
   }
 
 }

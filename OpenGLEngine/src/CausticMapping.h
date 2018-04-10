@@ -58,6 +58,7 @@ namespace render
       render::Shader* post_process, scene::Object* ss_quad);
     void BindCausticTexture();
     void BindReceiverTexture();
+    void BindShadowTexture();
     void LoadShaders();
     void SetLightPosition(const glm::vec3& light_position) {
       light_position_ = light_position;

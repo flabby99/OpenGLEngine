@@ -7,7 +7,7 @@ layout(location=2) in vec2 vt;
 out vec3 eye_position;
 out vec3 eye_normal;
 out vec2 texture_coords;
-out vec2 tex_lookup;
+out vec4 TexPt;
 
 layout(location = 0) uniform mat4 view;
 layout(location = 1) uniform mat4 proj;
@@ -20,8 +20,7 @@ void main() {
   //eye_normal = vNormal;
   //Transform vertex position into eye co-ordinates
   vec4 world_position = model * vec4(vPosition, 1.0);
-  vec4 TexPt = light_view_proj * world_position;
-  tex_lookup = 0.5 * TexPt.xy / TexPt.w + vec2(0.5);
+  TexPt = light_view_proj * world_position;
   eye_position = vec3(view * world_position); 
   //Transform vertex normal into eye co-ordinates
   //Allows for non-uniform scaling
