@@ -38,6 +38,7 @@ namespace scene {
   };
 
   class DepthTexture : public Texture {
+  public:
     inline DepthTexture() {}
     DepthTexture(const GLuint& size_x, const GLuint& size_y, const GLenum& type);
   };

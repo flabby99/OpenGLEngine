@@ -10,3 +10,6 @@ shaders/caustics/caustic_shader.frag
 scene
 shaders/caustics/scene_shader.vert
 shaders/caustics/scene_shader.frag
+shadow
+shaders/caustics/shadow_shader.vert
+shaders/caustics/shadow_shader.frag

@@ -114,11 +114,14 @@ void CreateScreenQuad() {
   ss_quad = std::make_shared<scene::Object>(va, ib);
 }
 
+int caustic_size = 64;
 std::unique_ptr<render::CausticMapping> caustic_mapping;
 glm::vec3 light_position;
 void CreateCausticMapper() {
   light_position = glm::vec3(5.0f, 4.0f, 20.0f);
-  caustic_mapping = std::make_unique<render::CausticMapping>(&window_width, &window_height, false, light_position);
+  //NOTE the textures can be any size, advantage of window size is that number of renderered pixels match
+  //caustic_mapping = std::make_unique<render::CausticMapping>(&caustic_size, &caustic_size, false, light_position);
+  caustic_mapping = std::make_unique<render::CausticMapping>(&window_width, &window_height, true, light_position);
   glm::vec3 up(0.0f, 1.0f, 0.0f);
   TPcamera = std::make_unique<Camera>(light_position, -light_position, up);
 }
@@ -176,7 +179,7 @@ std::shared_ptr<scene::Object> plane;
 std::vector <std::shared_ptr<scene::Object>> receivers;
 std::vector<std::shared_ptr<scene::Object>> producers;
 void LoadModels() {
-  std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/piper_diffuse.jpg");
+  std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
  
   scene_root = std::make_shared<scene::Object>();
   scene_root->SetTranslation(glm::vec3(0.f, 0.0f, 5.f));
@@ -250,9 +253,9 @@ void RenderCaustics() {
   //float aspect = (float)window_height / (float)window_width;
   //persp_proj = glm::frustum(-1.0f, 1.0f, -aspect, aspect, 1.0f, -1.0f);
   render::Renderer::SetScreenAsRenderTarget();
-  //glViewport(window_width / 2, 0, window_width, window_height / 2);
-  glViewport(0, 0, window_width, window_height);
-  render::Renderer::Clear();
+  glViewport(window_width / 2, 0, window_width, window_height / 2);
+  //glViewport(0, 0, window_width, window_height);
+  //render::Renderer::Clear();
   //DrawSkyBox();
 
   //Draw receivers

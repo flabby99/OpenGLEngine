@@ -45,8 +45,8 @@ namespace render
     if (should_shadow_map_)
     {
       shadow_map_ = std::make_shared<render::FrameBuffer>();
-      auto map_texture = std::make_shared<scene::Texture>(*window_width_, *window_height_, GL_TEXTURE_2D);
-      shadow_map_->AttachTexture(map_texture, GL_COLOR_ATTACHMENT0);
+      auto map_texture = std::make_shared<scene::DepthTexture>(*window_width_, *window_height_, GL_TEXTURE_2D);
+      shadow_map_->AttachTexture(map_texture, GL_DEPTH_ATTACHMENT);
       shadow_map_->BufferStatusCheck();
     }
     //Create the shaders
@@ -55,8 +55,7 @@ namespace render
     vertex_grid_ = std::make_unique<VertexGrid>(*window_width_, *window_height_);
     query_ = std::make_unique<Query>(GL_SAMPLES_PASSED);
     //persp_proj_ = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 80.0f);
-    persp_proj_ = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 20.0f, -70.0f);
-    //persp_proj_ = glm::frustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
+    persp_proj_ = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -10.0f, 20.0f);
     pixels_renderered_last_frame_ = *window_height_ * *window_width_;
   }
 
@@ -79,6 +78,7 @@ namespace render
     std::vector<std::shared_ptr<scene::Object>> producers,
     render::Shader* post_process, scene::Object* ss_quad) {
     glClearColor(0.f, 0.f, 0.0f, 0.0f);
+    //For directional lights, this position is really the inverse of the direction
     light_view_matrix_ = glm::lookAt(light_position_, origin_, up_);
     if (past_first_frame) {
       query_->ResultNoWait(&pixels_renderered_last_frame_);
@@ -92,19 +92,19 @@ namespace render
       glViewport(0, 0, *window_width_, *window_height_);
       render::Renderer::Clear();
       receiver_shader_->Bind();
+      receiver_shader_->SetUniform4fv("view", light_view_matrix_);
+      receiver_shader_->SetUniform4fv("proj", persp_proj_);
       for (auto object : receivers) {
         glm::mat4 model_matrix = object->GetGlobalModelMatrix();
         receiver_shader_->SetUniform4fv("model", object->GetGlobalModelMatrix());
-        receiver_shader_->SetUniform4fv("view", light_view_matrix_);
-        receiver_shader_->SetUniform4fv("proj", persp_proj_);
         render::Renderer::Draw(*object);
       }
 
       //Visualise to see what I'm getting
-      receiver_positions_->Unbind();
+     /* receiver_positions_->Unbind();
       render::Renderer::SetScreenAsRenderTarget();
       glViewport(*window_width_ / 2, *window_height_ / 2, *window_width_  / 2, *window_height_ / 2);
-      Visualise(receiver_positions_, 0, post_process, ss_quad);
+      Visualise(receiver_positions_, 0, post_process, ss_quad);*/
     }
     
     //Obtain 3D positions and surface normals of the producers
@@ -114,11 +114,11 @@ namespace render
       glViewport(0, 0, *window_width_, *window_height_);
       render::Renderer::ClearColourOnly();
       producer_shader_->Bind();
+      producer_shader_->SetUniform4fv("view", light_view_matrix_);
+      producer_shader_->SetUniform4fv("proj", persp_proj_);
       for (auto object : producers) {
         glm::mat4 model_matrix = object->GetGlobalModelMatrix();
         producer_shader_->SetUniform4fv("model", object->GetGlobalModelMatrix());
-        producer_shader_->SetUniform4fv("view", light_view_matrix_);
-        producer_shader_->SetUniform4fv("proj", persp_proj_);
         render::Renderer::Draw(*object);
       }
       query_->End();
@@ -163,7 +163,25 @@ namespace render
     //Optionally Construct a shadow map
     if (should_shadow_map_) 
     {
-      shadow_map_->SetBufferForDraw();
+      shadow_map_->SetDepthBufferForDraw();
+      glViewport(0, 0, *window_width_, *window_height_);
+      render::Renderer::Clear();
+      shadow_shader_->Bind();
+      shadow_shader_->SetUniform4fv("view_proj", persp_proj_ * light_view_matrix_);
+      for (auto object : producers) {
+        glm::mat4 model_matrix = object->GetGlobalModelMatrix();
+        shadow_shader_->SetUniform4fv("model", object->GetGlobalModelMatrix());
+        render::Renderer::Draw(*object);
+      }
+      for (auto object : receivers) {
+        glm::mat4 model_matrix = object->GetGlobalModelMatrix();
+        shadow_shader_->SetUniform4fv("model", object->GetGlobalModelMatrix());
+        render::Renderer::Draw(*object);
+      }
+      render::Renderer::SetScreenAsRenderTarget();
+      shadow_map_->Unbind();
+      glViewport(*window_width_ / 2, *window_height_ / 2, *window_width_ / 2, *window_height_ / 2);
+      Visualise(shadow_map_, 0, post_process, ss_quad);
     }
   }
   void CausticMapping::LoadShaders()
@@ -172,6 +190,9 @@ namespace render
     receiver_shader_ = std::make_shared<Shader>("receiver", caustic_shaders);
     producer_shader_ = std::make_shared<Shader>("producer", caustic_shaders);
     caustic_shader_ = std::make_shared<Shader>("caustic", caustic_shaders);
+    if (should_shadow_map_) {
+      shadow_shader_ = std::make_shared<Shader>("shadow", caustic_shaders);
+    }
   }
   void CausticMapping::BindCausticTexture() {
     caustic_map_->GetTexture(0)->Bind();

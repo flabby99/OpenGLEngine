@@ -87,6 +87,8 @@
     <None Include="shaders\caustics\receiver_shader.vert" />
     <None Include="shaders\caustics\scene_shader.frag" />
     <None Include="shaders\caustics\scene_shader.vert" />
+    <None Include="shaders\caustics\shadow_shader.frag" />
+    <None Include="shaders\caustics\shadow_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="config\modelnames.txt" />

@@ -27,6 +27,11 @@ namespace render
     Bind();
     GLCall(glDrawBuffers(draw_targets_.size(), &draw_targets_[0]));
   }
+  void FrameBuffer::SetDepthBufferForDraw()
+  {
+    Bind();
+    GLCall(glDrawBuffer(GL_NONE));
+  }
   bool FrameBuffer::BufferStatusCheck()
   {
     Bind();

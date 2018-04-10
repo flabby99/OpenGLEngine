@@ -25,7 +25,10 @@ namespace render
     //@param attachment - the place to attacch
     //@param texture - the texture to attach
     void AttachTexture(std::shared_ptr<scene::Texture> texture, GLenum attachment);
+    //Use this for colour buffers
     void SetBufferForDraw();
+    //Use this for depth only buffers (shadow mapping)
+    void SetDepthBufferForDraw();
     bool BufferStatusCheck();
     inline std::shared_ptr<scene::Texture> GetTexture(const unsigned int& index) {
       return textures_[index];
