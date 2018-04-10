@@ -56,7 +56,7 @@ namespace render
     vertex_grid_ = std::make_unique<VertexGrid>(*window_width_, *window_height_);
     query_ = std::make_unique<Query>(GL_SAMPLES_PASSED);
     //persp_proj_ = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 80.0f);
-    persp_proj_ = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -10.0f, 20.0f);
+    persp_proj_ = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
     pixels_renderered_last_frame_ = *window_height_ * *window_width_;
   }
 
