@@ -51,10 +51,11 @@ namespace render
       shadow_map_->BufferStatusCheck();
     }
     //Load the point sprite texture
-    const char* sprite_location = "res/Models/textures/star.png";
+    const char* sprite_location = "res/Models/textures/lights/telescope.jpg";
     point_sprite_ = std::make_unique<scene::Texture>();
     point_sprite_->LoadNoMip(sprite_location);
     point_sprite_->SetSlot(GL_TEXTURE4);
+    glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
     //Create the shaders
     LoadShaders();
     //Create a vertex grid of predifined size

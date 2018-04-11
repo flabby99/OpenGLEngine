@@ -53,10 +53,10 @@ void main()
     vec3 receiver_pos = EstimateIntersection (producer_pos.rgb, refracted, receiver_pos_tex);
     vec4 temp = view_proj * vec4(receiver_pos, 1.0); 
     gl_Position = temp;
-    gl_PointSize = 1;
+    gl_PointSize = 5;
     float light_normal_dot = clamp(dot(receiver_normal, -light_direction), 0.0, 1.0);
     float intensity_scale = light_normal_dot;
     //intensity_scale = light_normal_dot;
-    intensity = vec4(vec3(intensity_scale), surface_area);
+    intensity = vec4(vec3(intensity_scale), surface_area / 2);
   }
 }
