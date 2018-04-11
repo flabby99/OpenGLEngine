@@ -58,7 +58,10 @@ void main() {
   float visibility = texture(depth_texture, TexPt.xyz);
   //fColour = vec4(Iambient + Idiffuse + Ispecular, 1.0) * texture (diffuse_texture, texture_coords);
   vec4 temp = texture(caustic_intensity, TexPt.xy);
-  fColour = vec4(Iambient + temp.rgb + visibility * (Idiffuse + Ispecular), 1.0);
+  if(temp.a < 0.02) {
+	temp.a = 0.0;
+  }
+  fColour = vec4(Iambient + temp.a * temp.rgb + visibility * (Idiffuse + Ispecular), 1.0);
   //fColour = vec4(texture(depth_texture, TexPt.xy).z, 0, 0, 1);
   //fColour = vec4(visibility, 0, 0, 1);
 }

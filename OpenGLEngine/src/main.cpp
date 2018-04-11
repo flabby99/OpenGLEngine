@@ -114,7 +114,7 @@ void CreateScreenQuad() {
   ss_quad = std::make_shared<scene::Object>(va, ib);
 }
 
-int caustic_size = 1024;
+int caustic_size = 64;
 std::unique_ptr<render::CausticMapping> caustic_mapping;
 glm::vec3 light_position;
 void CreateCausticMapper() {
@@ -500,6 +500,7 @@ void Init() {
   glClearColor(0.3f, 0.3f, 0.3f, 1.0f); //Grey clear colour
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_PROGRAM_POINT_SIZE);
   glDepthFunc(GL_LESS);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);

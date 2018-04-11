@@ -19,17 +19,26 @@ float glass_refractive_index = 1.517;
 //Let us just work with air and glass at the moment
 float ratio = air_refractive_index / glass_refractive_index;
 
+void DistanceEstimationStep(in vec3 v, in vec3 r, in sampler2D posTexture, inout float distance) {
+  vec3 P1 = v + distance * r;
+  vec4 texPt = view_proj * vec4(P1, 1.0);
+  vec2 tc = 0.5 * texPt.xy /texPt.w + vec2(0.5);
+  vec4 recPos = texture(posTexture, tc);
+  distance = distance(v, recPos.xyz);
+}
+
 //This is from the paper "Caustics Mapping - An Image space technique for Real time Caustics"
 vec3 EstimateIntersection (in vec3 v, in vec3 r, in sampler2D posTexture) {
-vec3 P1 = v + r;
-vec4 texPt = view_proj * vec4(P1, 1.0);
-vec2 tc = 0.5 * texPt.xy /texPt.w + vec2(0.5);
-vec4 recPos = texture(posTexture, tc);
-vec3 P2 = v + distance(v, recPos.xyz) * r;
-texPt = view_proj * vec4(P2, 1.0);
-tc = 0.5 * texPt.xy /texPt.w + vec2(0.5);
-return texture(posTexture, tc).rgb;
+  float distance = 1.0;
+  for(int i = 0; i < 3; ++i) {
+    DistanceEstimationStep(v, r, posTexture, distance);
+  }
+  vec3 P2 = v + distance * r;
+  vec4 texPt = view_proj * vec4(P2, 1.0);
+  vec2 tc = 0.5 * texPt.xy /texPt.w + vec2(0.5);
+  return texture(posTexture, tc).rgb;
 }
+
 void main()
 {
   vec4 producer_pos = texture(producer_pos_tex, vPosition * 0.5 + vec2(0.5));
@@ -44,9 +53,10 @@ void main()
     vec3 receiver_pos = EstimateIntersection (producer_pos.rgb, refracted, receiver_pos_tex);
     vec4 temp = view_proj * vec4(receiver_pos, 1.0); 
     gl_Position = temp;
+    gl_PointSize = 1.0;
     float light_normal_dot = clamp(dot(receiver_normal, -light_direction), 0.0, 1.0);
-    float intensity_scale = light_normal_dot * surface_area;
+    float intensity_scale = light_normal_dot;
     //intensity_scale = light_normal_dot;
-    intensity = vec4(vec3(intensity_scale), 1.0);
+    intensity = vec4(vec3(intensity_scale), surface_area);
   }
 }
