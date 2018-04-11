@@ -50,6 +50,11 @@ namespace render
       shadow_map_->AttachTexture(shadow_texture, GL_DEPTH_ATTACHMENT);
       shadow_map_->BufferStatusCheck();
     }
+    //Load the point sprite texture
+    const char* sprite_location = "res/Models/textures/star.png";
+    point_sprite_ = std::make_unique<scene::Texture>();
+    point_sprite_->LoadNoMip(sprite_location);
+    point_sprite_->SetSlot(GL_TEXTURE4);
     //Create the shaders
     LoadShaders();
     //Create a vertex grid of predifined size
@@ -141,6 +146,7 @@ namespace render
      /* query_->Result(&pixels_renderered_last_frame);*/
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+      point_sprite_->Bind();
       caustic_pos_norms_->GetTexture(0)->Bind();
       caustic_pos_norms_->GetTexture(1)->Bind();
       receiver_positions_->GetTexture(0)->Bind();

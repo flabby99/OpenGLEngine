@@ -6,6 +6,7 @@
 
 namespace scene {
   class Object;
+  class Texture;
 }
 
 namespace render
@@ -29,6 +30,7 @@ namespace render
     std::shared_ptr<Shader> shadow_shader_;
     std::unique_ptr<VertexGrid> vertex_grid_;
     std::unique_ptr<Query> query_;
+    std::unique_ptr<scene::Texture> point_sprite_;
 
     bool past_first_frame = false;
     glm::vec3 light_position_;

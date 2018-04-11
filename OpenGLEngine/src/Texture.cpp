@@ -58,7 +58,7 @@ namespace scene {
     //TODO, think of what will happen if we are reading a RGB image
     std::cout << "Texture " << filename << " has " << log2(x) + 1 << " layers" << std::endl;
     glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, x, y);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, x, y, GL_BGRA, GL_UNSIGNED_BYTE, image_data);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, x, y, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
     //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
     //Good for anti-aliasing and safe wrapping
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
