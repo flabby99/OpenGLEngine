@@ -175,6 +175,7 @@ void ReloadShaders() {
 
 std::shared_ptr<scene::Object> sphere;
 std::shared_ptr<scene::Object> dragon;
+std::shared_ptr<scene::Object> bench;
 std::shared_ptr<scene::Object> scene_root;
 std::shared_ptr<scene::Object> plane;
 std::vector <std::shared_ptr<scene::Object>> receivers;
@@ -202,6 +203,17 @@ void LoadModels() {
   dragon->SetTranslation(glm::vec3(-1.0f, 1.0f, 0.0f));
   dragon->UpdateModelMatrix();
 
+  std::string bench_filename = "outdoors/Wood_Bench/wood_bench.obj";
+  core::SceneInfo bench_scene(bench_filename, white);
+  bench = bench_scene.GetObject_(0);
+  bench->SetColour(glm::vec3(1.0f));
+  bench->SetParent(scene_root);
+  bench->SetScale(glm::vec3(0.01f));
+  bench->SetTranslation(glm::vec3(-1.0f, 0.0f, -2.0f));
+  bench->UpdateModelMatrix();
+  auto bench_diffuse = std::make_shared<scene::Texture>("res/Models/outdoors/Wood_Bench/Oak.jpg");
+  bench->SetDiffuseTexture(bench_diffuse);
+
   std::string plane_filename = "flat_plane.obj";
   core::SceneInfo plane_scene(plane_filename, white);
   plane = plane_scene.GetObject_(0);
@@ -217,6 +229,7 @@ void LoadModels() {
   core::SceneInfo box_scene(filename, white);
   sky_box = box_scene.GetObject_(0);
   receivers.push_back(plane);
+  receivers.push_back(bench);
   producers.push_back(sphere);
   producers.push_back(dragon);
 }
@@ -287,7 +300,6 @@ void RenderCaustics() {
   caustic_scene_shader->SetUniform4fv("view", view);
   caustic_scene_shader->SetUniform4fv("proj", persp_proj);
   for (auto object : receivers) {
-    caustic_scene_shader->SetUniform3f("colour", object->GetColour());
     render::Renderer::Draw(*object, caustic_scene_shader.get(), view);
   }
   //Draw rest of scene
