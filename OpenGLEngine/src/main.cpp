@@ -174,6 +174,7 @@ void ReloadShaders() {
 }
 
 std::shared_ptr<scene::Object> sphere;
+std::shared_ptr<scene::Object> dragon;
 std::shared_ptr<scene::Object> scene_root;
 std::shared_ptr<scene::Object> plane;
 std::vector <std::shared_ptr<scene::Object>> receivers;
@@ -189,7 +190,17 @@ void LoadModels() {
   sphere = sphere_scene.GetObject_(0);
   sphere->SetColour(glm::vec3(1.0f, 0.f, 0.f));
   sphere->SetParent(scene_root);
-  sphere->SetScale(glm::vec3(0.3f));
+  sphere->SetScale(glm::vec3(1.0f));
+  sphere->UpdateModelMatrix();
+
+  std::string dragon_filename = "dragon.obj";
+  core::SceneInfo dragon_scene(dragon_filename, white);
+  dragon = dragon_scene.GetObject_(0);
+  dragon->SetColour(glm::vec3(1.0f, 0.f, 0.f));
+  dragon->SetParent(scene_root);
+  dragon->SetScale(glm::vec3(0.5f));
+  dragon->SetTranslation(glm::vec3(-1.0f, 1.0f, 0.0f));
+  dragon->UpdateModelMatrix();
 
   std::string plane_filename = "flat_plane.obj";
   core::SceneInfo plane_scene(plane_filename, white);
@@ -198,7 +209,7 @@ void LoadModels() {
   plane->SetParent(scene_root);
   plane->SetRotation(glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
   plane->SetTranslation(glm::vec3(0.0f, 0.0f, -2.0f));
-  plane->SetScale(glm::vec3(0.15f));
+  plane->SetScale(glm::vec3(0.1f));
   plane->UpdateModelMatrix();
   plane->SetColour(glm::vec3(0.0f, 0.5f, 0.5f));
 
@@ -207,6 +218,7 @@ void LoadModels() {
   sky_box = box_scene.GetObject_(0);
   receivers.push_back(plane);
   producers.push_back(sphere);
+  producers.push_back(dragon);
 }
 
 void DrawSkyBox() {

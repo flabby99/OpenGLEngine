@@ -51,7 +51,7 @@ namespace render
       shadow_map_->BufferStatusCheck();
     }
     //Load the point sprite texture
-    const char* sprite_location = "res/Models/textures/lights/telescope.jpg";
+    const char* sprite_location = "res/Models/textures/lights/telescope.JPG";
     point_sprite_ = std::make_unique<scene::Texture>();
     point_sprite_->LoadNoMip(sprite_location);
     point_sprite_->SetSlot(GL_TEXTURE4);
@@ -62,7 +62,7 @@ namespace render
     vertex_grid_ = std::make_unique<VertexGrid>(*window_width_, *window_height_);
     query_ = std::make_unique<Query>(GL_SAMPLES_PASSED);
     //persp_proj_ = glm::perspective(glm::radians(45.0f), (float)*window_width_ / (float)*window_height_, 0.1f, 80.0f);
-    persp_proj_ = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
+    persp_proj_ = glm::ortho(-6.0f, 6.0f, -6.0f, 6.0f, -5.0f, 20.0f);
     pixels_renderered_last_frame_ = *window_height_ * *window_width_;
   }
 

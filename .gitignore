@@ -16,6 +16,7 @@
 *.dae
 *.hdr
 OpenGLEngine/logs/*
+OpenGLEngine/res/*
 
 # User-specific files
 *.suo
