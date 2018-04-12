@@ -34,7 +34,7 @@ namespace render
 
     bool past_first_frame = false;
     glm::vec3 light_position_;
-    glm::vec3 origin_ = glm::vec3(0.0f);
+    glm::vec3 origin_ = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 up_ = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::mat4 light_view_matrix_;
     glm::mat4 persp_proj_;

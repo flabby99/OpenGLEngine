@@ -118,7 +118,7 @@ int caustic_size = 64;
 std::unique_ptr<render::CausticMapping> caustic_mapping;
 glm::vec3 light_position;
 void CreateCausticMapper() {
-  light_position = glm::vec3(5.0f, 4.0f, 20.0f);
+  light_position = glm::vec3(1.0f, 15.0f, 10.0f);
   //NOTE the textures can be any size, advantage of window size is that number of renderered pixels match
   //caustic_mapping = std::make_unique<render::CausticMapping>(&caustic_size, &caustic_size, true, light_position);
   caustic_mapping = std::make_unique<render::CausticMapping>(&window_width, &window_height, true, light_position);
@@ -175,21 +175,23 @@ void ReloadShaders() {
 
 std::shared_ptr<scene::Object> sphere;
 std::shared_ptr<scene::Object> dragon;
-std::shared_ptr<scene::Object> bench;
+//std::shared_ptr<scene::Object> buddha;
 std::shared_ptr<scene::Object> scene_root;
 std::shared_ptr<scene::Object> plane;
+std::shared_ptr<scene::Object> ground;
 std::vector <std::shared_ptr<scene::Object>> receivers;
 std::vector<std::shared_ptr<scene::Object>> producers;
 void LoadModels() {
   std::shared_ptr<scene::Texture> white = std::make_shared<scene::Texture>("res/Models/textures/white.jpg");
  
   scene_root = std::make_shared<scene::Object>();
-  scene_root->SetTranslation(glm::vec3(0.f, 0.0f, 5.f));
+  scene_root->SetTranslation(glm::vec3(0.f, 0.0f, 0.f));
   scene_root->UpdateModelMatrix();
   std::string sphere_filename = "unit_sphere.obj";
   core::SceneInfo sphere_scene(sphere_filename, white);
   sphere = sphere_scene.GetObject_(0);
-  sphere->SetColour(glm::vec3(1.0f, 0.f, 0.f));
+  sphere->SetTranslation(glm::vec3(3.0f, 0.f, 2.f));
+  sphere->SetColour(glm::vec3(0.f, 0.f, 1.0f));
   sphere->SetParent(scene_root);
   sphere->SetScale(glm::vec3(1.0f));
   sphere->UpdateModelMatrix();
@@ -199,37 +201,48 @@ void LoadModels() {
   dragon = dragon_scene.GetObject_(0);
   dragon->SetColour(glm::vec3(1.0f, 0.f, 0.f));
   dragon->SetParent(scene_root);
-  dragon->SetScale(glm::vec3(0.5f));
-  dragon->SetTranslation(glm::vec3(-1.0f, 1.0f, 0.0f));
+  dragon->SetScale(glm::vec3(0.4f));
+  dragon->SetTranslation(glm::vec3(-1.0f, 0.0f, 1.5f));
   dragon->UpdateModelMatrix();
 
-  std::string bench_filename = "outdoors/Wood_Bench/wood_bench.obj";
-  core::SceneInfo bench_scene(bench_filename, white);
-  bench = bench_scene.GetObject_(0);
-  bench->SetColour(glm::vec3(1.0f));
-  bench->SetParent(scene_root);
-  bench->SetScale(glm::vec3(0.01f));
-  bench->SetTranslation(glm::vec3(-1.0f, 0.0f, -2.0f));
-  bench->UpdateModelMatrix();
-  auto bench_diffuse = std::make_shared<scene::Texture>("res/Models/outdoors/Wood_Bench/Oak.jpg");
-  bench->SetDiffuseTexture(bench_diffuse);
+  //std::string buddha_filename = "buddha.obj";
+  //core::SceneInfo buddha_scene(buddha_filename, white);
+  //buddha = buddha_scene.GetObject_(0);
+  //buddha->SetColour(glm::vec3(1.0f, 0.f, 0.f));
+  //buddha->SetParent(scene_root);
+  //buddha->SetScale(glm::vec3(2.0f));
+  //buddha->SetTranslation(glm::vec3(0.0f, 4.0f, 1.5f));
+  //buddha->UpdateModelMatrix();
 
   std::string plane_filename = "flat_plane.obj";
   core::SceneInfo plane_scene(plane_filename, white);
-  plane = plane_scene.GetObject_(0);
+  plane = std::make_shared<scene::Object>(*plane_scene.GetObject_(0));
   plane->SetColour(glm::vec3(0.1f, 0.1f, 0.1f));
   plane->SetParent(scene_root);
   plane->SetRotation(glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-  plane->SetTranslation(glm::vec3(0.0f, 0.0f, -2.0f));
-  plane->SetScale(glm::vec3(0.1f));
+  plane->SetTranslation(glm::vec3(0.0f, 4.0f, -2.0f));
+  plane->SetScale(glm::vec3(0.1f, 2.0f, 0.1f));
   plane->UpdateModelMatrix();
-  plane->SetColour(glm::vec3(0.0f, 0.5f, 0.5f));
+  plane->SetColour(glm::vec3(1.0f));
+  auto wall_diffuse = std::make_shared<scene::Texture>("res/Models/textures/brick.jpg");
+  plane->SetDiffuseTexture(wall_diffuse);
+
+  ground = plane_scene.GetObject_(0);
+  ground->SetColour(glm::vec3(0.1f, 0.1f, 0.1f));
+  ground->SetParent(scene_root);
+  ground->SetTranslation(glm::vec3(0.0f, -1.0f, 3.0f));
+  ground->SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
+  ground->UpdateModelMatrix();
+  ground->SetColour(glm::vec3(1.0f));
+  auto ground_diffuse = std::make_shared<scene::Texture>("res/Models/textures/stone.jpg");
+  ground->SetDiffuseTexture(ground_diffuse);
 
   std::string filename = "cube.obj";
   core::SceneInfo box_scene(filename, white);
   sky_box = box_scene.GetObject_(0);
   receivers.push_back(plane);
-  receivers.push_back(bench);
+  receivers.push_back(ground);
+  //producers.push_back(buddha);
   producers.push_back(sphere);
   producers.push_back(dragon);
 }
@@ -282,7 +295,6 @@ void RenderCaustics() {
   glViewport(window_width / 2, 0, window_width, window_height / 2);
   //glViewport(0, 0, window_width, window_height);
   //render::Renderer::Clear();
-  //DrawSkyBox();
 
   //Draw receivers
   caustic_scene_shader->Bind();
@@ -303,13 +315,18 @@ void RenderCaustics() {
     render::Renderer::Draw(*object, caustic_scene_shader.get(), view);
   }
   //Draw rest of scene
-  blinn_phong->Bind();
-  blinn_phong->SetUniform3f("world_light_position", light_position);
-  blinn_phong->SetUniform4fv("view", view);
-  blinn_phong->SetUniform4fv("proj", persp_proj);
+  sky_box->GetDiffuseTexture()->Bind();
+  reflection->Bind();
+  reflection->SetUniform3f("world_light_position", light_position);
+  reflection->SetUniform4fv("view", view);
+  reflection->SetUniform4fv("proj", persp_proj);
   for (auto object : producers) {
-    render::Renderer::Draw(*object, blinn_phong, view);
+    glm::mat4 model_matrix = object->GetGlobalModelMatrix();
+    reflection->SetUniform4fv("mv_it", glm::transpose(glm::inverse(view * model_matrix)));
+    reflection->SetUniform4fv("model", model_matrix);
+    render::Renderer::Draw(*object);
   }
+  DrawSkyBox();
 }
 
 void Render() {
@@ -475,7 +492,7 @@ void Keyboard(unsigned char key, int x, int y) {
   //Apply the changes
   if (changedmatrices) {
     model_transform = translationmatrices.UpdateModelMatrix();
-    light_position = glm::vec3(5.0f, 4.0f, 20.0f);
+    light_position = glm::vec3(1.0f, 15.0f, 10.0f);
     light_position = model_transform * glm::vec4(light_position, 1.0);
     caustic_mapping->SetLightPosition(light_position);
     //sphere->SetModelMatrix(model_transform);

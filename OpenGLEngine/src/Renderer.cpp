@@ -28,9 +28,9 @@ namespace render {
   {
     object.GetMesh().va->Bind();
     object.GetMesh().ib->Bind();
-    if (object.GetDiffuseTexture() != NULL) {
+   /* if (object.GetDiffuseTexture() != NULL) {
       object.GetDiffuseTexture()->Bind();
-    }
+    }*/
     GLCall(glDrawElements(GL_TRIANGLES, object.GetMesh().ib->GetCount(), GL_UNSIGNED_INT, (void*)0));
   }
   void Renderer::Render(scene::Object object)

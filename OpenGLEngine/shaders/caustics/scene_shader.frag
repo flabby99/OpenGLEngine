@@ -10,7 +10,6 @@ uniform mat4 view;
 
 layout(location = 5) uniform vec3 colour;
 layout(binding = 0) uniform sampler2D diffuse_texture;
-//layout(binding = 1) uniform sampler2D bump_map;
 layout(binding = 3) uniform sampler2D caustic_intensity;
 layout(binding = 4) uniform sampler2DShadow depth_texture;
 //layout(binding = 4) uniform sampler2D depth_texture;
@@ -38,7 +37,6 @@ void main() {
   vec3 eye_light_position = vec3(view * vec4(world_light_position, 1.0));
   vec3 direction_to_light = normalize(eye_light_position - eye_position);
   //Consider negative dot product to be 0
-  //eye_normal
   float dot_prod = clamp(dot(direction_to_light, eye_normal), 0.0, 1.0);
   //vec3 Idiffuse = Ldiffuse * vec3(texture (diffuse_texture, texture_coords)) * dot_prod;
   vec3 Idiffuse = Ldiffuse * Kdiffuse * dot_prod * texture (diffuse_texture, texture_coords);
