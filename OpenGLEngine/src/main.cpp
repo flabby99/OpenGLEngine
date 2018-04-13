@@ -265,15 +265,24 @@ void DrawSkyBox() {
 void UpdateScene() {
   // Wait until at least 16ms passed since start of last frame (Effectively caps framerate at ~60fps)
   static const DWORD start_time = timeGetTime();
-  static DWORD last_time = 0;
+  static DWORD frames = 0;
+  static DWORD last_time = timeGetTime();
+  glutPostRedisplay();
+  ++frames;
   DWORD curr_time = timeGetTime();
-  DWORD delta = (curr_time - last_time);
-  if (delta > 16)
+  DWORD diff = curr_time - last_time;
+  if (diff > 1000) {
+    std::cout << "Frame rate is " << frames << std::endl;
+    frames = 0;
+    last_time = timeGetTime();
+  }
+  /*if (delta > 16)
   {
     delta = 0;
     last_time = curr_time;
     glutPostRedisplay();
-  }
+  }*/
+  
 }
 
 void RenderWithShader(render::Shader* shader) {
