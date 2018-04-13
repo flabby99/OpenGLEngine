@@ -43,6 +43,8 @@ namespace render
     float intensity_scaling_ = 1.0;
     float point_size_ = 3.0;
 
+    float debug_ = false;
+
     void Init(bool should_shadow_map);
   public:
     //Blank constructor
@@ -76,6 +78,9 @@ namespace render
     }
     inline void ChangePointSize(const float& change) {
       point_size_ += change;
+    }
+    inline void InvertDebug() {
+      debug_ = !debug_;
     }
   };
 }

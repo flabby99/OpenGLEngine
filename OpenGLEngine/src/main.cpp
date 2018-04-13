@@ -40,6 +40,7 @@ std::unique_ptr<Camera> TPcamera;
 int window_height = 0;
 int window_width = 0;
 int mouse_x, mouse_y;
+bool debug = false;
 
 //A matrix that is updated in the keyboard function, allows moving model around in the scene
 glm::mat4 model_transform = glm::mat4(1.0f);
@@ -292,7 +293,10 @@ void RenderCaustics() {
   //float aspect = (float)window_height / (float)window_width;
   //persp_proj = glm::frustum(-1.0f, 1.0f, -aspect, aspect, 1.0f, -1.0f);
   render::Renderer::SetScreenAsRenderTarget();
-  glViewport(window_width / 2, 0, window_width, window_height / 2);
+  if (debug)
+    glViewport(window_width / 2, 0, window_width, window_height / 2);
+  else
+    glViewport(0, 0, window_width, window_height);
   //glViewport(0, 0, window_width, window_height);
   //render::Renderer::Clear();
 
@@ -377,6 +381,15 @@ void Keyboard(unsigned char key, int x, int y) {
 
   case 'g':
     caustic_mapping->ChangePointSize(-1.0f);
+    break;
+
+  case 'c':
+    dragon->SetColour(glm::vec3((float)rand() / RAND_MAX, (float)rand() / RAND_MAX, (float)rand() / RAND_MAX));
+    break;
+
+  case 'V':
+    debug = !debug;
+    caustic_mapping->InvertDebug();
     break;
 
     //Rotations
@@ -486,16 +499,20 @@ void Keyboard(unsigned char key, int x, int y) {
     break;
   //change rendering mode
   case 'l':
-    render_type = eRenderType::RT_blinn;
+    light_position += glm::vec3(0.0f, -0.1f, 0.0f);
+    caustic_mapping->SetLightPosition(light_position);
     break;
   case 'L':
-    render_type = eRenderType::RT_reflection;
+    light_position += glm::vec3(0.0f, 0.1f, 0.0f);
+    caustic_mapping->SetLightPosition(light_position);
     break;
-  case 't':
-    render_type = eRenderType::RT_cel;
+  case 'o':
+    light_position += glm::vec3(-0.1f, 0.0f, 0.0f);
+    caustic_mapping->SetLightPosition(light_position);
     break;
-  case 'T':
-    render_type = eRenderType::RT_minnaert;
+  case 'O':
+    light_position += glm::vec3(0.1f, 0.0f, 0.0f);
+    caustic_mapping->SetLightPosition(light_position);
     break;
   default:
     break;

@@ -111,10 +111,12 @@ namespace render
       }
 
       //Visualise to see what I'm getting
-     /* receiver_positions_->Unbind();
-      render::Renderer::SetScreenAsRenderTarget();
-      glViewport(*window_width_ / 2, *window_height_ / 2, *window_width_  / 2, *window_height_ / 2);
-      Visualise(receiver_positions_, 0, post_process, ss_quad);*/
+      if (debug_) {
+        receiver_positions_->Unbind();
+        render::Renderer::SetScreenAsRenderTarget();
+        glViewport(*window_width_ / 2, *window_height_ / 2, *window_width_ / 2, *window_height_ / 2);
+        Visualise(receiver_positions_, 0, post_process, ss_quad);
+      }
     }
     
     //Obtain 3D positions and surface normals of the producers
@@ -134,10 +136,13 @@ namespace render
       }
       query_->End();
       //Set temp slot to the current slot, set current slot to zero and then set back the slot after visualising
-      caustic_pos_norms_->Unbind();
-      render::Renderer::SetScreenAsRenderTarget();
-      glViewport(0, 0, *window_width_ / 2, *window_height_ / 2);
-      Visualise(caustic_pos_norms_, 2, post_process, ss_quad);
+      if (debug_)
+      {
+        caustic_pos_norms_->Unbind();
+        render::Renderer::SetScreenAsRenderTarget();
+        glViewport(0, 0, *window_width_ / 2, *window_height_ / 2);
+        Visualise(caustic_pos_norms_, 0, post_process, ss_quad);
+      }
     }
 
     //Create a caustic map texture
@@ -171,10 +176,13 @@ namespace render
       render::Renderer::DrawPoints(vertex_grid_.get());
       glDisable(GL_BLEND);
 
-      render::Renderer::SetScreenAsRenderTarget();
-      caustic_map_->Unbind();
-      glViewport(0, *window_height_ / 2, *window_width_ / 2, *window_height_ / 2);
-      Visualise(caustic_map_, 0, post_process, ss_quad);
+      if (debug_)
+      {
+        render::Renderer::SetScreenAsRenderTarget();
+        caustic_map_->Unbind();
+        glViewport(0, *window_height_ / 2, *window_width_ / 2, *window_height_ / 2);
+        Visualise(caustic_map_, 0, post_process, ss_quad);
+      }
     }
 
     //Optionally Construct a shadow map
@@ -200,10 +208,10 @@ namespace render
         render::Renderer::Draw(*object);
       }
       glDisable(GL_POLYGON_OFFSET_FILL);
-      render::Renderer::SetScreenAsRenderTarget();
+      /*render::Renderer::SetScreenAsRenderTarget();
       shadow_map_->Unbind();
       glViewport(*window_width_ / 2, *window_height_ / 2, *window_width_ / 2, *window_height_ / 2);
-      Visualise(shadow_map_, 0, post_process, ss_quad);
+      Visualise(shadow_map_, 0, post_process, ss_quad);*/
     }
   }
   void CausticMapping::LoadShaders()
