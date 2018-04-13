@@ -51,5 +51,5 @@ void main() {
 
   float fresnel = clamp(empirical_fresnel(I, N, vec3(0.05f, 1.0f, 0.8f)), 0, 1);
   
-  fColour =  vec4((reflectedColour * fresnel) + (refractedColour * (1.0f - fresnel)), 1.0f);
+  fColour =  vec4((reflectedColour * fresnel) + (refractedColour * (1.0f - fresnel)) * colour, 1.0f);
 }

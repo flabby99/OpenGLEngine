@@ -40,6 +40,9 @@ namespace render
     glm::mat4 persp_proj_;
     GLuint pixels_renderered_last_frame_;
 
+    float intensity_scaling_ = 1.0;
+    float point_size_ = 3.0;
+
     void Init(bool should_shadow_map);
   public:
     //Blank constructor
@@ -67,6 +70,12 @@ namespace render
     }
     inline glm::mat4 getLightViewProj() {
       return persp_proj_ * light_view_matrix_;
+    }
+    inline void ChangeIntensity(const float& change) {
+      intensity_scaling_ *= change;
+    }
+    inline void ChangePointSize(const float& change) {
+      point_size_ += change;
     }
   };
 }

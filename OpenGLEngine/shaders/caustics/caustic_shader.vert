@@ -4,14 +4,17 @@ layout (location = 0) in vec2 vPosition;
 layout (binding = 0) uniform sampler2D producer_pos_tex;
 layout (binding = 1) uniform sampler2D producer_norm_tex;
 layout (binding = 2) uniform sampler2D receiver_pos_tex;
+layout (binding = 4) uniform sampler2D tint_tex;
 
 //This is for directional lights, for point lights must be done differenlty
 //The process is similar to ray tracing
 layout (location = 0) uniform vec3 light_direction;
 layout (location = 1) uniform mat4 view_proj;
 layout (location = 2) uniform float surface_area;
+layout (location = 3) uniform float point_size;
 
 out vec4 intensity;
+out vec4 colour;
 
 //Constants for refraction
 float air_refractive_index = 1;
@@ -53,10 +56,11 @@ void main()
     vec3 receiver_pos = EstimateIntersection (producer_pos.rgb, refracted, receiver_pos_tex);
     vec4 temp = view_proj * vec4(receiver_pos, 1.0); 
     gl_Position = temp;
-    gl_PointSize = 3;
+    gl_PointSize = point_size;
     float light_normal_dot = clamp(dot(receiver_normal, -light_direction), 0.0, 1.0);
     float intensity_scale = light_normal_dot;
     //intensity_scale = light_normal_dot;
     intensity = vec4(vec3(intensity_scale), surface_area);
+    colour = texture(tint_tex, vPosition * 0.5 + vec2(0.5));
   }
 }

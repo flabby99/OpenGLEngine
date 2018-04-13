@@ -324,6 +324,7 @@ void RenderCaustics() {
     glm::mat4 model_matrix = object->GetGlobalModelMatrix();
     reflection->SetUniform4fv("mv_it", glm::transpose(glm::inverse(view * model_matrix)));
     reflection->SetUniform4fv("model", model_matrix);
+    reflection->SetUniform3f("colour", object->GetColour());
     render::Renderer::Draw(*object);
   }
   DrawSkyBox();
@@ -360,6 +361,22 @@ void Keyboard(unsigned char key, int x, int y) {
     ReloadShaders();
     caustic_mapping->LoadShaders();
     std::cout << "Reloaded shaders" << std::endl;
+    break;
+
+  case 'H':
+    caustic_mapping->ChangeIntensity(2.0f);
+    break;
+
+  case 'h':
+    caustic_mapping->ChangeIntensity(0.5f);
+    break;
+
+  case 'G':
+    caustic_mapping->ChangePointSize(1.0f);
+    break;
+
+  case 'g':
+    caustic_mapping->ChangePointSize(-1.0f);
     break;
 
     //Rotations
@@ -425,27 +442,21 @@ void Keyboard(unsigned char key, int x, int y) {
   //Camera Translations
   case 'd':
     TPcamera->Move(glm::vec3(1.0f, 0.0f, 0.0f));
-    changedmatrices = true;
     break;
   case 'a':
     TPcamera->Move(glm::vec3(-1.0f, 0.0f, 0.0f));
-    changedmatrices = true;
     break;
   case 'w':
     TPcamera->Move(glm::vec3(0.0f, 1.0f, 0.0f));
-    changedmatrices = true;
     break;
   case 's':
     TPcamera->Move(glm::vec3(0.0f, -1.0f, 0.0f));
-    changedmatrices = true;
     break;
   case 'q':
     TPcamera->Move(glm::vec3(0.0f, 0.0f, -1.0f));
-    changedmatrices = true;
     break;
   case 'e':
     TPcamera->Move(glm::vec3(0.0f, 0.0f, 1.0f));
-    changedmatrices = true;
     break;
 
   //model translations
@@ -492,10 +503,7 @@ void Keyboard(unsigned char key, int x, int y) {
   //Apply the changes
   if (changedmatrices) {
     model_transform = translationmatrices.UpdateModelMatrix();
-    light_position = glm::vec3(1.0f, 15.0f, 10.0f);
-    light_position = model_transform * glm::vec4(light_position, 1.0);
-    caustic_mapping->SetLightPosition(light_position);
-    //sphere->SetModelMatrix(model_transform);
+    dragon->SetModelMatrix(model_transform);
     glutPostRedisplay();
   }
 }

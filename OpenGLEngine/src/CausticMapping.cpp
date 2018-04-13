@@ -31,6 +31,9 @@ namespace render
       auto normals_texture = std::make_shared<scene::Texture>(*window_width_, *window_height_, GL_TEXTURE_2D);
       normals_texture->SetSlot(GL_TEXTURE1);
       caustic_pos_norms_->AttachTexture(normals_texture, GL_COLOR_ATTACHMENT1);
+      auto colours_texture = std::make_shared<scene::Texture>(*window_width_, *window_height_, GL_TEXTURE_2D);
+      colours_texture->SetSlot(GL_TEXTURE4);
+      caustic_pos_norms_->AttachTexture(colours_texture, GL_COLOR_ATTACHMENT2);
       caustic_pos_norms_->BufferStatusCheck();
     }
 
@@ -51,7 +54,7 @@ namespace render
       shadow_map_->BufferStatusCheck();
     }
     //Load the point sprite texture
-    const char* sprite_location = "res/Models/textures/lights/telescope.JPG";
+    const char* sprite_location = "res/Models/textures/lights/telescope.jpg";
     point_sprite_ = std::make_unique<scene::Texture>();
     point_sprite_->LoadNoMip(sprite_location);
     point_sprite_->SetSlot(GL_TEXTURE4);
@@ -126,6 +129,7 @@ namespace render
       for (auto object : producers) {
         glm::mat4 model_matrix = object->GetGlobalModelMatrix();
         producer_shader_->SetUniform4fv("model", object->GetGlobalModelMatrix());
+        producer_shader_->SetUniform3f("colour", object->GetColour());
         render::Renderer::Draw(*object);
       }
       query_->End();
@@ -133,7 +137,7 @@ namespace render
       caustic_pos_norms_->Unbind();
       render::Renderer::SetScreenAsRenderTarget();
       glViewport(0, 0, *window_width_ / 2, *window_height_ / 2);
-      Visualise(caustic_pos_norms_, 0, post_process, ss_quad);
+      Visualise(caustic_pos_norms_, 2, post_process, ss_quad);
     }
 
     //Create a caustic map texture
@@ -150,9 +154,11 @@ namespace render
       point_sprite_->Bind();
       caustic_pos_norms_->GetTexture(0)->Bind();
       caustic_pos_norms_->GetTexture(1)->Bind();
+      caustic_pos_norms_->GetTexture(2)->Bind();
       receiver_positions_->GetTexture(0)->Bind();
       glm::vec3 light_direction = -glm::normalize(light_position_);
       float visible = 1.f - (float)(pixels_renderered_last_frame_) / (float)(*window_width_ * *window_height_);
+      visible *= intensity_scaling_;
       if (visible < 0.01f) visible = 0.01f;
       //TODO figure out correct value for this
       //TODO one option would be make it variable with a key press and show the difference
@@ -161,6 +167,7 @@ namespace render
       caustic_shader_->SetUniform1f("surface_area", visible);
       caustic_shader_->SetUniform3f("light_direction", light_direction);
       caustic_shader_->SetUniform4fv("view_proj", persp_proj_ * light_view_matrix_);
+      caustic_shader_->SetUniform1f("point_size", point_size_);
       render::Renderer::DrawPoints(vertex_grid_.get());
       glDisable(GL_BLEND);
 
