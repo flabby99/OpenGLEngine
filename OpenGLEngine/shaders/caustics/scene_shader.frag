@@ -39,7 +39,7 @@ void main() {
   //Consider negative dot product to be 0
   float dot_prod = clamp(dot(direction_to_light, eye_normal), 0.0, 1.0);
   //vec3 Idiffuse = Ldiffuse * vec3(texture (diffuse_texture, texture_coords)) * dot_prod;
-  vec3 Idiffuse = Ldiffuse * Kdiffuse * dot_prod * texture (diffuse_texture, texture_coords);
+  vec3 Idiffuse = Ldiffuse * Kdiffuse * dot_prod * texture (diffuse_texture, texture_coords).rgb;
 
   //Specular takes the angle between the light the surface and the viewer into account
   vec3 direction_to_viewer = normalize(-eye_position);

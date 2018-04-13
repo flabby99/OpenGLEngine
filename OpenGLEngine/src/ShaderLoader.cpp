@@ -24,7 +24,7 @@ namespace core {
     return shadercode;
   }
 
-  GLint ShaderLoader::CreateShader(GLenum shadertype, const char* shadercode)
+  GLint ShaderLoader::CreateShader(GLenum shadertype, const char* shadercode, const char* name)
   {
     GLint compile_result = 0;
     GLCall(GLint shader = glCreateShader(shadertype));
@@ -39,7 +39,7 @@ namespace core {
     if (compile_result == GL_FALSE) {
       GLchar infolog[1024];
       GLCall(glGetShaderInfoLog(shader, 1024, NULL, infolog));
-      fprintf(stderr, "Error compiling shader type %d: '%s'\n", shadertype, infolog);
+      fprintf(stderr, "Error compiling %s shader type %d: '%s'\n", name, shadertype, infolog);
       exit(1);
     }
     return shader;
@@ -54,8 +54,8 @@ namespace core {
     char* vertexshader_code = ReadShader(filenames[0]);
     char* fragmentshader_code = ReadShader(filenames[1]);
 
-    GLint vertexshader = CreateShader(GL_VERTEX_SHADER, vertexshader_code);
-    GLint fragmentshader = CreateShader(GL_FRAGMENT_SHADER, fragmentshader_code);
+    GLint vertexshader = CreateShader(GL_VERTEX_SHADER, vertexshader_code, filenames[0]);
+    GLint fragmentshader = CreateShader(GL_FRAGMENT_SHADER, fragmentshader_code, filenames[1]);
 
     GLCall(GLint program = glCreateProgram());
     GLCall(glAttachShader(program, vertexshader));
